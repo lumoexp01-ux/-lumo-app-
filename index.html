@@ -1,0 +1,844 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUMO - Dias de Controle</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            overflow: hidden;
+        }
+        
+        #root {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            width: 100%;
+            height: 100%;
+            max-width: 500px;
+            background: #0f0f0f;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* SPLASH SCREEN */
+        .splash {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            padding: 2rem;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .splash-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 10px 30px rgba(118, 75, 162, 0.4);
+        }
+        
+        .splash h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+        }
+        
+        .splash p {
+            font-size: 16px;
+            color: #999;
+            line-height: 1.6;
+            max-width: 300px;
+        }
+        
+        .btn {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);
+            color: white;
+            margin-top: 1rem;
+            box-shadow: 0 8px 20px rgba(118, 75, 162, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(118, 75, 162, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #1a1a1a;
+            color: #764ba2;
+            border: 1px solid #764ba2;
+            margin-top: 0.5rem;
+        }
+        
+        .btn-secondary:hover {
+            background: #764ba2;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #8b3a3a;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #a84545;
+        }
+        
+        /* LOGIN */
+        .login {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            padding: 2rem;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .login-form {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .input-group label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        input[type="email"], input[type="password"], input[type="text"] {
+            padding: 12px 16px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="email"]:focus, input[type="password"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1);
+        }
+        
+        /* HOME / CONTADOR */
+        .home {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            gap: 2rem;
+            overflow-y: auto;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .header-menu {
+            background: none;
+            border: none;
+            color: #764ba2;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .counter-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 2rem 0;
+            border-top: 1px solid #333;
+            border-bottom: 1px solid #333;
+        }
+        
+        .counter-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .counter-number {
+            font-size: 72px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .counter-message {
+            font-size: 16px;
+            color: #aaa;
+            text-align: center;
+        }
+        
+        .buttons-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .btn-full {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-chat {
+            background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);
+            color: white;
+        }
+        
+        .btn-chat:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-relapse {
+            background: #1a1a1a;
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+        
+        .btn-relapse:active {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            border: 1px solid #333;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.3s ease;
+        }
+        
+        .modal h2 {
+            font-size: 24px;
+            color: #fff;
+            line-height: 1.3;
+        }
+        
+        .modal p {
+            font-size: 14px;
+            color: #aaa;
+            line-height: 1.6;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-direction: column;
+        }
+        
+        /* CHAT */
+        .chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            gap: 1rem;
+            overflow-y: auto;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .chat-header {
+            font-size: 14px;
+            color: #888;
+            text-align: center;
+            padding: 0.5rem 0;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        
+        .message {
+            display: flex;
+            gap: 0.5rem;
+            animation: slideUp 0.3s ease;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message.ai {
+            justify-content: flex-start;
+        }
+        
+        .message-bubble {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+        
+        .message.user .message-bubble {
+            background: #764ba2;
+            color: white;
+        }
+        
+        .message.ai .message-bubble {
+            background: #1a1a1a;
+            color: #ccc;
+            border: 1px solid #333;
+        }
+        
+        .chat-input-section {
+            display: flex;
+            gap: 0.75rem;
+            border-top: 1px solid #333;
+            padding-top: 1rem;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 10px 14px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: white;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: #764ba2;
+        }
+        
+        .chat-send {
+            padding: 10px 16px;
+            background: #764ba2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-send:active {
+            transform: scale(0.95);
+        }
+        
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 10px 14px;
+            background: #1a1a1a;
+            border-radius: 12px;
+            width: fit-content;
+            border: 1px solid #333;
+        }
+        
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #764ba2;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { opacity: 0.3; transform: translateY(0); }
+            40% { opacity: 1; transform: translateY(-8px); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .quick-missions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .mission-btn {
+            background: #1a1a1a;
+            border: 1px solid #764ba2;
+            color: #764ba2;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mission-btn:hover {
+            background: #764ba2;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyA-LHWB0o3a-Z21GxPug3cYui579jHQxS4",
+            authDomain: "lumo-app-89926.firebaseapp.com",
+            projectId: "lumo-app-89926",
+            storageBucket: "lumo-app-89926.firebasestorage.app",
+            messagingSenderId: "470067283117",
+            appId: "1:470067283117:web:174d7e9d11078129953224"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // Respostas pré-definidas da IA
+        const aiResponses = {
+            "sozinho": "Então muda o ambiente agora. Levanta, vai para outro lugar. Seu cérebro está tentando repetir um padrão.",
+            "vontade": "Isso passa. Sempre passa. Espera 10 minutos antes de qualquer decisão. Só 10.",
+            "aguento": "Você não precisa vencer pra sempre. Só precisa vencer esse momento.",
+            "recaída": "Cada decisão agora ainda conta. Você não é seu histórico.",
+            "ninguém": "Eu entendo. E você não é o único passando por isso. Fica aqui comigo um pouco.",
+            "tentado": "Respira. Sai desse lugar. Bebe água. Isso vai passar."
+        };
+
+        const App = () => {
+            const [screen, setScreen] = React.useState("splash");
+            const [user, setUser] = React.useState(null);
+            const [email, setEmail] = React.useState("");
+            const [password, setPassword] = React.useState("");
+            const [counterDays, setCounterDays] = React.useState(0);
+            const [showRelapse, setShowRelapse] = React.useState(false);
+            const [messages, setMessages] = React.useState([]);
+            const [input, setInput] = React.useState("");
+            const [loading, setLoading] = React.useState(false);
+
+            React.useEffect(() => {
+                auth.onAuthStateChanged((currentUser) => {
+                    if (currentUser) {
+                        setUser(currentUser);
+                        setScreen("home");
+                        loadCounterData(currentUser.uid);
+                    }
+                });
+            }, []);
+
+            const loadCounterData = (uid) => {
+                db.ref(`users/${uid}/startDate`).on("value", (snapshot) => {
+                    if (snapshot.exists()) {
+                        const startDate = new Date(snapshot.val());
+                        const today = new Date();
+                        const days = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+                        setCounterDays(Math.max(0, days));
+                    }
+                });
+            };
+
+            const handleSignup = async () => {
+                if (!email || !password) return;
+                try {
+                    const result = await auth.createUserWithEmailAndPassword(email, password);
+                    const uid = result.user.uid;
+                    await db.ref(`users/${uid}`).set({
+                        email,
+                        startDate: new Date().toISOString(),
+                        createdAt: new Date().toISOString()
+                    });
+                    setUser(result.user);
+                    setScreen("home");
+                } catch (err) {
+                    alert("Erro: " + err.message);
+                }
+            };
+
+            const handleLogin = async () => {
+                if (!email || !password) return;
+                try {
+                    const result = await auth.signInWithEmailAndPassword(email, password);
+                    setUser(result.user);
+                    setScreen("home");
+                } catch (err) {
+                    alert("Erro: " + err.message);
+                }
+            };
+
+            const handleRelapse = async () => {
+                if (!user) return;
+                try {
+                    await db.ref(`users/${user.uid}/startDate`).set(new Date().toISOString());
+                    setCounterDays(0);
+                    setShowRelapse(false);
+                    setMessages([]);
+                } catch (err) {
+                    alert("Erro ao atualizar: " + err.message);
+                }
+            };
+
+            const sendMessage = async () => {
+                if (!input.trim()) return;
+
+                const userMessage = input.trim();
+                setMessages([...messages, { role: "user", text: userMessage }]);
+                setInput("");
+                setLoading(true);
+
+                try {
+                    // Procura por palavra-chave nas respostas pré-definidas
+                    let aiResponse = "Estou aqui com você. Você consegue passar por isso.";
+                    
+                    for (const [key, response] of Object.entries(aiResponses)) {
+                        if (userMessage.toLowerCase().includes(key)) {
+                            aiResponse = response;
+                            break;
+                        }
+                    }
+
+                    // Se não encontrar palavra-chave, usa OpenAI API
+                    if (aiResponse === "Estou aqui com você. Você consegue passar por isso.") {
+                        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${OPENAI_API_KEY}`
+                            },
+                            body: JSON.stringify({
+                                model: "gpt-3.5-turbo",
+                                messages: [
+                                    {
+                                        role: "system",
+                                        content: "Você é um amigo compassivo ajudando alguém em recuperação de vício. Não dê terapia. Seja breve (máx 100 palavras). Português brasileiro coloquial. Responda em tom amigo, sem julgamento."
+                                    },
+                                    {
+                                        role: "user",
+                                        content: userMessage
+                                    }
+                                ],
+                                max_tokens: 150,
+                                temperature: 0.7
+                            })
+                        });
+
+                        const data = await response.json();
+                        if (data.choices && data.choices[0]) {
+                            aiResponse = data.choices[0].message.content;
+                        }
+                    }
+
+                    setMessages(prev => [...prev, { role: "ai", text: aiResponse }]);
+                } catch (err) {
+                    setMessages(prev => [...prev, { role: "ai", text: "Desculpa, algo deu errado. Mas estou aqui com você." }]);
+                }
+
+                setLoading(false);
+            };
+
+            // SPLASH SCREEN
+            if (screen === "splash") {
+                return (
+                    <div className="container">
+                        <div className="splash">
+                            <div className="splash-logo">L</div>
+                            <div>
+                                <h1>LUMO</h1>
+                                <p>Você não precisa lutar sozinho.</p>
+                            </div>
+                            <button className="btn btn-primary" onClick={() => setScreen("login")}>
+                                Começar
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // LOGIN SCREEN
+            if (screen === "login") {
+                return (
+                    <div className="container">
+                        <div className="login">
+                            <h2 style={{ fontSize: "24px", marginBottom: "1rem" }}>Bem-vindo à LUMO</h2>
+                            <div className="login-form">
+                                <div className="input-group">
+                                    <label>Email</label>
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="seu@email.com"
+                                    />
+                                </div>
+                                <div className="input-group">
+                                    <label>Senha</label>
+                                    <input
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        placeholder="Mínimo 6 caracteres"
+                                    />
+                                </div>
+                                <button className="btn btn-primary" style={{ width: "100%" }} onClick={handleSignup}>
+                                    Criar Conta
+                                </button>
+                                <button className="btn btn-secondary" style={{ width: "100%" }} onClick={handleLogin}>
+                                    Entrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // HOME SCREEN
+            if (screen === "home" && !showRelapse) {
+                return (
+                    <div className="container">
+                        <div className="home">
+                            <div className="header">
+                                <div className="header-title">LUMO</div>
+                                <button className="header-menu" onClick={() => auth.signOut()}>⚙️</button>
+                            </div>
+
+                            <div className="counter-section">
+                                <div className="counter-label">Dias de Controle</div>
+                                <div className="counter-number">{counterDays}</div>
+                                <div className="counter-message">Você está mais forte do que ontem.</div>
+                            </div>
+
+                            <div className="buttons-section">
+                                <button className="btn btn-full btn-chat" onClick={() => setScreen("chat")}>
+                                    💬 Estou tentado...
+                                </button>
+                                <button className="btn btn-full btn-relapse" onClick={() => setShowRelapse(true)}>
+                                    📍 Tive uma recaída
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // RELAPSE MODAL
+            if (showRelapse) {
+                return (
+                    <div className="container">
+                        <div className="modal-overlay" onClick={() => setShowRelapse(false)}>
+                            <div className="modal" onClick={(e) => e.stopPropagation()}>
+                                <h2>Respira. Não acabou.</h2>
+                                <p>
+                                    Recaídas fazem parte do processo. O importante é o que você faz agora. 
+                                    Volte para o controle.
+                                </p>
+                                <div className="modal-buttons">
+                                    <button className="btn btn-primary" style={{ width: "100%" }} onClick={handleRelapse}>
+                                        Recomeçar
+                                    </button>
+                                    <button className="btn btn-secondary" style={{ width: "100%" }} onClick={() => setShowRelapse(false)}>
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="home" style={{ display: "none" }}>
+                            {/* mantém o background */}
+                        </div>
+                    </div>
+                );
+            }
+
+            // CHAT SCREEN
+            if (screen === "chat") {
+                return (
+                    <div className="container">
+                        <div className="chat">
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                                <button style={{ background: "none", border: "none", color: "#764ba2", fontSize: "24px", cursor: "pointer" }} onClick={() => setScreen("home")}>
+                                    ←
+                                </button>
+                                <span className="chat-header">LUMO - Chat de Suporte</span>
+                                <div style={{ width: "24px" }}></div>
+                            </div>
+
+                            <div className="chat-messages">
+                                {messages.length === 0 && (
+                                    <div style={{ textAlign: "center", color: "#666", marginTop: "2rem" }}>
+                                        <p>Fale comigo. Estou aqui para ajudar.</p>
+                                    </div>
+                                )}
+                                {messages.map((msg, idx) => (
+                                    <div key={idx} className={`message ${msg.role}`}>
+                                        <div className="message-bubble">{msg.text}</div>
+                                    </div>
+                                ))}
+                                {loading && (
+                                    <div className="message ai">
+                                        <div className="typing-indicator">
+                                            <div className="typing-dot"></div>
+                                            <div className="typing-dot"></div>
+                                            <div className="typing-dot"></div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="quick-missions">
+                                <div style={{ fontSize: "11px", color: "#666", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "0.5rem" }}>
+                                    Missões rápidas:
+                                </div>
+                                <button className="mission-btn" onClick={() => { setMessages([...messages, { role: "user", text: "Preciso me distrair" }]); sendMessage(); }}>
+                                    💧 Beba água
+                                </button>
+                                <button className="mission-btn" onClick={() => { setMessages([...messages, { role: "user", text: "Vou fazer exercício" }]); sendMessage(); }}>
+                                    💪 10 flexões
+                                </button>
+                                <button className="mission-btn" onClick={() => { setMessages([...messages, { role: "user", text: "Vou sair de onde estou" }]); sendMessage(); }}>
+                                    🚶 Saia do quarto
+                                </button>
+                            </div>
+
+                            <div className="chat-input-section">
+                                <input
+                                    type="text"
+                                    className="chat-input"
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+                                    placeholder="Estou tentado..."
+                                    disabled={loading}
+                                />
+                                <button className="chat-send" onClick={sendMessage} disabled={loading}>
+                                    →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+        };
+
+        // Coloca sua chave OpenAI aqui (TEMPORÁRIA - vai regenerar depois)
+        const OPENAI_API_KEY = "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";
+
+        ReactDOM.render(<App />, document.getElementById("root"));
+    </script>
+</body>
+</html>
