@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -129,6 +128,36 @@
         
         .btn-danger:hover {
             background: #a84545;
+        }
+        
+        /* DEBUG SCREEN */
+        .debug-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            gap: 1rem;
+            overflow-y: auto;
+            background: #000;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .debug-screen h2 {
+            color: #f093fb;
+            font-size: 18px;
+        }
+        
+        .debug-box {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 11px;
+            color: #0f0;
+            max-height: 200px;
+            overflow-y: auto;
+            word-break: break-all;
         }
         
         /* LOGIN */
@@ -498,7 +527,7 @@
     <div id="root"></div>
     
     <script type="text/babel">
-        // Firebase Config
+        // Firebase Config - COLOQUE SEUS VALORES AQUI
         const firebaseConfig = {
             apiKey: "AIzaSyA-LHWB0o3a-Z21GxPug3cYui579jHQxS4",
             authDomain: "lumo-app-89926.firebaseapp.com",
@@ -512,6 +541,9 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
+        
+        // Debug: Log Firebase initialization
+        console.log("🔥 Firebase inicializado com projeto:", firebaseConfig.projectId);
 
         // Respostas pré-definidas da IA
         const aiResponses = {
@@ -533,52 +565,88 @@
             const [messages, setMessages] = React.useState([]);
             const [input, setInput] = React.useState("");
             const [loading, setLoading] = React.useState(false);
+            const [debugLogs, setDebugLogs] = React.useState(["🎬 App iniciada"]);
+
+            const addLog = (msg) => {
+                console.log(msg);
+                setDebugLogs(prev => [...prev, msg]);
+            };
 
             React.useEffect(() => {
-                auth.onAuthStateChanged((currentUser) => {
+                addLog("📡 Checando autenticação...");
+                const unsubscribe = auth.onAuthStateChanged((currentUser) => {
                     if (currentUser) {
+                        addLog(`✅ Usuário autenticado: ${currentUser.email}`);
                         setUser(currentUser);
                         setScreen("home");
                         loadCounterData(currentUser.uid);
+                    } else {
+                        addLog("❌ Usuário não autenticado");
                     }
+                }, (error) => {
+                    addLog(`🔴 Erro de auth: ${error.message}`);
                 });
+                return unsubscribe;
             }, []);
 
             const loadCounterData = (uid) => {
+                addLog(`📊 Carregando dados do contador para UID: ${uid}`);
                 db.ref(`users/${uid}/startDate`).on("value", (snapshot) => {
                     if (snapshot.exists()) {
+                        addLog(`✅ Data encontrada no Firebase`);
                         const startDate = new Date(snapshot.val());
                         const today = new Date();
                         const days = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
                         setCounterDays(Math.max(0, days));
+                        addLog(`📅 Dias calculados: ${Math.max(0, days)}`);
+                    } else {
+                        addLog(`⚠️ Sem dados no Firebase ainda`);
                     }
+                }, (error) => {
+                    addLog(`🔴 Erro ao carregar dados: ${error.message}`);
                 });
             };
 
             const handleSignup = async () => {
-                if (!email || !password) return;
+                if (!email || !password) {
+                    addLog("⚠️ Email ou senha vazio");
+                    return;
+                }
                 try {
+                    addLog(`📝 Criando conta: ${email}`);
                     const result = await auth.createUserWithEmailAndPassword(email, password);
                     const uid = result.user.uid;
+                    addLog(`✅ Conta criada! UID: ${uid}`);
+                    
+                    addLog(`💾 Salvando dados no Firebase...`);
                     await db.ref(`users/${uid}`).set({
                         email,
                         startDate: new Date().toISOString(),
                         createdAt: new Date().toISOString()
                     });
+                    addLog(`✅ Dados salvos!`);
+                    
                     setUser(result.user);
                     setScreen("home");
                 } catch (err) {
+                    addLog(`🔴 Erro signup: ${err.message}`);
                     alert("Erro: " + err.message);
                 }
             };
 
             const handleLogin = async () => {
-                if (!email || !password) return;
+                if (!email || !password) {
+                    addLog("⚠️ Email ou senha vazio");
+                    return;
+                }
                 try {
+                    addLog(`🔐 Fazendo login: ${email}`);
                     const result = await auth.signInWithEmailAndPassword(email, password);
+                    addLog(`✅ Login bem-sucedido!`);
                     setUser(result.user);
                     setScreen("home");
                 } catch (err) {
+                    addLog(`🔴 Erro login: ${err.message}`);
                     alert("Erro: " + err.message);
                 }
             };
@@ -599,7 +667,7 @@
                 if (!input.trim()) return;
 
                 const userMessage = input.trim();
-                setMessages([...messages, { role: "user", text: userMessage }]);
+                setMessages(prev => [...prev, { role: "user", text: userMessage }]);
                 setInput("");
                 setLoading(true);
 
@@ -614,39 +682,12 @@
                         }
                     }
 
-                    // Se não encontrar palavra-chave, usa OpenAI API
-                    if (aiResponse === "Estou aqui com você. Você consegue passar por isso.") {
-                        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                "Authorization": `Bearer ${OPENAI_API_KEY}`
-                            },
-                            body: JSON.stringify({
-                                model: "gpt-3.5-turbo",
-                                messages: [
-                                    {
-                                        role: "system",
-                                        content: "Você é um amigo compassivo ajudando alguém em recuperação de vício. Não dê terapia. Seja breve (máx 100 palavras). Português brasileiro coloquial. Responda em tom amigo, sem julgamento."
-                                    },
-                                    {
-                                        role: "user",
-                                        content: userMessage
-                                    }
-                                ],
-                                max_tokens: 150,
-                                temperature: 0.7
-                            })
-                        });
-
-                        const data = await response.json();
-                        if (data.choices && data.choices[0]) {
-                            aiResponse = data.choices[0].message.content;
-                        }
-                    }
-
+                    // Pequeno delay pra parecer natural (0.5s)
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
                     setMessages(prev => [...prev, { role: "ai", text: aiResponse }]);
                 } catch (err) {
+                    console.error("Erro ao enviar mensagem:", err);
                     setMessages(prev => [...prev, { role: "ai", text: "Desculpa, algo deu errado. Mas estou aqui com você." }]);
                 }
 
@@ -665,6 +706,35 @@
                             </div>
                             <button className="btn btn-primary" onClick={() => setScreen("login")}>
                                 Começar
+                            </button>
+                            <button 
+                                className="btn btn-secondary" 
+                                style={{ marginTop: "2rem", fontSize: "11px" }}
+                                onClick={() => setScreen("debug")}
+                            >
+                                🔧 Debug
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // DEBUG SCREEN
+            if (screen === "debug") {
+                return (
+                    <div className="container">
+                        <div className="debug-screen">
+                            <h2>🔧 Console de Debug</h2>
+                            <div className="debug-box">
+                                {debugLogs.map((log, idx) => (
+                                    <div key={idx}>{log}</div>
+                                ))}
+                            </div>
+                            <button className="btn btn-primary" onClick={() => setScreen("splash")}>
+                                ← Voltar
+                            </button>
+                            <button className="btn btn-secondary" onClick={() => setDebugLogs(["🔄 Logs limpos"])}>
+                                Limpar Logs
                             </button>
                         </div>
                     </div>
@@ -834,9 +904,6 @@
                 );
             }
         };
-
-        // Coloca sua chave OpenAI aqui (TEMPORÁRIA - vai regenerar depois)
-       const apiKey = "SUA_API_AQUI"
 
         ReactDOM.render(<App />, document.getElementById("root"));
     </script>
