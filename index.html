@@ -558,33 +558,60 @@
             const loginBtn = document.getElementById('loginBtn');
             const statusDiv = document.getElementById('loginStatus');
             
+            console.log('🔐 handleLogin chamado com:', email);
+            
             if (!email || !password) {
-                statusDiv.innerHTML = '<div style="color: #f00; font-size: 12px;">Email e senha obrigatórios</div>';
+                statusDiv.innerHTML = '<div style="color: #f00; font-size: 12px;">⚠️ Email e senha obrigatórios</div>';
+                console.log('❌ Email ou senha vazios');
                 return;
             }
             
             loginBtn.disabled = true;
-            statusDiv.innerHTML = '';
+            loginBtn.textContent = 'Processando...';
+            statusDiv.innerHTML = '<div style="color: #0ff; font-size: 12px;">⏳ Conectando...</div>';
+            console.log('⏳ Tentando fazer login...');
             
+            // Tenta login primeiro
             auth.signInWithEmailAndPassword(email, password)
                 .then((result) => {
+                    console.log('✅ Login bem-sucedido para:', result.user.email);
                     currentUser = result.user;
-                    goToHome();
+                    statusDiv.innerHTML = '<div style="color: #0f0; font-size: 12px;">✅ Login bem-sucedido!</div>';
+                    setTimeout(() => goToHome(), 500);
                 })
-                .catch(() => {
+                .catch((loginError) => {
+                    console.log('❌ Login falhou:', loginError.code, loginError.message);
+                    console.log('📝 Tentando criar nova conta...');
+                    statusDiv.innerHTML = '<div style="color: #0ff; font-size: 12px;">📝 Criando conta...</div>';
+                    
+                    // Se falhar, tenta criar
                     auth.createUserWithEmailAndPassword(email, password)
                         .then((result) => {
+                            console.log('✅ Conta criada:', result.user.uid);
                             currentUser = result.user;
+                            statusDiv.innerHTML = '<div style="color: #0f0; font-size: 12px;">💾 Salvando dados...</div>';
+                            
+                            // Salva no Firebase
                             db.ref(`users/${currentUser.uid}`).set({
                                 email: email,
                                 startDate: new Date().toISOString(),
                                 createdAt: new Date().toISOString()
+                            }).then(() => {
+                                console.log('✅ Dados salvos no Firebase');
+                                statusDiv.innerHTML = '<div style="color: #0f0; font-size: 12px;">✅ Tudo pronto!</div>';
+                                setTimeout(() => goToHome(), 500);
+                            }).catch((dbError) => {
+                                console.log('❌ Erro ao salvar no Firebase:', dbError.message);
+                                statusDiv.innerHTML = `<div style="color: #f00; font-size: 12px;">❌ DB: ${dbError.message}</div>`;
+                                loginBtn.disabled = false;
+                                loginBtn.textContent = 'Criar Conta / Entrar';
                             });
-                            goToHome();
                         })
-                        .catch((error) => {
-                            statusDiv.innerHTML = `<div style="color: #f00; font-size: 12px;">${error.message}</div>`;
+                        .catch((createError) => {
+                            console.log('❌ Erro ao criar conta:', createError.code, createError.message);
+                            statusDiv.innerHTML = `<div style="color: #f00; font-size: 12px;">❌ ${createError.message}</div>`;
                             loginBtn.disabled = false;
+                            loginBtn.textContent = 'Criar Conta / Entrar';
                         });
                 });
         }
