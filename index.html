@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LUMO - Dias de Controle</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -13,23 +17,77 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0a0a0a;
+            background: #000;
             color: #fff;
+            min-height: 100vh;
+        }
+        
+        .app-wrapper {
+            width: 100vw;
+            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            padding: 1rem;
+            padding: 0;
         }
         
         .container {
-            max-width: 500px;
             width: 100%;
+            height: 100%;
+            max-width: 500px;
             background: #0f0f0f;
-            border-radius: 12px;
-            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .screen {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .screen.active {
+            display: flex;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* ====== HEADER ====== */
+        .header {
+            background: linear-gradient(135deg, #764ba2 0%, #5a3a7d 100%);
+            padding: 1.5rem;
             text-align: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid #333;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .header-subtitle {
+            font-size: 12px;
+            color: #ccc;
+            margin-top: 0.5rem;
+        }
+        
+        /* ====== CONTENT ====== */
+        .content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
         }
         
         .logo {
@@ -42,92 +100,61 @@
             justify-content: center;
             font-size: 40px;
             font-weight: 700;
-            margin: 0 auto 1.5rem;
             box-shadow: 0 10px 30px rgba(118, 75, 162, 0.4);
         }
         
         h1 {
             font-size: 28px;
-            margin-bottom: 1rem;
-            color: #fff;
+            font-weight: 700;
         }
         
         p {
-            font-size: 16px;
+            font-size: 15px;
             color: #999;
-            margin-bottom: 2rem;
             line-height: 1.6;
+            max-width: 350px;
         }
         
-        button {
-            padding: 14px 32px;
-            background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 0.5rem;
-            width: 100%;
-        }
-        
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(118, 75, 162, 0.4);
-        }
-        
-        .section {
-            display: none;
-            animation: fadeIn 0.5s ease-in;
-        }
-        
-        .section.active {
-            display: block;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .counter-number {
-            font-size: 64px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin: 1rem 0;
-        }
-        
-        .counter-label {
-            font-size: 12px;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 1rem;
-        }
-        
-        .input-group {
-            margin-bottom: 1rem;
-        }
-        
-        input {
+        input, textarea {
             width: 100%;
             padding: 12px;
             background: #1a1a1a;
             border: 1px solid #333;
             border-radius: 8px;
-            color: white;
+            color: #fff;
             font-size: 14px;
+            margin-bottom: 0.75rem;
+            font-family: inherit;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1);
+        }
+        
+        button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
             margin-bottom: 0.5rem;
         }
         
-        input:focus {
-            outline: none;
-            border-color: #764ba2;
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(118, 75, 162, 0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         
         .btn-secondary {
@@ -142,167 +169,510 @@
             border: none;
         }
         
+        /* ====== COUNTER ====== */
+        .counter-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 2rem 0;
+            border-top: 1px solid #333;
+            border-bottom: 1px solid #333;
+            width: 100%;
+        }
+        
+        .counter-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .counter-number {
+            font-size: 72px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .counter-message {
+            font-size: 15px;
+            color: #aaa;
+        }
+        
+        /* ====== CHAT ====== */
+        .chat-container {
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .messages-box {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 0;
+            padding-right: 4px;
+        }
+        
         .message {
-            margin-bottom: 1rem;
-            padding: 1rem;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            max-width: 85%;
+            word-wrap: break-word;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message.user {
+            align-self: flex-end;
+            background: #764ba2;
+            color: white;
+        }
+        
+        .message.ai {
+            align-self: flex-start;
             background: #1a1a1a;
+            color: #ccc;
+            border: 1px solid #333;
+        }
+        
+        .message.system {
+            align-self: center;
+            background: transparent;
+            color: #888;
+            font-size: 12px;
+            text-align: center;
+            max-width: 100%;
+        }
+        
+        .chat-input-group {
+            display: flex;
+            gap: 0.75rem;
+            border-top: 1px solid #333;
+            padding-top: 1rem;
+        }
+        
+        .chat-input-group input {
+            flex: 1;
+            margin-bottom: 0;
+            padding: 10px;
+        }
+        
+        .chat-input-group button {
+            width: auto;
+            padding: 10px 16px;
+            margin-bottom: 0;
+        }
+        
+        /* ====== MISSÕES ====== */
+        .missions-section {
+            background: #1a1a1a;
+            padding: 1rem;
             border-radius: 8px;
             border: 1px solid #333;
-            line-height: 1.6;
+            margin-top: 1rem;
         }
         
-        .status-ok {
-            background: #0a2a0a;
-            border-color: #0f0;
-            color: #0f0;
+        .missions-title {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.75rem;
+        }
+        
+        .missions-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .mission-btn {
+            background: #0f0f0f;
+            border: 1px solid #764ba2;
+            color: #764ba2;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mission-btn:hover {
+            background: #764ba2;
+            color: white;
+        }
+        
+        /* ====== CONFIGURAÇÕES ====== */
+        .config-item {
+            background: #1a1a1a;
             padding: 1rem;
             border-radius: 8px;
+            border: 1px solid #333;
             margin-bottom: 1rem;
         }
         
-        .status-error {
-            background: #2a0a0a;
-            border-color: #f00;
-            color: #f00;
-            padding: 1rem;
-            border-radius: 8px;
+        .config-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.75rem;
+        }
+        
+        .config-value {
+            font-size: 14px;
+            color: #ccc;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #764ba2;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* ====== MODAL ====== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid #333;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal h2 {
+            font-size: 22px;
             margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+        
+        .modal p {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        
-        <!-- SPLASH -->
-        <div id="splash" class="section active">
-            <div class="logo">L</div>
-            <h1>LUMO</h1>
-            <p>Você não precisa lutar sozinho.</p>
-            <button onclick="goToLogin()">Começar</button>
-        </div>
-        
-        <!-- LOGIN -->
-        <div id="login" class="section">
-            <h1>Bem-vindo</h1>
-            <div class="input-group">
-                <input type="email" id="email" placeholder="Email: teste@example.com">
-                <input type="password" id="password" placeholder="Senha: Teste123456">
-            </div>
-            <button onclick="handleLogin()">Criar / Entrar</button>
-            <button class="btn-secondary" onclick="goToSplash()" style="margin-top: 1rem;">Voltar</button>
-        </div>
-        
-        <!-- HOME -->
-        <div id="home" class="section">
-            <h1>LUMO</h1>
-            <div class="counter-label">Dias de Controle</div>
-            <div class="counter-number" id="counter">0</div>
-            <p>Você está mais forte do que ontem.</p>
-            <button onclick="goToChat()">💬 Estou tentado...</button>
-            <button class="btn-danger" onclick="handleRelapse()" style="margin-top: 0.5rem;">📍 Tive uma recaída</button>
-            <button class="btn-secondary" onclick="handleLogout()" style="margin-top: 1rem;">Sair</button>
-        </div>
-        
-        <!-- CHAT -->
-        <div id="chat" class="section">
-            <h1>Chat de Suporte</h1>
-            <div id="messages" style="max-height: 300px; overflow-y: auto; margin-bottom: 1rem; text-align: left;">
-                <div class="message" style="text-align: center; color: #888;">
-                    Fale comigo. Estou aqui para ajudar.
+    <div class="app-wrapper">
+        <div class="container">
+            
+            <!-- SPLASH -->
+            <div id="splash" class="screen active">
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; gap: 1.5rem;">
+                    <div class="logo">L</div>
+                    <h1>LUMO</h1>
+                    <p>Você não precisa lutar sozinho.</p>
+                    <button onclick="goToLogin()" style="margin-top: 1rem;">Começar</button>
                 </div>
             </div>
-            <div style="display: flex; gap: 0.5rem;">
-                <input type="text" id="userMessage" placeholder="Escreva algo..." style="margin-bottom: 0;">
-                <button onclick="sendMessage()" style="width: 50px; padding: 12px;">→</button>
+            
+            <!-- LOGIN -->
+            <div id="login" class="screen">
+                <div class="header">
+                    <h1>LUMO</h1>
+                </div>
+                <div class="content" style="justify-content: flex-start; padding-top: 3rem;">
+                    <h1 style="font-size: 20px;">Bem-vindo</h1>
+                    <div id="loginStatus" style="width: 100%;"></div>
+                    <div style="width: 100%; max-width: 350px;">
+                        <input type="email" id="email" placeholder="Email">
+                        <input type="password" id="password" placeholder="Senha">
+                        <button id="loginBtn" onclick="handleLogin()">Criar Conta / Entrar</button>
+                        <button class="btn-secondary" onclick="goToSplash()">Voltar</button>
+                    </div>
+                </div>
             </div>
-            <button class="btn-secondary" onclick="goToHome()" style="margin-top: 1rem;">Voltar</button>
+            
+            <!-- HOME -->
+            <div id="home" class="screen">
+                <div class="header">
+                    <h1>LUMO</h1>
+                    <div class="header-subtitle" id="userEmail"></div>
+                </div>
+                <div class="content" style="justify-content: flex-start; padding-top: 0;">
+                    <div class="counter-section">
+                        <div class="counter-label">Dias de Controle</div>
+                        <div class="counter-number" id="counter">0</div>
+                        <div class="counter-message">Você está mais forte do que ontem.</div>
+                    </div>
+                    <div style="width: 100%; max-width: 350px;">
+                        <button onclick="goToChat()">💬 Estou tentado...</button>
+                        <button class="btn-danger" onclick="showRelapseModal()">📍 Tive uma recaída</button>
+                        <button class="btn-secondary" onclick="goToConfig()">⚙️ Configurações</button>
+                        <button class="btn-secondary" onclick="handleLogout()" style="margin-top: 1rem;">🚪 Sair</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CHAT -->
+            <div id="chat" class="screen">
+                <div class="header">
+                    <h1>Chat de Suporte</h1>
+                    <div class="header-subtitle">Estou aqui pra ajudar</div>
+                </div>
+                <div class="content" style="justify-content: flex-start; padding: 1rem; gap: 0;">
+                    <div class="chat-container" style="width: 100%; max-width: 350px;">
+                        <div class="messages-box" id="messages"></div>
+                        <div class="missions-section">
+                            <div class="missions-title">Missões rápidas:</div>
+                            <div class="missions-grid">
+                                <button class="mission-btn" onclick="sendMission('Beba água agora')">💧 Beba água</button>
+                                <button class="mission-btn" onclick="sendMission('Vou fazer 10 flexões')">💪 10 flexões</button>
+                                <button class="mission-btn" onclick="sendMission('Vou sair do quarto')">🚶 Saia do quarto</button>
+                            </div>
+                        </div>
+                        <div class="chat-input-group">
+                            <input type="text" id="userMessage" placeholder="Escreva algo...">
+                            <button onclick="sendMessage()" style="width: 50px; padding: 10px;">→</button>
+                        </div>
+                    </div>
+                </div>
+                <div style="padding: 1rem; text-align: center;">
+                    <button class="btn-secondary" onclick="goToHome()" style="max-width: 350px;">← Voltar</button>
+                </div>
+            </div>
+            
+            <!-- CONFIGURAÇÕES -->
+            <div id="config" class="screen">
+                <div class="header">
+                    <h1>Configurações</h1>
+                </div>
+                <div class="content" style="justify-content: flex-start; padding-top: 1rem;">
+                    <div style="width: 100%; max-width: 350px;">
+                        <div class="config-item">
+                            <div class="config-label">Onde mais ocorrem recaídas?</div>
+                            <textarea id="recaidaPlaces" placeholder="Ex: Redes sociais, quarto, madrugada..." style="min-height: 80px;"></textarea>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-label">Qual app te deixa mais tentado?</div>
+                            <textarea id="triggerApps" placeholder="Ex: Instagram, TikTok, YouTube..." style="min-height: 80px;"></textarea>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-label">Horários críticos?</div>
+                            <textarea id="criticalTimes" placeholder="Ex: Madrugada, entre 18-20h..." style="min-height: 80px;"></textarea>
+                        </div>
+                        <button onclick="saveConfig()" style="margin-top: 1rem;">✅ Salvar</button>
+                        <button class="btn-secondary" onclick="goToHome()">← Voltar</button>
+                    </div>
+                </div>
+            </div>
+            
         </div>
-        
+    </div>
+    
+    <!-- MODAL RECAÍDA -->
+    <div id="relapseModal" class="modal-overlay" style="display: none;" onclick="this.style.display='none'">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h2>Respira. Não acabou.</h2>
+            <p>Recaídas fazem parte do processo. O importante é o que você faz agora. Volte para o controle.</p>
+            <div class="modal-buttons">
+                <button onclick="handleRelapse()">Recomeçar</button>
+                <button class="btn-secondary" onclick="document.getElementById('relapseModal').style.display='none'">Cancelar</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // ====== FUNÇÕES DE NAVEGAÇÃO ======
+        const firebaseConfig = {
+            apiKey: "AIzaSyA-LHWB0o3a-Z21GxPug3cYui579jHQxS4",
+            authDomain: "lumo-app-89926.firebaseapp.com",
+            projectId: "lumo-app-89926",
+            storageBucket: "lumo-app-89926.firebasestorage.app",
+            messagingSenderId: "470067283117",
+            appId: "1:470067283117:web:174d7e9d11078129953224"
+        };
         
-        function showSection(id) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+        
+        let currentUser = null;
+        
+        // ====== NAVEGAÇÃO ======
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
         
-        function goToSplash() { showSection('splash'); }
-        function goToLogin() { showSection('login'); }
-        function goToHome() { showSection('home'); updateCounter(); }
-        function goToChat() { showSection('chat'); }
-        
-        // ====== DADOS (localStorage - sem Firebase por enquanto) ======
-        
-        function saveUser(userData) {
-            localStorage.setItem('lumo_user', JSON.stringify(userData));
+        function goToSplash() { showScreen('splash'); }
+        function goToLogin() { showScreen('login'); }
+        function goToHome() { showScreen('home'); updateCounter(); }
+        function goToChat() { 
+            showScreen('chat'); 
+            document.getElementById('messages').innerHTML = '<div class="message system">Fale comigo. Estou aqui para ajudar.</div>';
         }
+        function goToConfig() { showScreen('config'); loadConfig(); }
         
-        function getUser() {
-            return JSON.parse(localStorage.getItem('lumo_user')) || null;
-        }
-        
-        function updateCounter() {
-            const user = getUser();
-            if (!user) return;
-            
-            const startDate = new Date(user.startDate);
-            const today = new Date();
-            const days = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
-            document.getElementById('counter').textContent = Math.max(0, days);
-        }
-        
-        // ====== AUTENTICAÇÃO (sem Firebase - apenas localStorage) ======
-        
+        // ====== AUTENTICAÇÃO ======
         function handleLogin() {
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
+            const loginBtn = document.getElementById('loginBtn');
+            const statusDiv = document.getElementById('loginStatus');
             
             if (!email || !password) {
-                alert('Email e senha obrigatórios');
+                statusDiv.innerHTML = '<div style="color: #f00; font-size: 12px;">Email e senha obrigatórios</div>';
                 return;
             }
             
-            // Salva usuário localmente (sem Firebase)
-            saveUser({
-                email: email,
-                startDate: new Date().toISOString(),
-                createdAt: new Date().toISOString()
-            });
+            loginBtn.disabled = true;
+            statusDiv.innerHTML = '';
             
-            alert('✅ Login bem-sucedido!');
-            goToHome();
+            auth.signInWithEmailAndPassword(email, password)
+                .then((result) => {
+                    currentUser = result.user;
+                    goToHome();
+                })
+                .catch(() => {
+                    auth.createUserWithEmailAndPassword(email, password)
+                        .then((result) => {
+                            currentUser = result.user;
+                            db.ref(`users/${currentUser.uid}`).set({
+                                email: email,
+                                startDate: new Date().toISOString(),
+                                createdAt: new Date().toISOString()
+                            });
+                            goToHome();
+                        })
+                        .catch((error) => {
+                            statusDiv.innerHTML = `<div style="color: #f00; font-size: 12px;">${error.message}</div>`;
+                            loginBtn.disabled = false;
+                        });
+                });
         }
         
         function handleLogout() {
-            localStorage.removeItem('lumo_user');
-            goToSplash();
+            auth.signOut().then(() => {
+                currentUser = null;
+                goToSplash();
+            });
+        }
+        
+        // ====== CONTADOR ======
+        function updateCounter() {
+            if (!currentUser) return;
+            
+            db.ref(`users/${currentUser.uid}/startDate`).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const startDate = new Date(snapshot.val());
+                    const today = new Date();
+                    const days = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+                    document.getElementById('counter').textContent = Math.max(0, days);
+                } else {
+                    document.getElementById('counter').textContent = '0';
+                }
+            });
+            
+            document.getElementById('userEmail').textContent = currentUser.email;
+        }
+        
+        function showRelapseModal() {
+            document.getElementById('relapseModal').style.display = 'flex';
         }
         
         function handleRelapse() {
-            const confirm = window.confirm('Respira. Não acabou.\n\nRecaídas fazem parte do processo.\nO importante é recomeçar agora.\n\nTem certeza?');
-            if (confirm) {
-                const user = getUser();
-                if (user) {
-                    user.startDate = new Date().toISOString();
-                    saveUser(user);
-                    updateCounter();
-                    document.getElementById('messages').innerHTML = '<div class="message" style="text-align: center; color: #888;">Fale comigo. Estou aqui para ajudar.</div>';
-                }
+            if (currentUser) {
+                db.ref(`users/${currentUser.uid}/startDate`).set(new Date().toISOString());
+                updateCounter();
+                document.getElementById('relapseModal').style.display = 'none';
+                document.getElementById('messages').innerHTML = '<div class="message system">Fale comigo. Estou aqui para ajudar.</div>';
+                goToHome();
             }
         }
         
-        // ====== CHAT ======
-        
+        // ====== CHAT COM MÚLTIPLAS RESPOSTAS ======
         const aiResponses = {
-            "sozinho": "Então muda o ambiente agora. Levanta, vai para outro lugar. Seu cérebro está tentando repetir um padrão.",
-            "vontade": "Isso passa. Sempre passa. Espera 10 minutos antes de qualquer decisão. Só 10.",
-            "aguento": "Você não precisa vencer pra sempre. Só precisa vencer esse momento.",
-            "recaída": "Cada decisão agora ainda conta. Você não é seu histórico.",
-            "ninguém": "Eu entendo. E você não é o único passando por isso. Fica aqui comigo um pouco.",
-            "tentado": "Respira. Sai desse lugar. Bebe água. Isso vai passar."
+            "sozinho": [
+                "Então muda o ambiente agora. Levanta, vai para outro lugar. Seu cérebro está tentando repetir um padrão.",
+                "Você está sozinho? Pode chamar alguém pra conversar? A gente sempre consegue melhor com ajuda."
+            ],
+            "vontade": [
+                "Isso passa. Sempre passa. Espera 10 minutos antes de qualquer decisão. Só 10.",
+                "Essas vontades são como ondas. Parecem infinitas, mas sempre passam. Respira fundo."
+            ],
+            "aguento": [
+                "Você não precisa vencer pra sempre. Só precisa vencer esse momento.",
+                "Quando tá muito pesado, a gente pensa só no agora. Esse minuto. Só isso."
+            ],
+            "recaída": [
+                "Cada decisão agora ainda conta. Você não é seu histórico.",
+                "Recaídas são parte da jornada. O importante é levantar de novo. Você consegue."
+            ],
+            "ninguém": [
+                "Eu entendo. E você não é o único passando por isso. Fica aqui comigo um pouco.",
+                "Muitas pessoas estão nessa luta. Você não está sozinho. Prometo."
+            ],
+            "tentado": [
+                "Respira. Sai desse lugar. Bebe água. Isso vai passar.",
+                "Esse é o momento. Você consegue sair dessa. Eu acredito em você."
+            ],
+            "fraco": [
+                "Força não é não sentir. É sentir e continuar mesmo assim. Você tem isso.",
+                "Você não é fraco. Estar aqui, conversando comigo, já é força."
+            ],
+            "difícil": [
+                "É difícil mesmo. Mas você já passou por coisas difíceis antes. Você consegue.",
+                "A dificuldade prova que você está vivo. E está lutando. Isso é poder."
+            ]
         };
+        
+        function getAIResponse(userMessage) {
+            const lower = userMessage.toLowerCase();
+            for (const [key, responses] of Object.entries(aiResponses)) {
+                if (lower.includes(key)) {
+                    return responses[Math.floor(Math.random() * responses.length)];
+                }
+            }
+            return "Estou aqui com você. Você consegue passar por isso. Fale mais.";
+        }
         
         function sendMessage() {
             const userMessage = document.getElementById('userMessage').value.trim();
@@ -310,28 +680,16 @@
             
             const messagesDiv = document.getElementById('messages');
             
-            // Adiciona mensagem do usuário
             const userMsg = document.createElement('div');
-            userMsg.className = 'message';
-            userMsg.style.background = '#764ba2';
-            userMsg.style.marginLeft = 'auto';
-            userMsg.style.maxWidth = '80%';
+            userMsg.className = 'message user';
             userMsg.textContent = userMessage;
             messagesDiv.appendChild(userMsg);
             
-            // Procura resposta
-            let aiResponse = "Estou aqui com você. Você consegue passar por isso.";
-            for (const [key, response] of Object.entries(aiResponses)) {
-                if (userMessage.toLowerCase().includes(key)) {
-                    aiResponse = response;
-                    break;
-                }
-            }
+            const aiResponse = getAIResponse(userMessage);
             
-            // Adiciona resposta da IA
             setTimeout(() => {
                 const aiMsg = document.createElement('div');
-                aiMsg.className = 'message';
+                aiMsg.className = 'message ai';
                 aiMsg.textContent = aiResponse;
                 messagesDiv.appendChild(aiMsg);
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -341,18 +699,55 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
         
+        function sendMission(mission) {
+            const messagesDiv = document.getElementById('messages');
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user';
+            userMsg.textContent = mission;
+            messagesDiv.appendChild(userMsg);
+            
+            setTimeout(() => {
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'message ai';
+                aiMsg.textContent = 'Boa! Isso. Continue. Você está no caminho certo. 💪';
+                messagesDiv.appendChild(aiMsg);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }, 300);
+        }
+        
+        // ====== CONFIGURAÇÕES ======
+        function saveConfig() {
+            if (!currentUser) return;
+            db.ref(`users/${currentUser.uid}/config`).set({
+                recaidaPlaces: document.getElementById('recaidaPlaces').value,
+                triggerApps: document.getElementById('triggerApps').value,
+                criticalTimes: document.getElementById('criticalTimes').value
+            });
+            alert('✅ Configurações salvas!');
+            goToHome();
+        }
+        
+        function loadConfig() {
+            if (!currentUser) return;
+            db.ref(`users/${currentUser.uid}/config`).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const config = snapshot.val();
+                    document.getElementById('recaidaPlaces').value = config.recaidaPlaces || '';
+                    document.getElementById('triggerApps').value = config.triggerApps || '';
+                    document.getElementById('criticalTimes').value = config.criticalTimes || '';
+                }
+            });
+        }
+        
+        // ====== MONITORAR AUTH ======
+        auth.onAuthStateChanged((user) => {
+            currentUser = user;
+        });
+        
         // ====== ENTER PARA ENVIAR ======
         document.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && document.getElementById('userMessage') === document.activeElement) {
                 sendMessage();
-            }
-        });
-        
-        // ====== VERIFICAR SE USUÁRIO JÁ TÁ LOGADO ======
-        window.addEventListener('load', () => {
-            const user = getUser();
-            if (user) {
-                goToHome();
             }
         });
     </script>
