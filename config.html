@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>LUMO — Configurações</title>
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── Estilos específicos de config ── */
+
+    .config-screen {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding-bottom: 48px;
+    }
+
+    /* Header */
+    .config-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 52px 20px 20px;
+    }
+
+    .config-header__back {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: var(--border-default);
+      color: var(--text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      flex-shrink: 0;
+      text-decoration: none;
+    }
+
+    .config-header__title {
+      font-family: var(--font-display);
+      font-size: 28px;
+      color: var(--text-primary);
+      line-height: 1;
+      letter-spacing: 0.04em;
+    }
+
+    /* Conteúdo */
+    .config-content {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 0 20px;
+    }
+
+    /* Bloco de seção */
+    .config-block {
+      background: var(--bg-card);
+      border: var(--border-default);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+    }
+
+    .config-block__header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 16px 10px;
+      border-bottom: var(--border-default);
+    }
+
+    .config-block__icon {
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .config-block__title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* Linha de item dentro de bloco */
+    .config-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: var(--border-default);
+      gap: 12px;
+    }
+
+    .config-row:last-child {
+      border-bottom: none;
+    }
+
+    .config-row__label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .config-row__value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-align: right;
+    }
+
+    /* Subseção de chips dentro de bloco */
+    .config-sub {
+      padding: 14px 16px;
+      border-bottom: var(--border-default);
+    }
+
+    .config-sub:last-child {
+      border-bottom: none;
+    }
+
+    .config-sub__label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .config-sub__chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* Toggle row */
+    .config-toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: var(--border-default);
+    }
+
+    .config-toggle-row__left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .config-toggle-row__title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .config-toggle-row__sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* Input inline */
+    .config-input {
+      width: 100%;
+      padding: 10px 0;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--text-faint);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .config-input:focus {
+      border-bottom-color: var(--purple-muted);
+    }
+
+    .config-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Botão de logout */
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 16px;
+      border-radius: var(--radius-btn);
+      background: transparent;
+      color: #c84040;
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 600;
+      border: 1px solid rgba(138, 32, 32, 0.35);
+      cursor: pointer;
+      margin-top: 16px;
+      transition: background 0.15s;
+    }
+
+    .btn-logout:active {
+      background: rgba(138, 32, 32, 0.08);
+    }
+
+    /* Versão do app */
+    .config-version {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-faint);
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="config-screen">
+
+    <!-- ════════════════════════════
+         HEADER
+         ════════════════════════════ -->
+    <header class="config-header">
+      <a class="config-header__back" href="index.html" aria-label="Voltar">←</a>
+      <div class="config-header__title">CONFIGURAÇÕES</div>
+    </header>
+
+    <div class="config-content">
+
+      <!-- ════════════════════════════
+           SEÇÃO: PERFIL
+           ════════════════════════════ -->
+      <div class="config-block">
+        <div class="config-block__header">
+          <span class="config-block__icon">👤</span>
+          <span class="config-block__title">Seu perfil</span>
+        </div>
+
+        <div class="config-row">
+          <span class="config-row__label">Nome</span>
+          <span class="config-row__value">Rafael</span>
+        </div>
+
+        <div class="config-row">
+          <span class="config-row__label">Email</span>
+          <span class="config-row__value" style="font-size:12px; color: var(--text-secondary);">rafael@email.com</span>
+        </div>
+
+        <div class="config-row">
+          <span class="config-row__label">Início da jornada</span>
+          <span class="config-row__value">26/fev/2026</span>
+        </div>
+
+        <div class="config-row" style="border-bottom: none;">
+          <span class="config-row__label">Nível atual</span>
+          <span class="badge">Capitão · 47 dias</span>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════
+           SEÇÃO: BOTÃO DE APOIO (FAB)
+           ════════════════════════════ -->
+      <div class="config-block">
+        <div class="config-block__header">
+          <span class="config-block__icon">🛡️</span>
+          <span class="config-block__title">Botão de apoio</span>
+        </div>
+
+        <!-- Toggle ativar/desativar -->
+        <div class="config-toggle-row">
+          <div class="config-toggle-row__left">
+            <span class="config-toggle-row__title">Ativar botão de apoio</span>
+            <span class="config-toggle-row__sub">Aparece sobre outros apps</span>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" checked />
+            <span class="toggle__track"></span>
+          </label>
+        </div>
+
+        <!-- Disfarce -->
+        <div class="config-sub">
+          <div class="config-sub__label">Disfarce</div>
+          <div class="config-sub__chips">
+            <div class="chip active">Calculadora</div>
+            <div class="chip">Clima</div>
+            <div class="chip">Lanterna</div>
+            <div class="chip">Transparente</div>
+            <div class="chip">Ponto</div>
+          </div>
+        </div>
+
+        <!-- Posição -->
+        <div class="config-sub">
+          <div class="config-sub__label">Posição na tela</div>
+          <div class="config-sub__chips">
+            <div class="chip active">Inf. direita</div>
+            <div class="chip">Inf. esquerda</div>
+            <div class="chip">Lat. direita</div>
+            <div class="chip">Lat. esquerda</div>
+          </div>
+        </div>
+
+        <!-- Opacidade -->
+        <div class="config-sub">
+          <div class="config-sub__label">Opacidade</div>
+          <div class="config-sub__chips">
+            <div class="chip">20%</div>
+            <div class="chip">50%</div>
+            <div class="chip active">100%</div>
+          </div>
+        </div>
+
+        <!-- Tamanho -->
+        <div class="config-sub">
+          <div class="config-sub__label">Tamanho</div>
+          <div class="config-sub__chips">
+            <div class="chip">Pequeno</div>
+            <div class="chip active">Médio</div>
+            <div class="chip">Grande</div>
+          </div>
+        </div>
+
+        <!-- Ação no toque -->
+        <div class="config-sub">
+          <div class="config-sub__label">Toque rápido abre</div>
+          <div class="config-sub__chips">
+            <div class="chip active">Protocolo</div>
+            <div class="chip">Chat IA</div>
+            <div class="chip">Respiração</div>
+            <div class="chip">Abrir LUMO</div>
+          </div>
+        </div>
+
+        <!-- Ação ao segurar -->
+        <div class="config-sub" style="border-bottom: none;">
+          <div class="config-sub__label">Segurar abre</div>
+          <div class="config-sub__chips">
+            <div class="chip active">Menu completo</div>
+            <div class="chip">Contato</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ════════════════════════════
+           SEÇÃO: CONTATO DE CONFIANÇA
+           ════════════════════════════ -->
+      <div class="config-block">
+        <div class="config-block__header">
+          <span class="config-block__icon">🤝</span>
+          <span class="config-block__title">Contato de confiança</span>
+        </div>
+
+        <div class="config-sub">
+          <div class="config-sub__label">Nome</div>
+          <input
+            class="config-input"
+            type="text"
+            placeholder="Nome do seu contato"
+            value="Carlos"
+          />
+        </div>
+
+        <div class="config-sub" style="border-bottom: none;">
+          <div class="config-sub__label">Telefone</div>
+          <input
+            class="config-input"
+            type="tel"
+            placeholder="(00) 00000-0000"
+            value="(11) 99999-0000"
+          />
+        </div>
+      </div>
+
+      <!-- ════════════════════════════
+           BOTÃO SAIR
+           ════════════════════════════ -->
+      <button class="btn-logout">Sair da conta</button>
+
+      <div class="config-version">LUMO v0.1 · MVP</div>
+
+    </div>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

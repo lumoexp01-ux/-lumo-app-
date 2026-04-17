@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>LUMO — Gatilhos</title>
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── Estilos específicos de triggers ── */
+
+    .triggers-screen {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding-bottom: 48px;
+    }
+
+    /* Header */
+    .triggers-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 52px 20px 20px;
+    }
+
+    .triggers-header__back {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: var(--border-default);
+      color: var(--text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      flex-shrink: 0;
+      text-decoration: none;
+    }
+
+    .triggers-header__info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .triggers-header__title {
+      font-family: var(--font-display);
+      font-size: 28px;
+      color: var(--text-primary);
+      line-height: 1;
+      letter-spacing: 0.04em;
+    }
+
+    .triggers-header__sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Seções de gatilho */
+    .triggers-content {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding: 4px 20px 0;
+    }
+
+    .trigger-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .trigger-section__header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .trigger-section__icon {
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .trigger-section__title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .trigger-section__chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* Card de padrão identificado */
+    .pattern-card {
+      margin: 8px 20px 0;
+      background: var(--bg-card-accent);
+      border: var(--border-accent);
+      border-radius: var(--radius-card);
+      padding: 18px 20px;
+    }
+
+    .pattern-card__label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--purple-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+
+    .pattern-card__risk {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+
+    .pattern-card__risk span {
+      color: var(--purple-text);
+    }
+
+    .pattern-card__hint {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Divisor de seções */
+    .section-divider {
+      height: 1px;
+      background: var(--text-faint);
+      opacity: 0.2;
+    }
+
+    /* Botão salvar */
+    .triggers-footer {
+      padding: 24px 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="triggers-screen">
+
+    <!-- ════════════════════════════
+         HEADER
+         ════════════════════════════ -->
+    <header class="triggers-header">
+      <a class="triggers-header__back" href="index.html" aria-label="Voltar">←</a>
+      <div class="triggers-header__info">
+        <div class="triggers-header__title">GATILHOS</div>
+        <div class="triggers-header__sub">Onde as recaídas acontecem mais?</div>
+      </div>
+    </header>
+
+    <!-- ════════════════════════════
+         SEÇÕES DE GATILHO
+         ════════════════════════════ -->
+    <div class="triggers-content">
+
+      <!-- Seção 1: Lugares -->
+      <div class="trigger-section">
+        <div class="trigger-section__header">
+          <span class="trigger-section__icon">📍</span>
+          <span class="trigger-section__title">Onde recaídas acontecem</span>
+        </div>
+        <div class="trigger-section__chips" id="chips-lugares">
+          <div class="chip active" data-valor="Quarto">Quarto</div>
+          <div class="chip" data-valor="Banheiro">Banheiro</div>
+          <div class="chip" data-valor="Trabalho">Trabalho</div>
+          <div class="chip" data-valor="Sala">Sala</div>
+          <div class="chip" data-valor="Outro">Outro</div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Seção 2: Apps -->
+      <div class="trigger-section">
+        <div class="trigger-section__header">
+          <span class="trigger-section__icon">📱</span>
+          <span class="trigger-section__title">Apps gatilho</span>
+        </div>
+        <div class="trigger-section__chips" id="chips-apps">
+          <div class="chip active" data-valor="Instagram">Instagram</div>
+          <div class="chip" data-valor="TikTok">TikTok</div>
+          <div class="chip" data-valor="Twitter/X">Twitter/X</div>
+          <div class="chip" data-valor="YouTube">YouTube</div>
+          <div class="chip" data-valor="Telegram">Telegram</div>
+          <div class="chip" data-valor="Outro">Outro</div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Seção 3: Horários -->
+      <div class="trigger-section">
+        <div class="trigger-section__header">
+          <span class="trigger-section__icon">🕐</span>
+          <span class="trigger-section__title">Horários críticos</span>
+        </div>
+        <div class="trigger-section__chips" id="chips-horarios">
+          <div class="chip" data-valor="Manhã">Manhã</div>
+          <div class="chip" data-valor="Tarde">Tarde</div>
+          <div class="chip" data-valor="Noite">Noite</div>
+          <div class="chip active" data-valor="Madrugada">Madrugada</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ════════════════════════════
+         CARD — PADRÃO IDENTIFICADO
+         ════════════════════════════ -->
+    <div class="pattern-card" id="pattern-card">
+      <div class="pattern-card__label">Seu padrão identificado</div>
+      <div class="pattern-card__risk" id="pattern-risk">
+        Maior risco: <span id="pattern-risk-text"></span>
+      </div>
+      <p class="pattern-card__hint hidden" id="pattern-empty">
+        Selecione ao menos um gatilho acima.
+      </p>
+      <div class="pattern-card__hint">
+        Conhecer seus gatilhos é a primeira linha de defesa. Você já está um passo à frente.
+      </div>
+    </div>
+
+    <!-- ════════════════════════════
+         BOTÃO SALVAR
+         ════════════════════════════ -->
+    <div class="triggers-footer">
+      <button class="btn-primary">Salvar gatilhos</button>
+    </div>
+
+  </div>
+  <script src="chips.js"></script>
+  <script src="nav.js"></script>
+</body>
+</html>

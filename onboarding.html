@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>LUMO — Bem-vindo</title>
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .onboarding {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 0 20px;
+    }
+
+    .onboarding__top {
+      padding-top: 56px;
+      text-align: center;
+    }
+
+    .onboarding__logo {
+      font-family: var(--font-display);
+      font-size: 48px;
+      color: var(--text-primary);
+      letter-spacing: 0.08em;
+      line-height: 1;
+    }
+
+    .onboarding__logo span { color: var(--purple-primary); }
+
+    .onboarding__tagline {
+      margin-top: 8px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .step-dots {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 36px;
+    }
+
+    .step-dots__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-faint);
+      transition: all 0.2s;
+    }
+
+    .step-dots__dot.active {
+      background: var(--purple-primary);
+      width: 24px;
+      border-radius: 4px;
+    }
+
+    .step-dots__dot.done { background: var(--purple-muted); }
+
+    /* Passos */
+    .step-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding-top: 32px;
+      transition: opacity 0.18s ease;
+    }
+
+    .step-wrapper.step--hidden {
+      display: none;
+    }
+
+    .step-wrapper.step--visible {
+      display: flex;
+    }
+
+    .step__label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--purple-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+
+    .step__title {
+      font-family: var(--font-display);
+      font-size: 34px;
+      color: var(--text-primary);
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+
+    .step__subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .step__fields {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex: 1;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-group label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    /* Erro de validação */
+    .input-error {
+      font-size: 12px;
+      color: #c84040;
+      margin-top: 4px;
+    }
+
+    /* Data */
+    .date-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .date-row input[type="date"] {
+      flex: 1;
+    }
+
+    .date-display {
+      background: var(--bg-card);
+      border: var(--border-default);
+      border-radius: var(--radius-btn);
+      padding: 14px 16px;
+      margin-top: 8px;
+    }
+
+    .date-display__text {
+      font-size: 15px;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .date-display__sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    /* Card âncora passo 2 */
+    .identity-card {
+      background: var(--bg-card-accent);
+      border: var(--border-accent);
+      border-radius: var(--radius-card);
+      padding: 20px;
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    .identity-card__level {
+      font-family: var(--font-display);
+      font-size: 42px;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+
+    .identity-card__desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
+
+    .identity-card__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      padding: 4px 12px;
+      border-radius: var(--radius-chip);
+      background: rgba(61, 31, 255, 0.12);
+      border: 1px solid rgba(61, 31, 255, 0.25);
+      font-size: 12px;
+      color: var(--purple-text);
+    }
+
+    /* Logo na tela de boas-vindas */
+    .welcome-logo {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .welcome-logo__img {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      object-fit: contain;
+    }
+
+    /* Card boas-vindas passo 3 */
+    .welcome-card {
+      background: rgba(61, 31, 255, 0.08);
+      border: 1px solid rgba(61, 31, 255, 0.2);
+      border-radius: var(--radius-card);
+      padding: 20px;
+      text-align: center;
+    }
+
+    .welcome-card__title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: var(--purple-text);
+      line-height: 1;
+    }
+
+    .welcome-card__sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    /* Rodapé do passo */
+    .step__footer {
+      padding: 24px 0 40px;
+    }
+
+    .step__hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 14px;
+    }
+
+    /* Features passo 3 */
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-card);
+      border: var(--border-default);
+      border-radius: var(--radius-card);
+      padding: 14px 16px;
+    }
+
+    .feature-item__icon { font-size: 20px; }
+
+    .feature-item__title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .feature-item__desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="onboarding">
+
+    <!-- Topo -->
+    <div class="onboarding__top">
+      <div class="onboarding__logo">LUM<span>O</span></div>
+      <p class="onboarding__tagline">Seu companheiro silencioso</p>
+    </div>
+
+    <!-- Indicador de passos -->
+    <div class="step-dots">
+      <div class="step-dots__dot active"></div>
+      <div class="step-dots__dot"></div>
+      <div class="step-dots__dot"></div>
+    </div>
+
+    <!-- ══════════════════════════════
+         PASSO 1 — Quem é você?
+         ══════════════════════════════ -->
+    <div class="step-wrapper step--visible" id="step-1">
+      <p class="step__label">Passo 1 de 3</p>
+      <h1 class="step__title">Quem é você?</h1>
+      <p class="step__subtitle">Sem julgamentos aqui. Só você e o LUMO, caminhando juntos.</p>
+
+      <div class="step__fields">
+        <div class="field-group">
+          <label for="nome">Como posso te chamar?</label>
+          <input class="input" type="text" id="nome" placeholder="Seu nome ou apelido" autocomplete="off" />
+        </div>
+
+        <div class="field-group">
+          <label for="email">Seu e-mail</label>
+          <input class="input" type="email" id="email" placeholder="email@exemplo.com" autocomplete="off" />
+        </div>
+
+        <div class="field-group">
+          <label for="senha">Crie uma senha</label>
+          <input class="input" type="password" id="senha" placeholder="Mínimo 6 caracteres" />
+        </div>
+      </div>
+
+      <div class="step__footer">
+        <button class="btn-primary" id="btn-passo1">Próximo</button>
+        <p class="step__hint">Seus dados são privados e nunca serão compartilhados.</p>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         PASSO 2 — Quando começou?
+         ══════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-2">
+      <p class="step__label">Passo 2 de 3</p>
+      <h1 class="step__title">Quando começa sua jornada?</h1>
+      <p class="step__subtitle">Qual foi o último dia que você cedeu? A partir daqui contamos juntos.</p>
+
+      <div class="step__fields">
+        <div class="field-group">
+          <label>Data do seu recomeço</label>
+          <div class="date-display">
+            <div class="date-display__text" id="display-data">Hoje</div>
+            <div class="date-display__sub">Toque para ajustar</div>
+          </div>
+          <input class="input" type="date" id="start-date" style="margin-top: 8px;" />
+        </div>
+
+        <div class="identity-card">
+          <div class="identity-card__level">SOLDADO</div>
+          <p class="identity-card__desc">Todo guerreiro começa assim.</p>
+          <span class="identity-card__badge">✦ Dia 0 de controle</span>
+        </div>
+      </div>
+
+      <div class="step__footer">
+        <button class="btn-primary" id="btn-passo2">Próximo</button>
+        <p class="step__hint">Você pode sempre ajustar a data nas configurações.</p>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         PASSO 3 — Pronto!
+         ══════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-3">
+      <div class="welcome-logo">
+        <img src="icons/icon-192.png" alt="LUMO" class="welcome-logo__img" />
+      </div>
+      <p class="step__label">Passo 3 de 3</p>
+      <h1 class="step__title">Você está pronto.</h1>
+      <p class="step__subtitle">
+        <span id="nome-boas-vindas">Ei</span>, o LUMO vai estar aqui quando o impulso bater. A qualquer hora, sem julgamento.
+      </p>
+
+      <div class="step__fields">
+        <div class="welcome-card">
+          <div class="welcome-card__title">Sua missão começa agora</div>
+          <p class="welcome-card__sub">
+            Quando sentir o impulso, abra o LUMO.<br>
+            Menos de 5 segundos para chegar à ajuda.
+          </p>
+        </div>
+
+        <div class="feature-list">
+          <div class="feature-item">
+            <span class="feature-item__icon">🛡️</span>
+            <div>
+              <div class="feature-item__title">Botão de emergência</div>
+              <div class="feature-item__desc">Um toque abre o protocolo anti-impulso</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="feature-item__icon">🤖</span>
+            <div>
+              <div class="feature-item__title">IA sempre disponível</div>
+              <div class="feature-item__desc">Converse quando precisar de apoio real</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="feature-item__icon">🎖️</span>
+            <div>
+              <div class="feature-item__title">Níveis e progressão</div>
+              <div class="feature-item__desc">De Soldado a Monge — cada dia conta</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step__footer">
+        <button class="btn-primary" id="btn-comecar">Começar jornada</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="onboarding.js"></script>
+  <script src="nav.js"></script>
+</body>
+</html>

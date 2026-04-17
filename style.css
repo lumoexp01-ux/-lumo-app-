@@ -1,0 +1,638 @@
+/* ============================================================
+   LUMO — style.css global
+   Fonte única de verdade para todos os estilos do app.
+   NUNCA adicionar estilos inline nos HTMLs sem necessidade.
+   ============================================================ */
+
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap');
+
+/* ============================================================
+   RESET
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: var(--font-body);
+}
+
+input, textarea {
+  font-family: var(--font-body);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+/* ============================================================
+   VARIÁVEIS CSS
+   ============================================================ */
+:root {
+  /* Cores — fundo */
+  --bg-primary:       #0a0a0f;
+  --bg-card:          #0f0f1e;
+  --bg-card-accent:   #12102a;
+
+  /* Cores — bordas */
+  --border-default:   1px solid #1a1a30;
+  --border-accent:    1px solid #2a2650;
+
+  /* Cores — roxo */
+  --purple-primary:   #3d1fff;
+  --purple-mid:       #5a4fff;
+  --purple-light:     #9d6fff;
+  --purple-text:      #c8bfff;
+  --purple-muted:     #8878e8;
+
+  /* Cores — texto */
+  --text-primary:     #e8e0ff;
+  --text-secondary:   #9090b8;
+  --text-muted:       #44446a;
+  --text-faint:       #3a3a5a;
+
+  /* Cores — estado */
+  --green-win:        #1d9e75;
+  --red-relapse:      #8a2020;
+  --amber-warning:    #b06010;
+
+  /* Tipografia */
+  --font-display:     'Bebas Neue', sans-serif;
+  --font-body:        'DM Sans', sans-serif;
+
+  /* Componentes */
+  --radius-card:      16px;
+  --radius-chip:      20px;
+  --radius-btn:       14px;
+}
+
+/* ============================================================
+   TIPOGRAFIA
+   ============================================================ */
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-body);
+  font-weight: 600;
+}
+
+/* ============================================================
+   CARD
+   ============================================================ */
+.card {
+  background: var(--bg-card);
+  border: var(--border-default);
+  border-radius: var(--radius-card);
+  padding: 20px;
+}
+
+.card--accent {
+  background: var(--bg-card-accent);
+  border: var(--border-accent);
+}
+
+/* ============================================================
+   CHIP
+   ============================================================ */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: var(--radius-chip);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--bg-card);
+  border: var(--border-default);
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.chip.active {
+  background: var(--bg-card-accent);
+  border: var(--border-accent);
+  color: var(--purple-text);
+}
+
+.chip--done {
+  background: transparent;
+  border-color: var(--green-win);
+  color: var(--green-win);
+}
+
+.chip--locked {
+  background: transparent;
+  border-color: var(--text-faint);
+  color: var(--text-faint);
+  cursor: default;
+}
+
+/* ============================================================
+   BOTÕES
+   ============================================================ */
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--radius-btn);
+  background: var(--purple-primary);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: opacity 0.15s;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:active {
+  opacity: 0.85;
+}
+
+.btn-ghost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--radius-btn);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+  border: var(--border-default);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.btn-ghost:active {
+  border-color: var(--purple-muted);
+  color: var(--purple-text);
+}
+
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: var(--border-default);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.btn-icon:active {
+  background: var(--bg-card-accent);
+}
+
+/* ============================================================
+   BADGE
+   ============================================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-chip);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--bg-card-accent);
+  border: var(--border-accent);
+  color: var(--purple-text);
+}
+
+.badge--green {
+  background: rgba(29, 158, 117, 0.12);
+  border-color: rgba(29, 158, 117, 0.3);
+  color: var(--green-win);
+}
+
+.badge--red {
+  background: rgba(138, 32, 32, 0.15);
+  border-color: rgba(138, 32, 32, 0.3);
+  color: #c84040;
+}
+
+/* ============================================================
+   FAB — Floating Action Button
+   ============================================================ */
+.fab {
+  position: fixed;
+  bottom: 28px;
+  right: 20px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--purple-primary);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 22px;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(61, 31, 255, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
+  user-select: none;
+  touch-action: none;
+}
+
+.fab:active {
+  transform: scale(0.93);
+  box-shadow: 0 2px 10px rgba(61, 31, 255, 0.25);
+}
+
+/* Disfarces do FAB */
+.fab--calculadora {
+  background: #1c1c1e;
+  box-shadow: none;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: -0.5px;
+}
+
+.fab--clima {
+  background: #1a2a3a;
+  box-shadow: none;
+  font-size: 13px;
+  color: #7ab8e8;
+}
+
+.fab--lanterna {
+  background: #2a2a1a;
+  box-shadow: none;
+  font-size: 22px;
+}
+
+.fab--transparente {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+.fab--ponto {
+  background: rgba(30, 30, 50, 0.7);
+  box-shadow: none;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fab--ponto::before,
+.fab--ponto::after,
+.fab--ponto span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--text-muted);
+  border-radius: 2px;
+}
+
+/* ============================================================
+   BARRA DE PROGRESSO
+   ============================================================ */
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-card-accent);
+  border-radius: 99px;
+  overflow: hidden;
+  border: var(--border-default);
+}
+
+.progress-bar__fill {
+  height: 100%;
+  border-radius: 99px;
+  background: var(--purple-primary);
+  transition: width 0.4s ease;
+}
+
+/* ============================================================
+   OVERLAY / MODAL
+   ============================================================ */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 5, 12, 0.85);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+
+.modal {
+  background: var(--bg-card);
+  border: var(--border-accent);
+  border-radius: 24px 24px 0 0;
+  padding: 28px 20px 36px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.modal__handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--text-faint);
+  margin: 0 auto 24px;
+}
+
+/* ============================================================
+   INPUT
+   ============================================================ */
+.input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: var(--radius-btn);
+  background: var(--bg-card);
+  border: var(--border-default);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  border-color: var(--purple-muted);
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ============================================================
+   SCROLL HORIZONTAL (linha de níveis)
+   ============================================================ */
+.scroll-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.scroll-row::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================================
+   GRID DE STATS 2x2
+   ============================================================ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: var(--border-default);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-card__value {
+  font-family: var(--font-display);
+  font-size: 32px;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.stat-card__label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ============================================================
+   CHAT — bolhas
+   ============================================================ */
+.bubble {
+  max-width: 78%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  font-size: 15px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.bubble--user {
+  background: #1e1640;
+  border: var(--border-accent);
+  color: var(--text-primary);
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.bubble--ai {
+  background: var(--bg-card);
+  border: var(--border-default);
+  color: var(--text-primary);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+/* Indicador de digitação */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: var(--border-default);
+  border-radius: 18px;
+  border-bottom-left-radius: 4px;
+  align-self: flex-start;
+}
+
+.typing-indicator span {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  animation: typing-bounce 1.2s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30%            { transform: translateY(-6px); background: var(--purple-muted); }
+}
+
+/* ============================================================
+   RESPIRAÇÃO — círculo animado (CSS puro)
+   ============================================================ */
+.breath-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 2px solid var(--purple-muted);
+  background: rgba(61, 31, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  animation: breathe 8s ease-in-out infinite;
+}
+
+.breath-circle__label {
+  font-size: 13px;
+  color: var(--purple-text);
+  font-weight: 500;
+  text-align: center;
+  animation: breathe-text 8s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(61, 31, 255, 0.2); }
+  40%       { transform: scale(1.25); box-shadow: 0 0 0 16px rgba(61, 31, 255, 0); }
+  60%       { transform: scale(1.25); }
+}
+
+@keyframes breathe-text {
+  0%, 100% { opacity: 0.7; }
+  40%      { opacity: 1; }
+}
+
+/* ============================================================
+   TOGGLE
+   ============================================================ */
+.toggle {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle__track {
+  position: absolute;
+  inset: 0;
+  border-radius: 99px;
+  background: var(--text-faint);
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.toggle__track::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.2s;
+}
+
+.toggle input:checked + .toggle__track {
+  background: var(--purple-primary);
+}
+
+.toggle input:checked + .toggle__track::after {
+  transform: translateX(18px);
+}
+
+/* ============================================================
+   UTILITÁRIOS
+   ============================================================ */
+.text-display  { font-family: var(--font-display); }
+.text-primary  { color: var(--text-primary); }
+.text-secondary{ color: var(--text-secondary); }
+.text-muted    { color: var(--text-muted); }
+.text-purple   { color: var(--purple-text); }
+.text-green    { color: var(--green-win); }
+.text-red      { color: #c84040; }
+
+.gap-4  { gap: 4px; }
+.gap-8  { gap: 8px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+.gap-20 { gap: 20px; }
+
+.flex        { display: flex; }
+.flex-col    { flex-direction: column; }
+.items-center{ align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center  { justify-content: center; }
+.w-full      { width: 100%; }
+
+.p-4  { padding: 4px; }
+.p-8  { padding: 8px; }
+.p-16 { padding: 16px; }
+.p-20 { padding: 20px; }
+
+.mt-8  { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mt-20 { margin-top: 20px; }
+.mt-24 { margin-top: 24px; }
+.mt-32 { margin-top: 32px; }
+
+.hidden { display: none !important; }
