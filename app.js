@@ -48,18 +48,16 @@ function calcularProgresso(dias) {
 }
 
 // ─────────────────────────────────────────
-// OBJETO DO USUÁRIO (sem Firebase — Fase 3)
+// OBJETO DO USUÁRIO (Fragmento 4.4)
+// Preenchido pelo Firestore após auth. Nunca usar hardcoded.
 // ─────────────────────────────────────────
 
-// Carrega dados do sessionStorage (salvos no onboarding) ou usa defaults
-const _dadosSessao = JSON.parse(sessionStorage.getItem('usuario') || 'null');
-
 const usuario = {
-  nome:             _dadosSessao?.nome      || 'Rafael',
-  email:            _dadosSessao?.email     || '',
-  startDate:        _dadosSessao?.startDate || '2026-02-26',
-  impulsosVencidos: _dadosSessao?.impulsosVencidos ?? 12,
-  recaidas:         _dadosSessao?.recaidas  ?? 3,
+  nome:             '',
+  email:            '',
+  startDate:        new Date().toISOString().split('T')[0],
+  impulsosVencidos: 0,
+  recaidas:         0,
 };
 
 function salvarSessao() {
@@ -201,8 +199,10 @@ function registrarRecaida() {
 // INICIALIZAÇÃO
 // ─────────────────────────────────────────
 
-// Oculta splash screen — chamada por app.js agora e por Fragment 4.4 via Firebase
-// Fragment 4.4 substituirá a chamada automática por onAuthStateChanged
+// ─────────────────────────────────────────
+// SPLASH
+// ─────────────────────────────────────────
+
 function ocultarSplash() {
   const splash = document.getElementById('splash');
   if (!splash) return;
@@ -210,14 +210,57 @@ function ocultarSplash() {
   setTimeout(() => { splash.style.display = 'none'; }, 350);
 }
 
+// ─────────────────────────────────────────
+// LOGOUT
+// ─────────────────────────────────────────
+
+async function logout() {
+  const { auth, signOut } = window.lumo;
+  await signOut(auth);
+  usuario.nome = '';
+  sessionStorage.clear();
+  window.location.href = 'onboarding.html';
+}
+
+// ─────────────────────────────────────────
+// INICIALIZAÇÃO — Fragmento 4.4
+// Guard de autenticação: só entra na index
+// se estiver logado E tiver perfil no Firestore.
+// ─────────────────────────────────────────
+
 document.addEventListener('DOMContentLoaded', () => {
-  // Só renderiza se estiver na index
-  if (document.getElementById('rank-nivel')) {
+  if (!document.getElementById('rank-nivel')) return;
+
+  const { auth, db, onAuthStateChanged, doc, getDoc } = window.lumo;
+
+  onAuthStateChanged(auth, async (userFirebase) => {
+
+    // Não autenticado → onboarding
+    if (!userFirebase) {
+      window.location.href = 'onboarding.html';
+      return;
+    }
+
+    // Autenticado mas sem perfil no Firestore → onboarding
+    const snap = await getDoc(doc(db, 'usuarios', userFirebase.uid));
+    if (!snap.exists()) {
+      window.location.href = 'onboarding.html';
+      return;
+    }
+
+    // Perfil encontrado → carrega dados reais
+    const dados = snap.data();
+    usuario.nome             = dados.nome             || '';
+    usuario.email            = dados.email            || userFirebase.email || '';
+    usuario.startDate        = dados.startDate        || new Date().toISOString().split('T')[0];
+    usuario.impulsosVencidos = dados.impulsosVencidos ?? 0;
+    usuario.recaidas         = dados.recaidas         ?? 0;
+
+    salvarSessao();
     renderizarIndex();
-    // TODO Fragment 4.4: remover esta linha — o splash será ocultado após onAuthStateChanged
     ocultarSplash();
 
-    // "Venci esse momento" — registra vitória e fecha modal (app.js é dono deste handler)
+    // "Venci esse momento"
     const btnVenceu = document.getElementById('btn-venceu');
     if (btnVenceu) {
       btnVenceu.addEventListener('click', () => {
@@ -227,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // "Recomeçar do zero" — registra recaída e fecha modal (app.js é dono deste handler)
+    // "Recomeçar do zero"
     const btnRecomecar = document.getElementById('btn-recomecar');
     if (btnRecomecar) {
       btnRecomecar.addEventListener('click', () => {
@@ -236,5 +279,5 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modal && window.fecharModal) window.fecharModal(modal);
       });
     }
-  }
+  });
 });
