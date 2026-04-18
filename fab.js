@@ -121,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="fab-menu__item" data-acao="impulso">🛡️ Protocolo</div>
         <div class="fab-menu__item" data-acao="chat">💬 Chat IA</div>
         <div class="fab-menu__item" data-acao="respiracao">🌬️ Respiração</div>
+        <div class="fab-menu__item" data-acao="vermelho">🔴 Tela Vermelha</div>
       `;
       document.body.appendChild(menu);
 
@@ -167,6 +168,8 @@ document.addEventListener('DOMContentLoaded', () => {
           const acao = item.dataset.acao;
           if (acao === 'chat') {
             window.location.href = 'chat.html';
+          } else if (acao === 'vermelho') {
+            ativarTelaVermelha();
           } else if (acao === 'impulso' || acao === 'respiracao') {
             const modalImpulso = document.getElementById('modal-impulso');
             if (modalImpulso) {
@@ -185,3 +188,26 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
+
+// ── Tela Vermelha ──
+// Sobrepõe overlay vermelho para quebrar padrão visual de estimulação.
+// Segundo toque (ou clique no overlay) remove. Sem timeout automático.
+function ativarTelaVermelha() {
+  const existente = document.getElementById('overlay-vermelho');
+  if (existente) {
+    existente.remove();
+    return;
+  }
+  const overlay = document.createElement('div');
+  overlay.id = 'overlay-vermelho';
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(180, 0, 0, 0.6);
+    z-index: 99999;
+    cursor: pointer;
+  `;
+  overlay.addEventListener('click', () => overlay.remove());
+  document.body.appendChild(overlay);
+}

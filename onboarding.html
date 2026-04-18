@@ -69,13 +69,8 @@
       transition: opacity 0.18s ease;
     }
 
-    .step-wrapper.step--hidden {
-      display: none;
-    }
-
-    .step-wrapper.step--visible {
-      display: flex;
-    }
+    .step-wrapper.step--hidden  { display: none; }
+    .step-wrapper.step--visible { display: flex; }
 
     .step__label {
       font-size: 12px;
@@ -128,16 +123,6 @@
     }
 
     /* Data */
-    .date-row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .date-row input[type="date"] {
-      flex: 1;
-    }
-
     .date-display {
       background: var(--bg-card);
       border: var(--border-default);
@@ -194,7 +179,106 @@
       color: var(--purple-text);
     }
 
-    /* Logo na tela de boas-vindas */
+    /* ── Passo 3 — Auth ── */
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--text-faint);
+    }
+
+    .btn-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      border: 1px solid #3a3a5a;
+      border-radius: var(--radius-btn);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .btn-google:hover { border-color: var(--purple-muted); background: rgba(61,31,255,0.04); }
+    .btn-google:active { background: rgba(61,31,255,0.08); }
+
+    .btn-google svg { flex-shrink: 0; }
+
+    /* Estado de carregamento */
+    .btn-loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    /* ── Passo 4 — Termos ── */
+    .terms-box {
+      background: var(--bg-card);
+      border: var(--border-default);
+      border-radius: var(--radius-card);
+      padding: 16px;
+      max-height: 160px;
+      overflow-y: auto;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .terms-box p { margin-bottom: 10px; }
+    .terms-box p:last-child { margin-bottom: 0; }
+
+    .terms-link {
+      font-size: 13px;
+      color: var(--purple-light);
+      text-decoration: none;
+      text-align: center;
+      display: block;
+    }
+
+    .terms-link:hover { text-decoration: underline; }
+
+    .terms-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: var(--bg-card);
+      border: var(--border-default);
+      border-radius: var(--radius-card);
+      padding: 14px 16px;
+      cursor: pointer;
+    }
+
+    .terms-check input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+      accent-color: var(--purple-primary);
+      cursor: pointer;
+    }
+
+    .terms-check__label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      cursor: pointer;
+    }
+
+    /* ── Passo 5 — Boas-vindas ── */
     .welcome-logo {
       display: flex;
       justify-content: center;
@@ -208,7 +292,6 @@
       object-fit: contain;
     }
 
-    /* Card boas-vindas passo 3 */
     .welcome-card {
       background: rgba(61, 31, 255, 0.08);
       border: 1px solid rgba(61, 31, 255, 0.2);
@@ -243,7 +326,7 @@
       margin-top: 14px;
     }
 
-    /* Features passo 3 */
+    /* Features passo 5 */
     .feature-list {
       display: flex;
       flex-direction: column;
@@ -274,6 +357,78 @@
       color: var(--text-secondary);
       margin-top: 2px;
     }
+
+    /* ── Modal termos completos ── */
+    .modal-termos {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .modal-termos.hidden { display: none; }
+
+    .modal-termos__overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+    }
+
+    .modal-termos__sheet {
+      position: relative;
+      width: 100%;
+      max-height: 80vh;
+      background: var(--bg-card);
+      border-radius: 20px 20px 0 0;
+      border-top: var(--border-accent);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-termos__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 20px 14px;
+      border-bottom: var(--border-default);
+    }
+
+    .modal-termos__title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      color: var(--text-primary);
+    }
+
+    .modal-termos__close {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 22px;
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+    }
+
+    .modal-termos__body {
+      padding: 20px;
+      overflow-y: auto;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .modal-termos__body h3 {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--purple-text);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 18px 0 6px;
+    }
+
+    .modal-termos__body h3:first-child { margin-top: 0; }
   </style>
 </head>
 <body>
@@ -285,35 +440,28 @@
       <p class="onboarding__tagline">Seu companheiro silencioso</p>
     </div>
 
-    <!-- Indicador de passos -->
+    <!-- Indicador de passos (5 dots) -->
     <div class="step-dots">
       <div class="step-dots__dot active"></div>
+      <div class="step-dots__dot"></div>
+      <div class="step-dots__dot"></div>
       <div class="step-dots__dot"></div>
       <div class="step-dots__dot"></div>
     </div>
 
     <!-- ══════════════════════════════
-         PASSO 1 — Quem é você?
+         PASSO 1 — Nome
          ══════════════════════════════ -->
     <div class="step-wrapper step--visible" id="step-1">
-      <p class="step__label">Passo 1 de 3</p>
+      <p class="step__label">Passo 1 de 5</p>
       <h1 class="step__title">Quem é você?</h1>
       <p class="step__subtitle">Sem julgamentos aqui. Só você e o LUMO, caminhando juntos.</p>
 
       <div class="step__fields">
         <div class="field-group">
           <label for="nome">Como posso te chamar?</label>
-          <input class="input" type="text" id="nome" placeholder="Seu nome ou apelido" autocomplete="off" />
-        </div>
-
-        <div class="field-group">
-          <label for="email">Seu e-mail</label>
-          <input class="input" type="email" id="email" placeholder="email@exemplo.com" autocomplete="off" />
-        </div>
-
-        <div class="field-group">
-          <label for="senha">Crie uma senha</label>
-          <input class="input" type="password" id="senha" placeholder="Mínimo 6 caracteres" />
+          <input class="input" type="text" id="nome" placeholder="Seu nome ou apelido"
+                 autocomplete="off" autocapitalize="words" />
         </div>
       </div>
 
@@ -324,10 +472,10 @@
     </div>
 
     <!-- ══════════════════════════════
-         PASSO 2 — Quando começou?
+         PASSO 2 — Data de início
          ══════════════════════════════ -->
     <div class="step-wrapper step--hidden" id="step-2">
-      <p class="step__label">Passo 2 de 3</p>
+      <p class="step__label">Passo 2 de 5</p>
       <h1 class="step__title">Quando começa sua jornada?</h1>
       <p class="step__subtitle">Qual foi o último dia que você cedeu? A partir daqui contamos juntos.</p>
 
@@ -355,13 +503,85 @@
     </div>
 
     <!-- ══════════════════════════════
-         PASSO 3 — Pronto!
+         PASSO 3 — Acesso (Auth)
          ══════════════════════════════ -->
     <div class="step-wrapper step--hidden" id="step-3">
+      <p class="step__label">Passo 3 de 5</p>
+      <h1 class="step__title">Crie seu acesso.</h1>
+      <p class="step__subtitle">É aqui que sua conta fica salva — para você acessar em qualquer dispositivo.</p>
+
+      <div class="step__fields">
+        <div class="field-group">
+          <label for="email">Seu e-mail</label>
+          <input class="input" type="email" id="email" placeholder="email@exemplo.com"
+                 autocomplete="email" />
+        </div>
+
+        <div class="field-group">
+          <label for="senha">Crie uma senha</label>
+          <input class="input" type="password" id="senha" placeholder="Mínimo 6 caracteres"
+                 autocomplete="new-password" />
+        </div>
+
+        <div class="auth-divider">ou</div>
+
+        <button class="btn-google" id="btn-google">
+          <!-- Google "G" SVG -->
+          <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/>
+            <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853"/>
+            <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05"/>
+            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58Z" fill="#EA4335"/>
+          </svg>
+          Continuar com Google
+        </button>
+      </div>
+
+      <div class="step__footer">
+        <button class="btn-primary" id="btn-auth">Criar conta</button>
+        <p class="step__hint" id="hint-auth">Já tem conta? Digite seu email e senha para entrar.</p>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         PASSO 4 — Termos
+         ══════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-4">
+      <p class="step__label">Passo 4 de 5</p>
+      <h1 class="step__title">Antes de começar.</h1>
+      <p class="step__subtitle">Leia o resumo abaixo e confirme que está de acordo.</p>
+
+      <div class="step__fields">
+        <div class="terms-box">
+          <p>O LUMO é uma ferramenta de apoio comportamental, não um serviço médico ou psicológico.</p>
+          <p>Coletamos: nome, email, dados de uso e mensagens do chat para funcionamento do app.</p>
+          <p>Suas mensagens no chat podem ser processadas por APIs externas de IA. Não compartilhe informações sensíveis.</p>
+          <p>O app é permitido apenas para maiores de 18 anos.</p>
+          <p>Não vendemos seus dados. Você pode solicitar exclusão a qualquer momento.</p>
+          <p>Em caso de sofrimento emocional intenso, procure ajuda profissional. CVV: 188.</p>
+        </div>
+
+        <a href="#" class="terms-link" id="link-termos-completos">Ver termos completos →</a>
+
+        <label class="terms-check" for="aceito-termos">
+          <input type="checkbox" id="aceito-termos" />
+          <span class="terms-check__label">Li e aceito os Termos de Uso e Política de Privacidade do LUMO</span>
+        </label>
+      </div>
+
+      <div class="step__footer">
+        <button class="btn-primary" id="btn-aceitar" disabled>Continuar</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         PASSO 5 — Boas-vindas
+         ══════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-5">
       <div class="welcome-logo">
         <img src="icons/icon-192.png" alt="LUMO" class="welcome-logo__img" />
       </div>
-      <p class="step__label">Passo 3 de 3</p>
+      <p class="step__label">Passo 5 de 5</p>
       <h1 class="step__title">Você está pronto.</h1>
       <p class="step__subtitle">
         <span id="nome-boas-vindas">Ei</span>, o LUMO vai estar aqui quando o impulso bater. A qualquer hora, sem julgamento.
@@ -408,6 +628,51 @@
 
   </div>
 
+  <!-- ══════════════════════════════
+       MODAL — Termos completos
+       ══════════════════════════════ -->
+  <div class="modal-termos hidden" id="modal-termos">
+    <div class="modal-termos__overlay" id="modal-termos-overlay"></div>
+    <div class="modal-termos__sheet">
+      <div class="modal-termos__header">
+        <span class="modal-termos__title">Termos de Uso</span>
+        <button class="modal-termos__close" id="modal-termos-fechar">×</button>
+      </div>
+      <div class="modal-termos__body">
+        <h3>1. Sobre o aplicativo</h3>
+        <p>O LUMO é um aplicativo digital de apoio comportamental, projetado para auxiliar usuários no controle de hábitos e impulsos. O aplicativo é uma ferramenta de apoio e não constitui serviço médico, psicológico ou terapêutico profissional.</p>
+
+        <h3>2. Não substitui tratamento</h3>
+        <p>O LUMO não substitui acompanhamento médico, psicológico ou psiquiátrico. As orientações fornecidas, incluindo respostas de inteligência artificial, têm caráter informativo. Em caso de sofrimento emocional intenso, procure ajuda profissional. No Brasil: CVV pelo número 188.</p>
+
+        <h3>3. Idade mínima</h3>
+        <p>O uso do aplicativo é permitido apenas para maiores de 18 anos.</p>
+
+        <h3>4. Dados coletados</h3>
+        <p>Nome e e-mail, dados de uso e interação, dados comportamentais (progresso, hábitos, gatilhos) e conteúdo inserido pelo usuário.</p>
+
+        <h3>5. Uso de inteligência artificial</h3>
+        <p>O aplicativo utiliza APIs externas de IA para processamento de mensagens. Ao utilizar o chat, suas mensagens podem ser processadas por serviços externos. Recomenda-se não compartilhar informações sensíveis.</p>
+
+        <h3>6. Compartilhamento de dados</h3>
+        <p>O LUMO não vende dados pessoais. Os dados podem ser compartilhados apenas quando necessário para operação do serviço ou cumprimento de obrigações legais.</p>
+
+        <h3>7. Exclusão de dados</h3>
+        <p>O usuário pode solicitar exclusão de sua conta e dados a qualquer momento através do email de contato.</p>
+
+        <h3>8. Responsabilidade</h3>
+        <p>O LUMO é apenas uma ferramenta de apoio e não se responsabiliza por decisões tomadas pelo usuário ou resultados obtidos ou não obtidos.</p>
+
+        <h3>9. Pagamentos</h3>
+        <p>Valores serão informados previamente. Cancelamento pode ser feito a qualquer momento. Reembolsos seguem a legislação vigente.</p>
+
+        <h3>10. Alterações</h3>
+        <p>Os termos podem ser atualizados a qualquer momento. O usuário será notificado e deverá aceitar os novos termos para continuar usando o app.</p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="firebase.js"></script>
   <script src="onboarding.js"></script>
   <script src="nav.js"></script>
 </body>
