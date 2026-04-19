@@ -82,4 +82,55 @@ document.addEventListener('DOMContentLoaded', () => {
   // Roda uma vez ao carregar para refletir estado inicial do HTML
   atualizarPadrao();
 
+  // ── Fragmento 4.5 — Carregar e salvar gatilhos no Firestore ──
+  if (!window.lumo) return;
+
+  const { auth, db, onAuthStateChanged, doc, getDoc, updateDoc } = window.lumo;
+  let uidAtual = null;
+
+  onAuthStateChanged(auth, async (userFirebase) => {
+    if (!userFirebase) return;
+    uidAtual = userFirebase.uid;
+
+    const snap = await getDoc(doc(db, 'usuarios', uidAtual));
+    if (!snap.exists()) return;
+    const salvos = snap.data().gatilhos;
+    if (!salvos) return;
+
+    ['lugares', 'apps', 'horarios'].forEach(chave => {
+      const valores = salvos[chave] || [];
+      const container = document.getElementById(`chips-${chave}`);
+      if (!container) return;
+      gatilhos[chave] = [];
+      container.querySelectorAll('.chip').forEach(chip => {
+        const valor = chip.dataset.valor || chip.textContent.trim();
+        const ativo = valores.includes(valor);
+        chip.classList.toggle('active', ativo);
+        if (ativo) gatilhos[chave].push(valor);
+      });
+    });
+
+    atualizarPadrao();
+  });
+
+  const btnSalvar = document.getElementById('btn-salvar-gatilhos');
+  if (!btnSalvar) return;
+
+  btnSalvar.addEventListener('click', async () => {
+    if (!uidAtual) return;
+    const textoOriginal = btnSalvar.textContent;
+    btnSalvar.textContent = 'Salvando...';
+    btnSalvar.disabled = true;
+
+    try {
+      await updateDoc(doc(db, 'usuarios', uidAtual), { gatilhos });
+      btnSalvar.textContent = 'Salvo ✓';
+      setTimeout(() => { btnSalvar.textContent = textoOriginal; btnSalvar.disabled = false; }, 1500);
+    } catch (e) {
+      console.log('Erro ao salvar gatilhos');
+      btnSalvar.textContent = textoOriginal;
+      btnSalvar.disabled = false;
+    }
+  });
+
 });

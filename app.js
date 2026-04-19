@@ -180,6 +180,15 @@ function registrarImpulsoVencido() {
   salvarSessao();
   renderizarIndex();
 
+  // Persiste no Firestore em background
+  const sessao = JSON.parse(sessionStorage.getItem('usuario') || 'null');
+  const uid = window.lumo?.auth?.currentUser?.uid;
+  if (uid && window.lumo) {
+    const { db, doc, updateDoc, increment } = window.lumo;
+    updateDoc(doc(db, 'usuarios', uid), { impulsosVencidos: increment(1) })
+      .catch(() => {});
+  }
+
   // Debounce de 1.5s para evitar duplo clique
   setTimeout(() => { impulsoEmProcesso = false; }, 1500);
 }
@@ -189,10 +198,21 @@ function registrarImpulsoVencido() {
 // ─────────────────────────────────────────
 
 function registrarRecaida() {
-  usuario.startDate = new Date().toISOString().split('T')[0];
+  const hoje = new Date().toISOString().split('T')[0];
+  usuario.startDate = hoje;
   usuario.recaidas  += 1;
   salvarSessao();
   renderizarIndex();
+
+  // Persiste no Firestore em background
+  const uid = window.lumo?.auth?.currentUser?.uid;
+  if (uid && window.lumo) {
+    const { db, doc, updateDoc, increment } = window.lumo;
+    updateDoc(doc(db, 'usuarios', uid), {
+      startDate: hoje,
+      recaidas:  increment(1),
+    }).catch(() => {});
+  }
 }
 
 // ─────────────────────────────────────────
@@ -231,30 +251,50 @@ async function logout() {
 document.addEventListener('DOMContentLoaded', () => {
   if (!document.getElementById('rank-nivel')) return;
 
+  console.log('Index aberto, verificando auth');
+
   const { auth, db, onAuthStateChanged, doc, getDoc } = window.lumo;
 
   onAuthStateChanged(auth, async (userFirebase) => {
 
     // Não autenticado → onboarding
     if (!userFirebase) {
+      console.log('Auth não detectado, voltando para onboarding');
       window.location.href = 'onboarding.html';
       return;
     }
 
-    // Autenticado mas sem perfil no Firestore → onboarding
+    console.log('Auth detectado: ' + userFirebase.uid);
+
+    // Busca perfil no Firestore
     const snap = await getDoc(doc(db, 'usuarios', userFirebase.uid));
-    if (!snap.exists()) {
-      window.location.href = 'onboarding.html';
-      return;
-    }
 
-    // Perfil encontrado → carrega dados reais
-    const dados = snap.data();
-    usuario.nome             = dados.nome             || '';
-    usuario.email            = dados.email            || userFirebase.email || '';
-    usuario.startDate        = dados.startDate        || new Date().toISOString().split('T')[0];
-    usuario.impulsosVencidos = dados.impulsosVencidos ?? 0;
-    usuario.recaidas         = dados.recaidas         ?? 0;
+    if (snap.exists()) {
+      // Perfil encontrado → carrega dados do Firestore
+      const dados = snap.data();
+      usuario.nome             = dados.nome             || '';
+      usuario.email            = dados.email            || userFirebase.email || '';
+      usuario.startDate        = dados.startDate        || new Date().toISOString().split('T')[0];
+      usuario.impulsosVencidos = dados.impulsosVencidos ?? 0;
+      usuario.recaidas         = dados.recaidas         ?? 0;
+
+    } else {
+      // Perfil ainda não foi salvo no Firestore (Fragment 4.3 pendente).
+      // Fallback: usa sessionStorage se o usuário veio direto do onboarding.
+      const sessao = JSON.parse(sessionStorage.getItem('usuario') || 'null');
+      if (sessao?.nome) {
+        console.log('Perfil não encontrado no Firestore — usando sessionStorage');
+        usuario.nome             = sessao.nome;
+        usuario.email            = userFirebase.email || '';
+        usuario.startDate        = sessao.startDate        || new Date().toISOString().split('T')[0];
+        usuario.impulsosVencidos = sessao.impulsosVencidos ?? 0;
+        usuario.recaidas         = sessao.recaidas         ?? 0;
+      } else {
+        console.log('Perfil não encontrado, voltando para onboarding');
+        window.location.href = 'onboarding.html';
+        return;
+      }
+    }
 
     salvarSessao();
     renderizarIndex();

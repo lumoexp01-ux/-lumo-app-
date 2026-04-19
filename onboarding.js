@@ -234,16 +234,58 @@ document.addEventListener('DOMContentLoaded', () => {
     modalTermos.classList.add('hidden');
   });
 
-  // ── PASSO 5 — Ir para o app ──
-  document.getElementById('btn-comecar').addEventListener('click', () => {
-    // Salva em sessionStorage para a index usar enquanto Fragment 4.3 não persiste no Firestore
+  // ── PASSO 5 — Salvar perfil no Firestore e ir para o app ──
+  document.getElementById('btn-comecar').addEventListener('click', async () => {
+    console.log('Passo 5 clicado');
+
+    const btnComecar = document.getElementById('btn-comecar');
+    btnComecar.classList.add('btn-loading');
+    btnComecar.textContent = 'Aguarde...';
+
+    const { auth, db, doc, setDoc } = window.lumo;
+    const uid = auth.currentUser?.uid;
+
+    if (uid) {
+      try {
+        await setDoc(doc(db, 'usuarios', uid), {
+          nome:             dados.nome,
+          email:            auth.currentUser.email || '',
+          startDate:        dados.startDate,
+          impulsosVencidos: 0,
+          recaidas:         0,
+          gatilhos: { lugares: [], apps: [], horarios: [] },
+          config: {
+            fabAtivo:          true,
+            fabDisfarce:       'Calculadora',
+            fabPosicao:        'inferior-direita',
+            fabOpacidade:      100,
+            fabTamanho:        'medio',
+            fabAcaoToque:      'cards',
+            fabAcaoSegurar:    'menu',
+            contatoNome:       '',
+            contatoTelefone:   '',
+          },
+          termos: {
+            aceito:    true,
+            dataAceite: new Date().toISOString(),
+            versao:    '1.0',
+            plataforma: 'web',
+          },
+        });
+        console.log('Perfil salvo no Firestore');
+      } catch (e) {
+        console.log('Erro ao salvar perfil — continuando com sessionStorage');
+      }
+    }
+
     sessionStorage.setItem('usuario', JSON.stringify({
       nome:             dados.nome,
       startDate:        dados.startDate,
-      termosAceitos:    true,
       impulsosVencidos: 0,
       recaidas:         0,
     }));
+
+    console.log('Redirecionando para index');
     document.body.style.opacity    = '0';
     document.body.style.transition = 'opacity 0.18s ease';
     setTimeout(() => { window.location.href = 'index.html'; }, 160);

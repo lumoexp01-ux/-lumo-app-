@@ -242,22 +242,22 @@
 
         <div class="config-row">
           <span class="config-row__label">Nome</span>
-          <span class="config-row__value">Rafael</span>
+          <span class="config-row__value" id="config-perfil-nome">—</span>
         </div>
 
         <div class="config-row">
           <span class="config-row__label">Email</span>
-          <span class="config-row__value" style="font-size:12px; color: var(--text-secondary);">rafael@email.com</span>
+          <span class="config-row__value" id="config-perfil-email" style="font-size:12px; color: var(--text-secondary);">—</span>
         </div>
 
         <div class="config-row">
           <span class="config-row__label">Início da jornada</span>
-          <span class="config-row__value">26/fev/2026</span>
+          <span class="config-row__value" id="config-perfil-data">—</span>
         </div>
 
         <div class="config-row" style="border-bottom: none;">
           <span class="config-row__label">Nível atual</span>
-          <span class="badge">Capitão · 47 dias</span>
+          <span class="badge" id="config-perfil-nivel">—</span>
         </div>
       </div>
 
@@ -277,7 +277,7 @@
             <span class="config-toggle-row__sub">Aparece sobre outros apps</span>
           </div>
           <label class="toggle">
-            <input type="checkbox" checked />
+            <input type="checkbox" id="fab-toggle" checked />
             <span class="toggle__track"></span>
           </label>
         </div>
@@ -285,64 +285,64 @@
         <!-- Disfarce -->
         <div class="config-sub">
           <div class="config-sub__label">Disfarce</div>
-          <div class="config-sub__chips">
-            <div class="chip active">Calculadora</div>
-            <div class="chip">Clima</div>
-            <div class="chip">Lanterna</div>
-            <div class="chip">Transparente</div>
-            <div class="chip">Ponto</div>
+          <div class="config-sub__chips" id="config-chips-disfarce">
+            <div class="chip active" data-valor="Calculadora">Calculadora</div>
+            <div class="chip" data-valor="Clima">Clima</div>
+            <div class="chip" data-valor="Lanterna">Lanterna</div>
+            <div class="chip" data-valor="Transparente">Transparente</div>
+            <div class="chip" data-valor="Ponto">Ponto</div>
           </div>
         </div>
 
         <!-- Posição -->
         <div class="config-sub">
           <div class="config-sub__label">Posição na tela</div>
-          <div class="config-sub__chips">
-            <div class="chip active">Inf. direita</div>
-            <div class="chip">Inf. esquerda</div>
-            <div class="chip">Lat. direita</div>
-            <div class="chip">Lat. esquerda</div>
+          <div class="config-sub__chips" id="config-chips-posicao">
+            <div class="chip active" data-valor="inferior-direita">Inf. direita</div>
+            <div class="chip" data-valor="inferior-esquerda">Inf. esquerda</div>
+            <div class="chip" data-valor="lateral-direita">Lat. direita</div>
+            <div class="chip" data-valor="lateral-esquerda">Lat. esquerda</div>
           </div>
         </div>
 
         <!-- Opacidade -->
         <div class="config-sub">
           <div class="config-sub__label">Opacidade</div>
-          <div class="config-sub__chips">
-            <div class="chip">20%</div>
-            <div class="chip">50%</div>
-            <div class="chip active">100%</div>
+          <div class="config-sub__chips" id="config-chips-opacidade">
+            <div class="chip" data-valor="20">20%</div>
+            <div class="chip" data-valor="50">50%</div>
+            <div class="chip active" data-valor="100">100%</div>
           </div>
         </div>
 
         <!-- Tamanho -->
         <div class="config-sub">
           <div class="config-sub__label">Tamanho</div>
-          <div class="config-sub__chips">
-            <div class="chip">Pequeno</div>
-            <div class="chip active">Médio</div>
-            <div class="chip">Grande</div>
+          <div class="config-sub__chips" id="config-chips-tamanho">
+            <div class="chip" data-valor="pequeno">Pequeno</div>
+            <div class="chip active" data-valor="medio">Médio</div>
+            <div class="chip" data-valor="grande">Grande</div>
           </div>
         </div>
 
         <!-- Ação no toque -->
         <div class="config-sub">
           <div class="config-sub__label">Toque rápido abre</div>
-          <div class="config-sub__chips">
-            <div class="chip active">Protocolo</div>
-            <div class="chip">Chat IA</div>
-            <div class="chip">Respiração</div>
-            <div class="chip">Tela Vermelha</div>
-            <div class="chip">Abrir LUMO</div>
+          <div class="config-sub__chips" id="config-chips-acao-toque">
+            <div class="chip active" data-valor="cards">Protocolo</div>
+            <div class="chip" data-valor="chat">Chat IA</div>
+            <div class="chip" data-valor="respiracao">Respiração</div>
+            <div class="chip" data-valor="vermelho">Tela Vermelha</div>
+            <div class="chip" data-valor="lumo">Abrir LUMO</div>
           </div>
         </div>
 
         <!-- Ação ao segurar -->
         <div class="config-sub" style="border-bottom: none;">
           <div class="config-sub__label">Segurar abre</div>
-          <div class="config-sub__chips">
-            <div class="chip active">Menu completo</div>
-            <div class="chip">Contato</div>
+          <div class="config-sub__chips" id="config-chips-acao-segurar">
+            <div class="chip active" data-valor="menu">Menu completo</div>
+            <div class="chip" data-valor="contato">Contato</div>
           </div>
         </div>
 
@@ -360,20 +360,20 @@
         <div class="config-sub">
           <div class="config-sub__label">Nome</div>
           <input
+            id="config-contato-nome"
             class="config-input"
             type="text"
             placeholder="Nome do seu contato"
-            value="Carlos"
           />
         </div>
 
         <div class="config-sub" style="border-bottom: none;">
           <div class="config-sub__label">Telefone</div>
           <input
+            id="config-contato-tel"
             class="config-input"
             type="tel"
             placeholder="(00) 00000-0000"
-            value="(11) 99999-0000"
           />
         </div>
       </div>
@@ -389,6 +389,7 @@
   </div>
   <script type="module" src="firebase.js"></script>
   <script src="app.js"></script>
+  <script src="config.js"></script>
   <script src="nav.js"></script>
 </body>
 </html>
