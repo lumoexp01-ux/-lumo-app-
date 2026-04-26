@@ -91,6 +91,10 @@ ul, ol {
   --red-relapse:      #8a2020;
   --amber-warning:    #b06010;
 
+  /* Crise */
+  --red-crisis:       #cc2020;
+  --red-crisis-bg:    #2a0808;
+
   /* Tipografia */
   --font-display:     'Bebas Neue', sans-serif;
   --font-body:        'DM Sans', sans-serif;
@@ -232,6 +236,29 @@ h1, h2, h3 {
 
 .btn-icon:active {
   background: var(--bg-card-accent);
+}
+
+.btn-crisis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 18px;
+  border-radius: 14px;
+  background: var(--red-crisis);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn-crisis:active {
+  opacity: 0.88;
+  transform: scale(0.98);
 }
 
 /* ============================================================
