@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>LUMO — Intervenção</title>
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { background: var(--bg-primary); }
+
+    .intervencao {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 0 20px 48px;
+    }
+
+    /* ── Topo ── */
+    .iv-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 52px;
+      padding-bottom: 8px;
+    }
+
+    .iv-top__title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .iv-top__close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: var(--border-default);
+      color: var(--text-secondary);
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      line-height: 1;
+      text-decoration: none;
+    }
+
+    /* ── Steps ── */
+    .step-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .step-wrapper.step--hidden  { display: none; }
+    .step-wrapper.step--visible { display: flex; }
+
+    .iv-title {
+      font-family: var(--font-display);
+      font-size: 32px;
+      color: var(--text-primary);
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+
+    .iv-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .iv-footer {
+      margin-top: auto;
+      padding-top: 24px;
+    }
+
+    /* ════════════════════════════
+       ETAPA 1 — RESPIRAÇÃO
+       ════════════════════════════ */
+    .breath-stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      text-align: center;
+    }
+
+    .breath-orb {
+      width: 148px;
+      height: 148px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(61,31,255,0.28) 0%, rgba(61,31,255,0.05) 70%);
+      border: 2px solid rgba(61,31,255,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: orb-breathe 12s ease-in-out infinite;
+      margin-bottom: 32px;
+    }
+
+    .breath-orb__inner {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(61,31,255,0.15);
+      border: 1px solid rgba(61,31,255,0.3);
+    }
+
+    @keyframes orb-breathe {
+      0%   { transform: scale(1);    opacity: 0.65; }
+      33%  { transform: scale(1.2);  opacity: 1;    } /* inspire 4s */
+      50%  { transform: scale(1.2);  opacity: 1;    } /* segure 4s */
+      83%  { transform: scale(1);    opacity: 0.65; } /* solte 4s */
+      100% { transform: scale(1);    opacity: 0.65; }
+    }
+
+    .breath-label {
+      font-family: var(--font-display);
+      font-size: 28px;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      min-height: 36px;
+    }
+
+    .breath-sublabel {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+
+    .breath-progress-wrap {
+      width: 100%;
+      max-width: 280px;
+    }
+
+    .breath-progress-bar {
+      height: 4px;
+      background: var(--text-faint);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .breath-progress-bar__fill {
+      height: 100%;
+      width: 0%;
+      background: var(--purple-primary);
+      border-radius: 2px;
+      transition: width 1s linear;
+    }
+
+    .breath-timer {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* Botão "Continuar" aparece após 30s (via JS) */
+    #btn-respiracao-ok {
+      display: none;
+    }
+
+    /* ════════════════════════════
+       ETAPA 2 — ESCOLHA
+       ════════════════════════════ */
+    .choice-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .choice-card {
+      background: var(--bg-card);
+      border: var(--border-default);
+      border-radius: var(--radius-card);
+      padding: 22px 20px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      text-decoration: none;
+    }
+
+    .choice-card:active { background: var(--bg-card-accent); border-color: var(--purple-mid); }
+
+    .choice-card__icon {
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+
+    .choice-card__title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .choice-card__desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+
+    .choice-card__arrow {
+      margin-left: auto;
+      color: var(--text-muted);
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    /* Discord — oculto durante trial */
+    #choice-discord { display: none; }
+
+    /* ════════════════════════════
+       ETAPA 3 — PERGUNTA
+       ════════════════════════════ */
+    .iv-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      flex: 1;
+      align-content: flex-start;
+    }
+
+    .iv-chip {
+      padding: 11px 18px;
+      background: var(--bg-card);
+      border: var(--border-default);
+      border-radius: var(--radius-chip);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+    }
+
+    .iv-chip.selected {
+      border-color: var(--purple-primary);
+      background: rgba(61,31,255,0.1);
+      color: var(--purple-text);
+    }
+
+    .iv-chip:active { opacity: 0.8; }
+
+    /* ════════════════════════════
+       ETAPA 4 — LEMBRETE
+       ════════════════════════════ */
+    .iv-lembrete-card {
+      background: var(--bg-card-accent);
+      border: var(--border-accent);
+      border-radius: var(--radius-card);
+      padding: 28px 24px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .iv-lembrete-text {
+      font-size: 18px;
+      color: var(--text-primary);
+      line-height: 1.6;
+      font-weight: 500;
+    }
+
+    .iv-lembrete-text em {
+      color: var(--purple-text);
+      font-style: normal;
+    }
+
+    /* ════════════════════════════
+       ETAPA 5 — AÇÃO
+       ════════════════════════════ */
+    .iv-acao-card {
+      background: var(--bg-card-accent);
+      border: var(--border-accent);
+      border-radius: var(--radius-card);
+      padding: 28px 24px;
+      margin-bottom: 12px;
+    }
+
+    .iv-acao-text {
+      font-size: 18px;
+      color: var(--text-primary);
+      line-height: 1.6;
+      font-weight: 500;
+    }
+
+    .iv-acao-retorno {
+      background: var(--bg-card);
+      border: var(--border-default);
+      border-radius: var(--radius-card);
+      padding: 14px 18px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    /* ════════════════════════════
+       ETAPA 6 — CHECK-IN
+       ════════════════════════════ */
+    .checkin-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .btn-checkin {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      padding: 18px 20px;
+      border-radius: var(--radius-card);
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      text-align: left;
+      transition: opacity 0.15s;
+    }
+
+    .btn-checkin:active { opacity: 0.82; }
+
+    .btn-checkin__icon { font-size: 20px; flex-shrink: 0; }
+
+    .btn-checkin--ok {
+      background: rgba(29,158,117,0.1);
+      border-color: rgba(29,158,117,0.3);
+      color: var(--green-win);
+    }
+
+    .btn-checkin--help {
+      background: rgba(61,31,255,0.07);
+      border-color: rgba(61,31,255,0.2);
+      color: var(--purple-text);
+    }
+
+    .btn-checkin--relapse {
+      background: rgba(204,32,32,0.07);
+      border-color: rgba(204,32,32,0.2);
+      color: #e06060;
+    }
+
+    /* ════════════════════════════
+       MODAL DE CONFRONTO
+       ════════════════════════════ */
+    .confronto-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .confronto-overlay.hidden { display: none; }
+
+    .confronto-sheet {
+      width: 100%;
+      max-height: 80vh;
+      background: var(--red-crisis-bg);
+      border: 1px solid rgba(204,32,32,0.3);
+      border-radius: 20px 20px 0 0;
+      padding: 28px 24px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .confronto-sheet__handle {
+      width: 36px;
+      height: 4px;
+      background: rgba(204,32,32,0.3);
+      border-radius: 2px;
+      margin: 0 auto 8px;
+    }
+
+    .confronto-msg {
+      font-size: 16px;
+      color: var(--text-primary);
+      line-height: 1.8;
+      white-space: pre-line;
+    }
+
+    .confronto-msg strong {
+      font-size: 20px;
+      color: #fff;
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .confronto-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-recomecar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 16px;
+      border-radius: var(--radius-btn);
+      background: var(--red-crisis);
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .btn-recomecar:active { opacity: 0.85; }
+  </style>
+</head>
+<body>
+  <div class="intervencao">
+
+    <!-- Topo fixo em todos os passos -->
+    <div class="iv-top">
+      <span class="iv-top__title">LUMO</span>
+      <a href="index.html" class="iv-top__close" id="btn-fechar-iv">×</a>
+    </div>
+
+    <!-- ════════════════════════════
+         ETAPA 1 — RESPIRAÇÃO
+         ════════════════════════════ -->
+    <div class="step-wrapper step--visible" id="step-respiracao">
+      <div class="breath-stage">
+
+        <div class="breath-orb">
+          <div class="breath-orb__inner"></div>
+        </div>
+
+        <div class="breath-label" id="breath-label">Inspire...</div>
+        <div class="breath-sublabel" id="breath-sublabel">4 segundos</div>
+
+        <div class="breath-progress-wrap">
+          <div class="breath-progress-bar">
+            <div class="breath-progress-bar__fill" id="breath-fill"></div>
+          </div>
+          <div class="breath-timer" id="breath-timer">30s restantes</div>
+        </div>
+
+      </div>
+
+      <div class="iv-footer">
+        <button class="btn-primary" id="btn-respiracao-ok">Continuar</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════
+         ETAPA 2 — ESCOLHA
+         ════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-escolha">
+      <h1 class="iv-title">Como quer ser ajudado?</h1>
+
+      <div class="choice-cards">
+
+        <button class="choice-card" id="choice-rapida">
+          <span class="choice-card__icon">⚡</span>
+          <div>
+            <div class="choice-card__title">Ajuda Rápida</div>
+            <div class="choice-card__desc">Pergunta + lembrete + ação prática</div>
+          </div>
+          <span class="choice-card__arrow">›</span>
+        </button>
+
+        <!-- Oculto durante trial — JS exibe para pagantes -->
+        <button class="choice-card" id="choice-discord">
+          <span class="choice-card__icon">💬</span>
+          <div>
+            <div class="choice-card__title">Converse com alguém de verdade</div>
+            <div class="choice-card__desc">Entre no grupo de apoio</div>
+          </div>
+          <span class="choice-card__arrow">›</span>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- ════════════════════════════
+         ETAPA 3 — PERGUNTA
+         ════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-pergunta">
+      <h1 class="iv-title" id="pergunta-texto">O que você está sentindo agora?</h1>
+
+      <div class="iv-chips" id="pergunta-chips">
+        <!-- Opções geradas pelo JS — placeholder visual -->
+        <button class="iv-chip">Ansiedade</button>
+        <button class="iv-chip">Tédio</button>
+        <button class="iv-chip">Solidão</button>
+        <button class="iv-chip">Estresse</button>
+        <button class="iv-chip">Tristeza</button>
+        <button class="iv-chip">Raiva</button>
+      </div>
+
+      <div class="iv-footer">
+        <button class="btn-primary" id="btn-pergunta-ok">Continuar</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════
+         ETAPA 4 — LEMBRETE
+         ════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-lembrete">
+      <div class="iv-lembrete-card">
+        <p class="iv-lembrete-text" id="lembrete-texto">
+          Você é <em>Soldado</em>. 0 dias de jornada. Isso é real.
+        </p>
+      </div>
+
+      <div class="iv-footer">
+        <button class="btn-primary" id="btn-lembrete-ok">Continuar</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════
+         ETAPA 5 — AÇÃO
+         ════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-acao">
+      <h1 class="iv-title">Agora faça isso:</h1>
+
+      <div class="iv-acao-card">
+        <p class="iv-acao-text" id="acao-texto">
+          Saia do ambiente agora. Vá para outro cômodo.
+        </p>
+      </div>
+
+      <div class="iv-acao-retorno" id="acao-retorno">
+        Quando sair, volte aqui.
+      </div>
+
+      <div class="iv-footer">
+        <button class="btn-primary" id="btn-acao-ok">Já fiz. Continuar</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════
+         ETAPA 6 — CHECK-IN
+         ════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-checkin">
+      <h1 class="iv-title">Como você está agora?</h1>
+
+      <div class="checkin-options">
+
+        <button class="btn-checkin btn-checkin--ok" id="btn-checkin-ok">
+          <span class="btn-checkin__icon">✓</span>
+          Estou melhor
+        </button>
+
+        <button class="btn-checkin btn-checkin--help" id="btn-checkin-help">
+          <span class="btn-checkin__icon">↺</span>
+          Ainda preciso de ajuda
+        </button>
+
+        <button class="btn-checkin btn-checkin--relapse" id="btn-checkin-recaida">
+          <span class="btn-checkin__icon">✕</span>
+          Tive uma recaída
+        </button>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════
+       MODAL — CONFRONTO DE RECAÍDA
+       ════════════════════════════ -->
+  <div class="confronto-overlay hidden" id="modal-confronto">
+    <div class="confronto-sheet">
+      <div class="confronto-sheet__handle"></div>
+
+      <p class="confronto-msg" id="confronto-msg">
+        <strong>Rafael.</strong>Você ainda não recaiu nenhuma vez.
+0 dias limpos.
+Vai deixar isso acabar agora?
+      </p>
+
+      <div class="confronto-actions">
+        <button class="btn-recomecar" id="btn-recomecar">Recomeçar do zero</button>
+        <button class="btn-ghost" id="btn-nao-recair">Não vou recair</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="firebase.js"></script>
+  <script src="intervencao.js" defer></script>
+</body>
+</html>

@@ -15,14 +15,15 @@
       padding: 0 20px;
     }
 
+    /* ── Topo ── */
     .onboarding__top {
-      padding-top: 56px;
+      padding-top: 48px;
       text-align: center;
     }
 
     .onboarding__logo {
       font-family: var(--font-display);
-      font-size: 48px;
+      font-size: 44px;
       color: var(--text-primary);
       letter-spacing: 0.08em;
       line-height: 1;
@@ -31,49 +32,40 @@
     .onboarding__logo span { color: var(--purple-primary); }
 
     .onboarding__tagline {
-      margin-top: 8px;
-      font-size: 14px;
-      color: var(--text-secondary);
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
     }
 
-    .step-dots {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 36px;
-    }
-
-    .step-dots__dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
+    /* ── Barra de progresso ── */
+    .ob-progress {
+      height: 3px;
       background: var(--text-faint);
-      transition: all 0.2s;
+      border-radius: 2px;
+      margin-top: 18px;
+      overflow: hidden;
     }
 
-    .step-dots__dot.active {
+    .ob-progress__bar {
+      height: 100%;
       background: var(--purple-primary);
-      width: 24px;
-      border-radius: 4px;
+      border-radius: 2px;
+      transition: width 0.3s ease;
     }
 
-    .step-dots__dot.done { background: var(--purple-muted); }
-
-    /* Passos */
+    /* ── Steps ── */
     .step-wrapper {
       flex: 1;
       display: flex;
       flex-direction: column;
       padding-top: 32px;
-      transition: opacity 0.18s ease;
     }
 
     .step-wrapper.step--hidden  { display: none; }
     .step-wrapper.step--visible { display: flex; }
 
     .step__label {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       color: var(--purple-muted);
       text-transform: uppercase;
@@ -83,7 +75,7 @@
 
     .step__title {
       font-family: var(--font-display);
-      font-size: 34px;
+      font-size: 32px;
       color: var(--text-primary);
       line-height: 1.1;
       margin-bottom: 8px;
@@ -93,7 +85,7 @@
       font-size: 14px;
       color: var(--text-secondary);
       line-height: 1.6;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
 
     .step__fields {
@@ -103,6 +95,157 @@
       flex: 1;
     }
 
+    .step__footer {
+      padding: 24px 0 40px;
+    }
+
+    .step__hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 12px;
+    }
+
+    /* ── Quiz — opções de resposta ── */
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .quiz-option {
+      width: 100%;
+      padding: 16px 20px;
+      background: var(--bg-card);
+      border: var(--border-default);
+      border-radius: var(--radius-btn);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 16px;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+    }
+
+    .quiz-option.selected {
+      border-color: var(--purple-primary);
+      background: rgba(61, 31, 255, 0.08);
+      color: var(--purple-text);
+    }
+
+    .quiz-option:active { opacity: 0.8; }
+
+    /* Q5 multi-select — grid 2×2 */
+    .quiz-options--multi {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .quiz-options--multi .quiz-option {
+      text-align: center;
+      padding: 20px 12px;
+    }
+
+    /* ── Slides de impacto ── */
+    .slide-card {
+      background: var(--bg-card-accent);
+      border: var(--border-accent);
+      border-radius: var(--radius-card);
+      padding: 32px 24px;
+      text-align: center;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slide-card__icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(61, 31, 255, 0.12);
+      border: 1px solid rgba(61, 31, 255, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      margin-bottom: 24px;
+      flex-shrink: 0;
+    }
+
+    .slide-card__title {
+      font-family: var(--font-display);
+      font-size: 30px;
+      color: var(--text-primary);
+      line-height: 1.1;
+      margin-bottom: 14px;
+    }
+
+    .slide-card__body {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .slide-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .slide-indicator__dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-faint);
+      transition: all 0.2s;
+    }
+
+    .slide-indicator__dot.active {
+      background: var(--purple-primary);
+      width: 18px;
+      border-radius: 3px;
+    }
+
+    /* ── Tela de solução ── */
+    .solucao-features {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .solucao-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--bg-card);
+      border: var(--border-default);
+      border-radius: var(--radius-card);
+      padding: 16px;
+    }
+
+    .solucao-item__icon { font-size: 22px; }
+
+    .solucao-item__title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .solucao-item__desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* ── Cadastro ── */
     .field-group {
       display: flex;
       flex-direction: column;
@@ -115,71 +258,13 @@
       color: var(--text-secondary);
     }
 
-    /* Erro de validação */
     .input-error {
       font-size: 12px;
       color: #c84040;
       margin-top: 4px;
+      display: none;
     }
 
-    /* Data */
-    .date-display {
-      background: var(--bg-card);
-      border: var(--border-default);
-      border-radius: var(--radius-btn);
-      padding: 14px 16px;
-      margin-top: 8px;
-    }
-
-    .date-display__text {
-      font-size: 15px;
-      color: var(--text-primary);
-      font-weight: 500;
-    }
-
-    .date-display__sub {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 3px;
-    }
-
-    /* Card âncora passo 2 */
-    .identity-card {
-      background: var(--bg-card-accent);
-      border: var(--border-accent);
-      border-radius: var(--radius-card);
-      padding: 20px;
-      text-align: center;
-      margin-top: 4px;
-    }
-
-    .identity-card__level {
-      font-family: var(--font-display);
-      font-size: 42px;
-      color: var(--text-primary);
-      line-height: 1;
-    }
-
-    .identity-card__desc {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-top: 6px;
-    }
-
-    .identity-card__badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 12px;
-      padding: 4px 12px;
-      border-radius: var(--radius-chip);
-      background: rgba(61, 31, 255, 0.12);
-      border: 1px solid rgba(61, 31, 255, 0.25);
-      font-size: 12px;
-      color: var(--purple-text);
-    }
-
-    /* ── Passo 3 — Auth ── */
     .auth-divider {
       display: flex;
       align-items: center;
@@ -216,16 +301,14 @@
 
     .btn-google:hover { border-color: var(--purple-muted); background: rgba(61,31,255,0.04); }
     .btn-google:active { background: rgba(61,31,255,0.08); }
-
     .btn-google svg { flex-shrink: 0; }
 
-    /* Estado de carregamento */
     .btn-loading {
       opacity: 0.6;
       pointer-events: none;
     }
 
-    /* ── Passo 4 — Termos ── */
+    /* ── Termos ── */
     .terms-box {
       background: var(--bg-card);
       border: var(--border-default);
@@ -244,12 +327,9 @@
     .terms-link {
       font-size: 13px;
       color: var(--purple-light);
-      text-decoration: none;
       text-align: center;
       display: block;
     }
-
-    .terms-link:hover { text-decoration: underline; }
 
     .terms-check {
       display: flex;
@@ -278,84 +358,69 @@
       cursor: pointer;
     }
 
-    /* ── Passo 5 — Boas-vindas ── */
+    /* ── Boas-vindas ── */
     .welcome-logo {
       display: flex;
       justify-content: center;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .welcome-logo__img {
-      width: 80px;
-      height: 80px;
-      border-radius: 20px;
+      width: 72px;
+      height: 72px;
+      border-radius: 18px;
       object-fit: contain;
     }
 
-    .welcome-card {
-      background: rgba(61, 31, 255, 0.08);
-      border: 1px solid rgba(61, 31, 255, 0.2);
+    .welcome-identity {
+      background: var(--bg-card-accent);
+      border: var(--border-accent);
       border-radius: var(--radius-card);
       padding: 20px;
       text-align: center;
     }
 
-    .welcome-card__title {
+    .welcome-identity__level {
       font-family: var(--font-display);
-      font-size: 22px;
-      color: var(--purple-text);
+      font-size: 40px;
+      color: var(--text-primary);
       line-height: 1;
     }
 
-    .welcome-card__sub {
+    .welcome-identity__sub {
       font-size: 13px;
       color: var(--text-secondary);
-      margin-top: 8px;
-      line-height: 1.5;
+      margin-top: 6px;
     }
 
-    /* Rodapé do passo */
-    .step__footer {
-      padding: 24px 0 40px;
-    }
-
-    .step__hint {
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 14px;
-    }
-
-    /* Features passo 5 */
-    .feature-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 4px;
-    }
-
-    .feature-item {
-      display: flex;
+    .welcome-identity__badge {
+      display: inline-flex;
       align-items: center;
-      gap: 12px;
-      background: var(--bg-card);
-      border: var(--border-default);
-      border-radius: var(--radius-card);
-      padding: 14px 16px;
-    }
-
-    .feature-item__icon { font-size: 20px; }
-
-    .feature-item__title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .feature-item__desc {
+      gap: 6px;
+      margin-top: 10px;
+      padding: 4px 12px;
+      border-radius: var(--radius-chip);
+      background: rgba(61, 31, 255, 0.12);
+      border: 1px solid rgba(61, 31, 255, 0.25);
       font-size: 12px;
-      color: var(--text-secondary);
-      margin-top: 2px;
+      color: var(--purple-text);
+    }
+
+    .welcome-crisis-preview {
+      background: var(--red-crisis-bg);
+      border: 1px solid rgba(204, 32, 32, 0.3);
+      border-radius: var(--radius-card);
+      padding: 16px;
+      text-align: center;
+    }
+
+    .welcome-crisis-preview__label {
+      font-size: 12px;
+      color: rgba(204, 32, 32, 0.8);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
     }
 
     /* ── Modal termos completos ── */
@@ -434,99 +499,331 @@
 <body>
   <div class="onboarding">
 
-    <!-- Topo -->
+    <!-- Topo: logo + barra de progresso -->
     <div class="onboarding__top">
       <div class="onboarding__logo">LUM<span>O</span></div>
       <p class="onboarding__tagline">Seu companheiro silencioso</p>
-    </div>
-
-    <!-- Indicador de passos (5 dots) -->
-    <div class="step-dots">
-      <div class="step-dots__dot active"></div>
-      <div class="step-dots__dot"></div>
-      <div class="step-dots__dot"></div>
-      <div class="step-dots__dot"></div>
-      <div class="step-dots__dot"></div>
+      <div class="ob-progress">
+        <div class="ob-progress__bar" id="ob-progress-bar" style="width: 8%"></div>
+      </div>
     </div>
 
     <!-- ══════════════════════════════
-         PASSO 1 — Nome
+         QUIZ Q1 — Gênero
          ══════════════════════════════ -->
-    <div class="step-wrapper step--visible" id="step-1">
-      <p class="step__label">Passo 1 de 5</p>
-      <h1 class="step__title">Quem é você?</h1>
-      <p class="step__subtitle">Sem julgamentos aqui. Só você e o LUMO, caminhando juntos.</p>
+    <div class="step-wrapper step--visible" id="step-q1">
+      <p class="step__label">Pergunta 1 de 5</p>
+      <h1 class="step__title">Você é:</h1>
+
+      <div class="quiz-options">
+        <button class="quiz-option" data-value="masculino">Masculino</button>
+        <button class="quiz-option" data-value="feminino">Feminino</button>
+      </div>
+
+      <div class="step__footer">
+        <button class="btn-primary" id="btn-q1" disabled>Próximo</button>
+        <p class="step__hint">
+          Já tem uma conta?
+          <a href="#" id="link-ja-tenho-conta" style="color:var(--purple-light);">Entrar →</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         QUIZ Q2 — Frequência
+         ══════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-q2">
+      <p class="step__label">Pergunta 2 de 5</p>
+      <h1 class="step__title">Com que frequência você consome pornografia?</h1>
+
+      <div class="quiz-options">
+        <button class="quiz-option" data-value="varias-vezes-dia">Várias vezes ao dia</button>
+        <button class="quiz-option" data-value="1x-dia">1x por dia</button>
+        <button class="quiz-option" data-value="semanal">Semanal</button>
+        <button class="quiz-option" data-value="raramente">Raramente</button>
+      </div>
+
+      <div class="step__footer">
+        <button class="btn-primary" id="btn-q2" disabled>Próximo</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         QUIZ Q3 — Já tentou parar
+         ══════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-q3">
+      <p class="step__label">Pergunta 3 de 5</p>
+      <h1 class="step__title">Já tentou parar antes?</h1>
+
+      <div class="quiz-options">
+        <button class="quiz-option" data-value="sim-varias">Sim, várias vezes</button>
+        <button class="quiz-option" data-value="algumas">Algumas vezes</button>
+        <button class="quiz-option" data-value="nunca">Nunca tentei</button>
+      </div>
+
+      <div class="step__footer">
+        <button class="btn-primary" id="btn-q3" disabled>Próximo</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         QUIZ Q4 — Perda de controle
+         ══════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-q4">
+      <p class="step__label">Pergunta 4 de 5</p>
+      <h1 class="step__title">Sente que perdeu o controle?</h1>
+
+      <div class="quiz-options">
+        <button class="quiz-option" data-value="sim">Sim</button>
+        <button class="quiz-option" data-value="as-vezes">Às vezes</button>
+        <button class="quiz-option" data-value="nao">Não</button>
+      </div>
+
+      <div class="step__footer">
+        <button class="btn-primary" id="btn-q4" disabled>Próximo</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         QUIZ Q5 — Usa para lidar com (multi-select)
+         ══════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-q5">
+      <p class="step__label">Pergunta 5 de 5</p>
+      <h1 class="step__title">Você usa para lidar com:</h1>
+      <p class="step__subtitle">Pode selecionar mais de um.</p>
+
+      <div class="quiz-options quiz-options--multi">
+        <button class="quiz-option" data-value="ansiedade">Ansiedade</button>
+        <button class="quiz-option" data-value="tedio">Tédio</button>
+        <button class="quiz-option" data-value="solidao">Solidão</button>
+        <button class="quiz-option" data-value="estresse">Estresse</button>
+      </div>
+
+      <div class="step__footer">
+        <button class="btn-primary" id="btn-q5">Próximo</button>
+        <p class="step__hint">Se nenhum se aplica, avance diretamente.</p>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         LOGIN DIRETO ("Já tenho conta")
+         ══════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-login">
+      <h1 class="step__title">Bem-vindo de volta.</h1>
+      <p class="step__subtitle">Entre com sua conta para continuar.</p>
+
+      <div class="step__fields">
+        <div class="field-group">
+          <label for="login-email">Seu e-mail</label>
+          <input class="input" type="email" id="login-email" placeholder="email@exemplo.com"
+                 autocomplete="email" />
+        </div>
+
+        <div class="field-group">
+          <label for="login-senha">Sua senha</label>
+          <input class="input" type="password" id="login-senha" placeholder="Sua senha"
+                 autocomplete="current-password" />
+        </div>
+
+        <span class="input-error" id="erro-login-direto" style="display:none;text-align:center;"></span>
+
+        <div class="auth-divider">ou</div>
+
+        <button class="btn-google" id="btn-google-login">
+          <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/>
+            <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853"/>
+            <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05"/>
+            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58Z" fill="#EA4335"/>
+          </svg>
+          Continuar com Google
+        </button>
+      </div>
+
+      <div class="step__footer">
+        <button class="btn-primary" id="btn-login-direto">Entrar</button>
+        <p class="step__hint">
+          Não tem conta?
+          <a href="#" id="link-voltar-quiz" style="color:var(--purple-light);">Criar agora →</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         SLIDE 1 — Dopamina
+         ══════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-s1">
+      <div class="slide-card">
+        <div class="slide-card__icon">🧠</div>
+        <div class="slide-card__title">Pornografia vicia seu cérebro</div>
+        <p class="slide-card__body">
+          Usar pornografia libera dopamina — a mesma substância de drogas.
+          Com o tempo, você precisa de mais para sentir o mesmo.
+        </p>
+      </div>
+
+      <div class="slide-indicator">
+        <div class="slide-indicator__dot active"></div>
+        <div class="slide-indicator__dot"></div>
+        <div class="slide-indicator__dot"></div>
+        <div class="slide-indicator__dot"></div>
+      </div>
+
+      <div class="step__footer">
+        <button class="btn-primary" id="btn-s1">Próximo</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         SLIDE 2 — Relacionamentos
+         ══════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-s2">
+      <div class="slide-card">
+        <div class="slide-card__icon">💔</div>
+        <div class="slide-card__title">Afeta seus relacionamentos</div>
+        <p class="slide-card__body">
+          Pornografia muda a forma como você vê as pessoas.
+          Conexões reais ficam mais difíceis.
+        </p>
+      </div>
+
+      <div class="slide-indicator">
+        <div class="slide-indicator__dot"></div>
+        <div class="slide-indicator__dot active"></div>
+        <div class="slide-indicator__dot"></div>
+        <div class="slide-indicator__dot"></div>
+      </div>
+
+      <div class="step__footer">
+        <button class="btn-primary" id="btn-s2">Próximo</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         SLIDE 3 — Desejo real
+         ══════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-s3">
+      <div class="slide-card">
+        <div class="slide-card__icon">📉</div>
+        <div class="slide-card__title">Diminui seu desejo real</div>
+        <p class="slide-card__body">
+          Quanto mais consome, menos sente atração real.
+          Seu cérebro se recalibra para o artificial.
+        </p>
+      </div>
+
+      <div class="slide-indicator">
+        <div class="slide-indicator__dot"></div>
+        <div class="slide-indicator__dot"></div>
+        <div class="slide-indicator__dot active"></div>
+        <div class="slide-indicator__dot"></div>
+      </div>
+
+      <div class="step__footer">
+        <button class="btn-primary" id="btn-s3">Próximo</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         SLIDE 4 — Recupere o controle
+         ══════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-s4">
+      <div class="slide-card">
+        <div class="slide-card__icon">🛡️</div>
+        <div class="slide-card__title">Recupere o controle</div>
+        <p class="slide-card__body">
+          O LUMO te ajuda a interromper o impulso no momento crítico.
+          Reduz impulsos. Evita recaídas. Aumenta autocontrole.
+        </p>
+      </div>
+
+      <div class="slide-indicator">
+        <div class="slide-indicator__dot"></div>
+        <div class="slide-indicator__dot"></div>
+        <div class="slide-indicator__dot"></div>
+        <div class="slide-indicator__dot active"></div>
+      </div>
+
+      <div class="step__footer">
+        <button class="btn-primary" id="btn-s4">Quero mudar</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         SOLUÇÃO
+         ══════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-solucao">
+      <h1 class="step__title">Como o LUMO funciona</h1>
+      <p class="step__subtitle">Menos de 5 segundos para chegar à ajuda no momento crítico.</p>
+
+      <div class="solucao-features">
+        <div class="solucao-item">
+          <span class="solucao-item__icon">🚨</span>
+          <div>
+            <div class="solucao-item__title">Interrompe o impulso</div>
+            <div class="solucao-item__desc">Botão de crise ativa protocolo anti-recaída imediato</div>
+          </div>
+        </div>
+        <div class="solucao-item">
+          <span class="solucao-item__icon">🫁</span>
+          <div>
+            <div class="solucao-item__title">Respiração guiada</div>
+            <div class="solucao-item__desc">Desacelera o sistema nervoso em 30 segundos</div>
+          </div>
+        </div>
+        <div class="solucao-item">
+          <span class="solucao-item__icon">🎖️</span>
+          <div>
+            <div class="solucao-item__title">Progressão real</div>
+            <div class="solucao-item__desc">De Soldado a Monge — cada dia de controle conta</div>
+          </div>
+        </div>
+        <div class="solucao-item">
+          <span class="solucao-item__icon">📊</span>
+          <div>
+            <div class="solucao-item__title">Dados reais</div>
+            <div class="solucao-item__desc">Acompanha impulsos vencidos, sequências e recaídas</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step__footer">
+        <button class="btn-primary" id="btn-solucao">Criar minha conta</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         CADASTRO — Nome + Email + Senha
+         ══════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-cadastro">
+      <h1 class="step__title">Crie seu acesso.</h1>
+      <p class="step__subtitle">Seus dados ficam salvos — você acessa em qualquer dispositivo.</p>
 
       <div class="step__fields">
         <div class="field-group">
           <label for="nome">Como posso te chamar?</label>
           <input class="input" type="text" id="nome" placeholder="Seu nome ou apelido"
                  autocomplete="off" autocapitalize="words" />
-        </div>
-      </div>
-
-      <div class="step__footer">
-        <button class="btn-primary" id="btn-passo1">Próximo</button>
-        <p class="step__hint">Seus dados são privados e nunca serão compartilhados.</p>
-      </div>
-    </div>
-
-    <!-- ══════════════════════════════
-         PASSO 2 — Data de início
-         ══════════════════════════════ -->
-    <div class="step-wrapper step--hidden" id="step-2">
-      <p class="step__label">Passo 2 de 5</p>
-      <h1 class="step__title">Quando começa sua jornada?</h1>
-      <p class="step__subtitle">Qual foi o último dia que você cedeu? A partir daqui contamos juntos.</p>
-
-      <div class="step__fields">
-        <div class="field-group">
-          <label>Data do seu recomeço</label>
-          <div class="date-display">
-            <div class="date-display__text" id="display-data">Hoje</div>
-            <div class="date-display__sub">Toque para ajustar</div>
-          </div>
-          <input class="input" type="date" id="start-date" style="margin-top: 8px;" />
+          <span class="input-error" id="erro-nome">Precisa preencher para continuar</span>
         </div>
 
-        <div class="identity-card">
-          <div class="identity-card__level">SOLDADO</div>
-          <p class="identity-card__desc">Todo guerreiro começa assim.</p>
-          <span class="identity-card__badge">✦ Dia 0 de controle</span>
-        </div>
-      </div>
-
-      <div class="step__footer">
-        <button class="btn-primary" id="btn-passo2">Próximo</button>
-        <p class="step__hint">Você pode sempre ajustar a data nas configurações.</p>
-      </div>
-    </div>
-
-    <!-- ══════════════════════════════
-         PASSO 3 — Acesso (Auth)
-         ══════════════════════════════ -->
-    <div class="step-wrapper step--hidden" id="step-3">
-      <p class="step__label">Passo 3 de 5</p>
-      <h1 class="step__title">Crie seu acesso.</h1>
-      <p class="step__subtitle">É aqui que sua conta fica salva — para você acessar em qualquer dispositivo.</p>
-
-      <div class="step__fields">
         <div class="field-group">
           <label for="email">Seu e-mail</label>
           <input class="input" type="email" id="email" placeholder="email@exemplo.com"
                  autocomplete="email" />
+          <span class="input-error" id="erro-email">Esse email não parece certo</span>
         </div>
 
         <div class="field-group">
           <label for="senha">Crie uma senha</label>
           <input class="input" type="password" id="senha" placeholder="Mínimo 6 caracteres"
                  autocomplete="new-password" />
+          <span class="input-error" id="erro-senha">Senha muito curta — usa pelo menos 6 letras</span>
         </div>
 
         <div class="auth-divider">ou</div>
 
         <button class="btn-google" id="btn-google">
-          <!-- Google "G" SVG -->
           <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
             <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/>
             <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853"/>
@@ -544,18 +841,16 @@
     </div>
 
     <!-- ══════════════════════════════
-         PASSO 4 — Termos
+         TERMOS
          ══════════════════════════════ -->
-    <div class="step-wrapper step--hidden" id="step-4">
-      <p class="step__label">Passo 4 de 5</p>
+    <div class="step-wrapper step--hidden" id="step-termos">
       <h1 class="step__title">Antes de começar.</h1>
       <p class="step__subtitle">Leia o resumo abaixo e confirme que está de acordo.</p>
 
       <div class="step__fields">
         <div class="terms-box">
           <p>O LUMO é uma ferramenta de apoio comportamental, não um serviço médico ou psicológico.</p>
-          <p>Coletamos: nome, email, dados de uso e mensagens do chat para funcionamento do app.</p>
-          <p>Suas mensagens no chat podem ser processadas por APIs externas de IA. Não compartilhe informações sensíveis.</p>
+          <p>Coletamos: nome, email e dados de uso para funcionamento do app.</p>
           <p>O app é permitido apenas para maiores de 18 anos.</p>
           <p>Não vendemos seus dados. Você pode solicitar exclusão a qualquer momento.</p>
           <p>Em caso de sofrimento emocional intenso, procure ajuda profissional. CVV: 188.</p>
@@ -575,49 +870,31 @@
     </div>
 
     <!-- ══════════════════════════════
-         PASSO 5 — Boas-vindas
+         BOAS-VINDAS
          ══════════════════════════════ -->
-    <div class="step-wrapper step--hidden" id="step-5">
+    <div class="step-wrapper step--hidden" id="step-boas-vindas">
       <div class="welcome-logo">
         <img src="icons/icon-192.png" alt="LUMO" class="welcome-logo__img" />
       </div>
-      <p class="step__label">Passo 5 de 5</p>
-      <h1 class="step__title">Você está pronto.</h1>
-      <p class="step__subtitle">
-        <span id="nome-boas-vindas">Ei</span>, o LUMO vai estar aqui quando o impulso bater. A qualquer hora, sem julgamento.
-      </p>
+
+      <h1 class="step__title">Bem-vindo, <span id="nome-boas-vindas">guerreiro</span>.</h1>
+      <p class="step__subtitle">O LUMO vai estar aqui quando o impulso bater. A qualquer hora, sem julgamento.</p>
 
       <div class="step__fields">
-        <div class="welcome-card">
-          <div class="welcome-card__title">Sua missão começa agora</div>
-          <p class="welcome-card__sub">
-            Quando sentir o impulso, abra o LUMO.<br>
-            Menos de 5 segundos para chegar à ajuda.
-          </p>
+        <div class="welcome-identity">
+          <div class="welcome-identity__level">SOLDADO</div>
+          <p class="welcome-identity__sub">Todo guerreiro começa assim.</p>
+          <span class="welcome-identity__badge">✦ Dia 0 de controle</span>
         </div>
 
-        <div class="feature-list">
-          <div class="feature-item">
-            <span class="feature-item__icon">🛡️</span>
-            <div>
-              <div class="feature-item__title">Botão de emergência</div>
-              <div class="feature-item__desc">Um toque abre o protocolo anti-impulso</div>
-            </div>
-          </div>
-          <div class="feature-item">
-            <span class="feature-item__icon">🤖</span>
-            <div>
-              <div class="feature-item__title">IA sempre disponível</div>
-              <div class="feature-item__desc">Converse quando precisar de apoio real</div>
-            </div>
-          </div>
-          <div class="feature-item">
-            <span class="feature-item__icon">🎖️</span>
-            <div>
-              <div class="feature-item__title">Níveis e progressão</div>
-              <div class="feature-item__desc">De Soldado a Monge — cada dia conta</div>
-            </div>
-          </div>
+        <div class="welcome-crisis-preview">
+          <p class="welcome-crisis-preview__label">Seu botão de emergência</p>
+          <button class="btn-crisis" id="btn-crise-preview" style="pointer-events:none;">
+            Alerta de Recaída
+          </button>
+          <p class="step__hint" style="margin-top:10px;">
+            Quando o impulso bater — toque aqui. Menos de 5 segundos para a ajuda.
+          </p>
         </div>
       </div>
 
@@ -640,34 +917,31 @@
       </div>
       <div class="modal-termos__body">
         <h3>1. Sobre o aplicativo</h3>
-        <p>O LUMO é um aplicativo digital de apoio comportamental, projetado para auxiliar usuários no controle de hábitos e impulsos. O aplicativo é uma ferramenta de apoio e não constitui serviço médico, psicológico ou terapêutico profissional.</p>
+        <p>O LUMO é um aplicativo digital de apoio comportamental, projetado para auxiliar no controle de hábitos e impulsos. Não constitui serviço médico, psicológico ou terapêutico profissional.</p>
 
         <h3>2. Não substitui tratamento</h3>
-        <p>O LUMO não substitui acompanhamento médico, psicológico ou psiquiátrico. As orientações fornecidas, incluindo respostas de inteligência artificial, têm caráter informativo. Em caso de sofrimento emocional intenso, procure ajuda profissional. No Brasil: CVV pelo número 188.</p>
+        <p>O LUMO não substitui acompanhamento médico ou psicológico. Em caso de sofrimento emocional intenso, procure ajuda profissional. No Brasil: CVV pelo número 188.</p>
 
         <h3>3. Idade mínima</h3>
         <p>O uso do aplicativo é permitido apenas para maiores de 18 anos.</p>
 
         <h3>4. Dados coletados</h3>
-        <p>Nome e e-mail, dados de uso e interação, dados comportamentais (progresso, hábitos, gatilhos) e conteúdo inserido pelo usuário.</p>
+        <p>Nome, e-mail, dados de uso e interação, dados comportamentais (progresso, gatilhos) e conteúdo inserido pelo usuário.</p>
 
-        <h3>5. Uso de inteligência artificial</h3>
-        <p>O aplicativo utiliza APIs externas de IA para processamento de mensagens. Ao utilizar o chat, suas mensagens podem ser processadas por serviços externos. Recomenda-se não compartilhar informações sensíveis.</p>
-
-        <h3>6. Compartilhamento de dados</h3>
+        <h3>5. Compartilhamento de dados</h3>
         <p>O LUMO não vende dados pessoais. Os dados podem ser compartilhados apenas quando necessário para operação do serviço ou cumprimento de obrigações legais.</p>
 
-        <h3>7. Exclusão de dados</h3>
+        <h3>6. Exclusão de dados</h3>
         <p>O usuário pode solicitar exclusão de sua conta e dados a qualquer momento através do email de contato.</p>
 
-        <h3>8. Responsabilidade</h3>
-        <p>O LUMO é apenas uma ferramenta de apoio e não se responsabiliza por decisões tomadas pelo usuário ou resultados obtidos ou não obtidos.</p>
+        <h3>7. Responsabilidade</h3>
+        <p>O LUMO é uma ferramenta de apoio e não se responsabiliza por decisões tomadas pelo usuário ou resultados obtidos.</p>
 
-        <h3>9. Pagamentos</h3>
-        <p>Valores serão informados previamente. Cancelamento pode ser feito a qualquer momento. Reembolsos seguem a legislação vigente.</p>
+        <h3>8. Pagamentos</h3>
+        <p>Valores informados previamente. Cancelamento a qualquer momento. Reembolsos seguem a legislação vigente.</p>
 
-        <h3>10. Alterações</h3>
-        <p>Os termos podem ser atualizados a qualquer momento. O usuário será notificado e deverá aceitar os novos termos para continuar usando o app.</p>
+        <h3>9. Alterações</h3>
+        <p>Os termos podem ser atualizados. O usuário será notificado e deverá aceitar os novos termos para continuar usando o app.</p>
       </div>
     </div>
   </div>

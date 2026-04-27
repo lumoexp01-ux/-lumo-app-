@@ -68,38 +68,37 @@ document.addEventListener('DOMContentLoaded', () => {
   const inputNome = document.getElementById('nome');
   inputNome.addEventListener('input', () => limparErro(inputNome));
 
-  document.getElementById('btn-passo1').addEventListener('click', () => {
-    const nome = inputNome.value.trim();
-    if (!nome) {
-      mostrarErro(inputNome, 'Precisa do seu nome para continuar');
-      return;
-    }
-    if (nome.length > 60) {
-      mostrarErro(inputNome, 'Nome muito longo');
-      return;
-    }
-    dados.nome = nome;
-    irParaPasso(1);
-  });
+  const btnPasso1 = document.getElementById('btn-passo1');
+  if (btnPasso1) {
+    btnPasso1.addEventListener('click', () => {
+      const nome = inputNome.value.trim();
+      if (!nome) { mostrarErro(inputNome, 'Precisa do seu nome para continuar'); return; }
+      if (nome.length > 60) { mostrarErro(inputNome, 'Nome muito longo'); return; }
+      dados.nome = nome;
+      irParaPasso(1);
+    });
+  }
 
-  // ── PASSO 2 — Data ──
+  // ── PASSO 2 — Data (removido em v2.0; guards evitam crash) ──
   const inputData   = document.getElementById('start-date');
   const displayData = document.getElementById('display-data');
   const hojeISO     = new Date().toISOString().split('T')[0];
 
-  inputData.value = hojeISO;
-  inputData.max   = hojeISO;
-  displayData.textContent = formatarData(new Date(hojeISO + 'T12:00:00'));
+  if (inputData && displayData) {
+    inputData.value = hojeISO;
+    inputData.max   = hojeISO;
+    displayData.textContent = formatarData(new Date(hojeISO + 'T12:00:00'));
+    inputData.addEventListener('change', () => {
+      const data = new Date(inputData.value + 'T12:00:00');
+      displayData.textContent = formatarData(data);
+      dados.startDate = inputData.value;
+    });
+  }
 
-  inputData.addEventListener('change', () => {
-    const data = new Date(inputData.value + 'T12:00:00');
-    displayData.textContent = formatarData(data);
-    dados.startDate = inputData.value;
-  });
-
-  document.getElementById('btn-passo2').addEventListener('click', () => {
-    irParaPasso(2);
-  });
+  const btnPasso2 = document.getElementById('btn-passo2');
+  if (btnPasso2) {
+    btnPasso2.addEventListener('click', () => { irParaPasso(2); });
+  }
 
   // ── PASSO 3 — Auth ──
   const inputEmail = document.getElementById('email');
@@ -297,5 +296,104 @@ document.addEventListener('DOMContentLoaded', () => {
       day: 'numeric', month: 'long', year: 'numeric',
     });
   }
+
+  // ── Login direto ("Já tenho conta") ──
+  (function () {
+    const stepQ1    = document.getElementById('step-q1');
+    const stepLogin = document.getElementById('step-login');
+
+    function trocarStep(mostrar, esconder) {
+      esconder.classList.replace('step--visible', 'step--hidden');
+      mostrar.classList.replace('step--hidden', 'step--visible');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('link-ja-tenho-conta')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      trocarStep(stepLogin, stepQ1);
+    });
+
+    document.getElementById('link-voltar-quiz')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      trocarStep(stepQ1, stepLogin);
+    });
+
+    const btnLoginDireto  = document.getElementById('btn-login-direto');
+    const btnGoogleLogin  = document.getElementById('btn-google-login');
+    const inputLoginEmail = document.getElementById('login-email');
+    const inputLoginSenha = document.getElementById('login-senha');
+    const erroLogin       = document.getElementById('erro-login-direto');
+
+    function mostrarErroLogin(msg) {
+      if (!erroLogin) return;
+      erroLogin.textContent = msg;
+      erroLogin.style.display = 'block';
+    }
+
+    function limparErroLogin() {
+      if (erroLogin) erroLogin.style.display = 'none';
+    }
+
+    function setLoadingLogin(ligado) {
+      [btnLoginDireto, btnGoogleLogin].forEach(btn => {
+        if (btn) btn.classList.toggle('btn-loading', ligado);
+      });
+      if (btnLoginDireto) btnLoginDireto.textContent = ligado ? 'Aguarde...' : 'Entrar';
+    }
+
+    async function executarLogin(loginFn) {
+      if (!window.lumo) { mostrarErroLogin('Sem conexão agora. Tenta em alguns segundos.'); return; }
+      const { auth, db, doc, getDoc } = window.lumo;
+      setLoadingLogin(true);
+      limparErroLogin();
+      try {
+        await loginFn();
+        const uid  = auth.currentUser.uid;
+        const snap = await getDoc(doc(db, 'usuarios', uid));
+        if (snap.exists() && snap.data()?.termos?.aceito) {
+          const d = snap.data();
+          sessionStorage.setItem('usuario', JSON.stringify({
+            nome:             d.nome,
+            startDate:        d.startDate,
+            impulsosVencidos: d.impulsosVencidos ?? 0,
+            recaidas:         d.recaidas         ?? 0,
+          }));
+          document.body.style.opacity    = '0';
+          document.body.style.transition = 'opacity 0.18s ease';
+          setTimeout(() => { window.location.href = 'index.html'; }, 160);
+        } else {
+          // Auth existe mas onboarding incompleto → vai para cadastro
+          trocarStep(document.getElementById('step-cadastro'), stepLogin);
+        }
+      } catch (e) {
+        if (e.code !== 'auth/popup-closed-by-user') {
+          mostrarErroLogin('Email ou senha incorretos.');
+        }
+        console.log('Erro login direto');
+      } finally {
+        setLoadingLogin(false);
+      }
+    }
+
+    btnLoginDireto?.addEventListener('click', () => {
+      const email = inputLoginEmail?.value.trim() ?? '';
+      const senha = inputLoginSenha?.value ?? '';
+      if (!email || !email.includes('@')) { mostrarErroLogin('Esse email não parece certo'); return; }
+      if (senha.length < 6) { mostrarErroLogin('Senha muito curta — usa pelo menos 6 letras'); return; }
+      const { auth, signInWithEmailAndPassword } = window.lumo;
+      executarLogin(() => signInWithEmailAndPassword(auth, email, senha));
+    });
+
+    btnGoogleLogin?.addEventListener('click', () => {
+      const { auth, GoogleAuthProvider, signInWithPopup } = window.lumo;
+      executarLogin(async () => {
+        await signInWithPopup(auth, new GoogleAuthProvider());
+      });
+    });
+
+    [inputLoginEmail, inputLoginSenha].forEach(el => {
+      el?.addEventListener('input', limparErroLogin);
+    });
+  })();
 
 });
