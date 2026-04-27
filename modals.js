@@ -72,7 +72,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     menuDropdown.addEventListener('click', (e) => e.stopPropagation());
 
-    document.addEventListener('click', () => menuDropdown.classList.add('hidden'));
+    document.addEventListener('click', (e) => {
+      if (!btnMenu.contains(e.target) && !menuDropdown.contains(e.target)) {
+        menuDropdown.classList.add('hidden');
+      }
+    });
   }
 
 });
