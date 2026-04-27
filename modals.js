@@ -26,28 +26,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.style.overflow = '';
   };
 
-  // ── Modal de impulso ──
-  const modalImpulso = document.getElementById('modal-impulso');
-  const btnImpulso   = document.getElementById('btn-impulso');
-  const btnMaisAjuda = document.getElementById('btn-mais-ajuda');
-
-  if (modalImpulso) {
-    // Abre via botão principal
-    if (btnImpulso) {
-      btnImpulso.addEventListener('click', () => window.abrirModal(modalImpulso));
-    }
-
-    // "Preciso de mais ajuda" → fecha e vai para o chat
-    if (btnMaisAjuda) {
-      btnMaisAjuda.addEventListener('click', () => {
-        window.fecharModal(modalImpulso);
-        setTimeout(() => { window.location.href = 'chat.html'; }, 200);
-      });
-    }
-
-    // Fecha ao clicar fora do modal (no overlay)
-    modalImpulso.addEventListener('click', (e) => {
-      if (e.target === modalImpulso) window.fecharModal(modalImpulso);
+  // ── Botão de crise → intervencao.html ──
+  const btnCrise = document.getElementById('btn-crise');
+  if (btnCrise) {
+    btnCrise.addEventListener('click', () => {
+      window.location.href = 'intervencao.html';
     });
   }
 

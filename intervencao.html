@@ -409,6 +409,30 @@
       gap: 10px;
     }
 
+    /* ── Vitória ── */
+    .iv-vitoria {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .iv-vitoria__icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(29,158,117,0.12);
+      border: 2px solid rgba(29,158,117,0.35);
+      color: var(--green-win);
+      font-size: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
     .btn-recomecar {
       display: flex;
       align-items: center;
@@ -553,6 +577,17 @@
     </div>
 
     <!-- ════════════════════════════
+         VITÓRIA
+         ════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-vitoria">
+      <div class="iv-vitoria">
+        <div class="iv-vitoria__icon">✓</div>
+        <h1 class="iv-title">Mais uma vitória.</h1>
+        <p class="iv-subtitle">Você é isso.</p>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════
          ETAPA 6 — CHECK-IN
          ════════════════════════════ -->
     <div class="step-wrapper step--hidden" id="step-checkin">
@@ -601,6 +636,9 @@ Vai deixar isso acabar agora?
   </div>
 
   <script type="module" src="firebase.js"></script>
+  <script src="dados/perguntas.js"></script>
+  <script src="dados/lembretes.js"></script>
+  <script src="dados/acoes.js"></script>
   <script src="intervencao.js" defer></script>
 </body>
 </html>

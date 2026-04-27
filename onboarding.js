@@ -1,301 +1,290 @@
-// onboarding.js — Fragmento 4.2
-// Auth Firebase: email/senha + Google. Onboarding de 5 passos.
+// onboarding.js v2.0 — Fragmento 2.1
+// Quiz (Q1-Q5) + Slides (S1-S4) + Solução + Cadastro + Termos + Boas-vindas
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ── Dados em memória (Fragment 4.3 vai persistir no Firestore) ──
+  // ── Estado ──
   const dados = {
-    nome:      '',
-    startDate: new Date().toISOString().split('T')[0],
-    // email e uid vêm do Firebase Auth após o passo 3
+    nome:          '',
+    startDate:     new Date().toISOString().split('T')[0],
     termosAceitos: false,
   };
 
-  // ── Referências aos passos e dots ──
-  const passos = document.querySelectorAll('.step-wrapper');
-  const dots   = document.querySelectorAll('.step-dots__dot');
-  let passoAtual = 0;
+  const quiz = {
+    genero: null, frequencia: null, tentouParar: null,
+    controle: null, motivacoes: [],
+  };
 
-  function irParaPasso(indice) {
-    passos[passoAtual].classList.remove('step--visible');
-    passos[passoAtual].classList.add('step--hidden');
-    dots[passoAtual]?.classList.remove('active');
-    dots[passoAtual]?.classList.add('done');
+  // ── Navegação por step ID ──
+  const PROGRESS = {
+    'step-q1': 8,  'step-q2': 15, 'step-q3': 23, 'step-q4': 31, 'step-q5': 38,
+    'step-s1': 46, 'step-s2': 54, 'step-s3': 61, 'step-s4': 69,
+    'step-solucao': 77, 'step-cadastro': 85, 'step-termos': 92, 'step-boas-vindas': 100,
+  };
 
-    passoAtual = indice;
-
-    passos[passoAtual].classList.remove('step--hidden');
-    passos[passoAtual].classList.add('step--visible');
-    dots[passoAtual]?.classList.remove('done');
-    dots[passoAtual]?.classList.add('active');
-
+  function irParaStep(id) {
+    document.querySelectorAll('.step-wrapper').forEach(el => {
+      el.classList.remove('step--visible');
+      el.classList.add('step--hidden');
+    });
+    const target = document.getElementById(id);
+    if (target) {
+      target.classList.remove('step--hidden');
+      target.classList.add('step--visible');
+    }
+    const bar = document.getElementById('ob-progress-bar');
+    if (bar) bar.style.width = (PROGRESS[id] ?? 8) + '%';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // ── Validação com mensagens amigáveis ──
-  function mostrarErro(inputEl, mensagem) {
-    limparErro(inputEl);
-    const erro = document.createElement('p');
-    erro.className = 'input-error';
-    erro.textContent = mensagem;
-    inputEl.parentNode.appendChild(erro);
-    inputEl.style.borderColor = '#8a2020';
-  }
-
-  function limparErro(inputEl) {
-    const existente = inputEl.parentNode.querySelector('.input-error');
-    if (existente) existente.remove();
-    inputEl.style.borderColor = '';
-  }
-
-  function mostrarErroBotao(mensagem) {
-    const el = document.getElementById('erro-auth');
-    if (el) { el.textContent = mensagem; return; }
-    const p = document.createElement('p');
-    p.id = 'erro-auth';
-    p.className = 'input-error';
-    p.style.textAlign = 'center';
-    p.style.marginTop = '10px';
-    p.textContent = mensagem;
-    document.querySelector('#step-3 .step__footer').prepend(p);
-  }
-
-  function limparErroBotao() {
-    document.getElementById('erro-auth')?.remove();
-  }
-
-  // ── PASSO 1 — Nome ──
-  const inputNome = document.getElementById('nome');
-  inputNome.addEventListener('input', () => limparErro(inputNome));
-
-  const btnPasso1 = document.getElementById('btn-passo1');
-  if (btnPasso1) {
-    btnPasso1.addEventListener('click', () => {
-      const nome = inputNome.value.trim();
-      if (!nome) { mostrarErro(inputNome, 'Precisa do seu nome para continuar'); return; }
-      if (nome.length > 60) { mostrarErro(inputNome, 'Nome muito longo'); return; }
-      dados.nome = nome;
-      irParaPasso(1);
+  // ── Quiz Q1–Q4: single-select + auto-avanço ──
+  function wiredQuizSingle(stepId, campo, proximoId) {
+    const step = document.getElementById(stepId);
+    if (!step) return;
+    step.querySelectorAll('.quiz-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        step.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        quiz[campo] = opt.dataset.value;
+        setTimeout(() => irParaStep(proximoId), 260);
+      });
     });
   }
 
-  // ── PASSO 2 — Data (removido em v2.0; guards evitam crash) ──
-  const inputData   = document.getElementById('start-date');
-  const displayData = document.getElementById('display-data');
-  const hojeISO     = new Date().toISOString().split('T')[0];
+  wiredQuizSingle('step-q1', 'genero',      'step-q2');
+  wiredQuizSingle('step-q2', 'frequencia',  'step-q3');
+  wiredQuizSingle('step-q3', 'tentouParar', 'step-q4');
+  wiredQuizSingle('step-q4', 'controle',    'step-q5');
 
-  if (inputData && displayData) {
-    inputData.value = hojeISO;
-    inputData.max   = hojeISO;
-    displayData.textContent = formatarData(new Date(hojeISO + 'T12:00:00'));
-    inputData.addEventListener('change', () => {
-      const data = new Date(inputData.value + 'T12:00:00');
-      displayData.textContent = formatarData(data);
-      dados.startDate = inputData.value;
+  // ── Quiz Q5: multi-select ──
+  const stepQ5 = document.getElementById('step-q5');
+  if (stepQ5) {
+    stepQ5.querySelectorAll('.quiz-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        opt.classList.toggle('selected');
+        quiz.motivacoes = [...stepQ5.querySelectorAll('.quiz-option.selected')]
+          .map(o => o.dataset.value);
+      });
     });
   }
+  document.getElementById('btn-q5')?.addEventListener('click', () => {
+    sessionStorage.setItem('quiz', JSON.stringify(quiz));
+    irParaStep('step-s1');
+  });
 
-  const btnPasso2 = document.getElementById('btn-passo2');
-  if (btnPasso2) {
-    btnPasso2.addEventListener('click', () => { irParaPasso(2); });
-  }
+  // ── Slides ──
+  document.getElementById('btn-s1')?.addEventListener('click', () => irParaStep('step-s2'));
+  document.getElementById('btn-s2')?.addEventListener('click', () => irParaStep('step-s3'));
+  document.getElementById('btn-s3')?.addEventListener('click', () => irParaStep('step-s4'));
+  document.getElementById('btn-s4')?.addEventListener('click', () => irParaStep('step-solucao'));
 
-  // ── PASSO 3 — Auth ──
+  // ── Solução → Cadastro ──
+  document.getElementById('btn-solucao')?.addEventListener('click', () => irParaStep('step-cadastro'));
+
+  // ── Cadastro: Auth ──
+  const inputNome  = document.getElementById('nome');
   const inputEmail = document.getElementById('email');
   const inputSenha = document.getElementById('senha');
   const btnAuth    = document.getElementById('btn-auth');
   const btnGoogle  = document.getElementById('btn-google');
 
+  function mostrarErro(inputEl, msg) {
+    if (!inputEl) return;
+    inputEl.style.borderColor = '#8a2020';
+    const erroEl = inputEl.closest('.field-group')?.querySelector('.input-error');
+    if (erroEl) { erroEl.textContent = msg; erroEl.style.display = 'block'; }
+  }
+
+  function limparErro(inputEl) {
+    if (!inputEl) return;
+    inputEl.style.borderColor = '';
+    const erroEl = inputEl.closest('.field-group')?.querySelector('.input-error');
+    if (erroEl) erroEl.style.display = 'none';
+  }
+
+  function mostrarErroBotao(msg) {
+    let el = document.getElementById('erro-auth');
+    if (!el) {
+      el = document.createElement('p');
+      el.id = 'erro-auth';
+      el.className = 'input-error';
+      el.style.cssText = 'text-align:center;margin-top:10px;display:block;';
+      document.querySelector('#step-cadastro .step__footer')?.prepend(el);
+    }
+    el.textContent = msg;
+  }
+
+  function limparErroBotao() { document.getElementById('erro-auth')?.remove(); }
+
   [inputEmail, inputSenha].forEach(el => {
-    el.addEventListener('input', () => { limparErro(el); limparErroBotao(); });
+    el?.addEventListener('input', () => { limparErro(el); limparErroBotao(); });
   });
 
   function setCarregando(ligado) {
-    btnAuth.classList.toggle('btn-loading', ligado);
-    btnGoogle.classList.toggle('btn-loading', ligado);
-    btnAuth.textContent = ligado ? 'Aguarde...' : 'Criar conta';
+    [btnAuth, btnGoogle].forEach(btn => btn?.classList.toggle('btn-loading', ligado));
+    if (btnAuth) btnAuth.textContent = ligado ? 'Aguarde...' : 'Criar conta';
   }
 
-  // Email + senha
-  btnAuth.addEventListener('click', async () => {
-    const email = inputEmail.value.trim();
-    const senha = inputSenha.value;
-
-    if (!email || !email.includes('@')) {
-      mostrarErro(inputEmail, 'Esse email não parece certo');
-      return;
-    }
-    if (senha.length < 6) {
-      mostrarErro(inputSenha, 'Senha muito curta — usa pelo menos 6 caracteres');
-      return;
-    }
-
-    limparErroBotao();
-    setCarregando(true);
-
-    const { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword } = window.lumo;
-
-    try {
-      // Tenta criar conta; se já existe, faz login
-      try {
-        await createUserWithEmailAndPassword(auth, email, senha);
-      } catch (e) {
-        if (e.code === 'auth/email-already-in-use') {
-          await signInWithEmailAndPassword(auth, email, senha);
-        } else {
-          throw e;
-        }
-      }
-      await aposAutenticar();
-    } catch (e) {
-      // Mensagem genérica — nunca revelar se email existe (Brecha 6)
-      mostrarErroBotao('Email ou senha incorretos. Tente novamente.');
-      console.log('Erro de autenticação');
-    } finally {
-      setCarregando(false);
-    }
-  });
-
-  // Google
-  btnGoogle.addEventListener('click', async () => {
-    limparErroBotao();
-    setCarregando(true);
-    const { auth, GoogleAuthProvider, signInWithPopup } = window.lumo;
-    try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      await aposAutenticar();
-    } catch (e) {
-      if (e.code !== 'auth/popup-closed-by-user') {
-        mostrarErroBotao('Não foi possível entrar com Google. Tente novamente.');
-      }
-      console.log('Erro Google auth');
-    } finally {
-      setCarregando(false);
-    }
-  });
-
-  // Após qualquer autenticação bem-sucedida
   async function aposAutenticar() {
+    if (!window.lumo) return;
     const { auth, db, doc, getDoc } = window.lumo;
     const uid = auth.currentUser.uid;
 
-    // Verifica se já tem perfil completo (usuário retornando)
     const snap = await getDoc(doc(db, 'usuarios', uid));
     if (snap.exists() && snap.data()?.termos?.aceito) {
-      // Usuário já passou pelo onboarding completo → vai direto para o app
+      const d = snap.data();
       sessionStorage.setItem('usuario', JSON.stringify({
-        nome:             snap.data().nome,
-        startDate:        snap.data().startDate,
-        impulsosVencidos: snap.data().impulsosVencidos ?? 0,
-        recaidas:         snap.data().recaidas ?? 0,
+        nome:             d.perfil?.nome      ?? d.nome      ?? '',
+        startDate:        d.perfil?.startDate ?? d.startDate ?? dados.startDate,
+        impulsosVencidos: d.progresso?.impulsosVencidos ?? d.impulsosVencidos ?? 0,
+        recaidas:         d.progresso?.recaidas          ?? d.recaidas         ?? 0,
       }));
       window.location.href = 'index.html';
       return;
     }
 
-    // Novo usuário → preenche nome do Google se disponível
+    // Novo usuário: preenche nome do Google se disponível
     const displayName = auth.currentUser.displayName;
-    if (displayName && !dados.nome) {
-      dados.nome = displayName.split(' ')[0];
+    if (displayName && inputNome && !inputNome.value.trim()) {
+      inputNome.value = displayName.split(' ')[0];
     }
-
-    irParaPasso(3); // → tela de termos
+    irParaStep('step-termos');
   }
 
-  // ── PASSO 4 — Termos ──
+  btnAuth?.addEventListener('click', async () => {
+    const nome  = inputNome?.value.trim()  ?? '';
+    const email = inputEmail?.value.trim() ?? '';
+    const senha = inputSenha?.value        ?? '';
+
+    if (!nome)                    { mostrarErro(inputNome,  'Precisa do seu nome para continuar'); return; }
+    if (!email || !email.includes('@')) { mostrarErro(inputEmail, 'Esse email não parece certo'); return; }
+    if (senha.length < 6)         { mostrarErro(inputSenha, 'Senha muito curta — usa pelo menos 6 letras'); return; }
+
+    limparErroBotao();
+    setCarregando(true);
+    dados.nome = nome;
+
+    const { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword } = window.lumo;
+    try {
+      try {
+        await createUserWithEmailAndPassword(auth, email, senha);
+      } catch (e) {
+        if (e.code === 'auth/email-already-in-use') {
+          await signInWithEmailAndPassword(auth, email, senha);
+        } else { throw e; }
+      }
+      await aposAutenticar();
+    } catch (e) {
+      mostrarErroBotao('Email ou senha incorretos.');
+      console.log('Erro auth');
+    } finally {
+      setCarregando(false);
+    }
+  });
+
+  btnGoogle?.addEventListener('click', async () => {
+    limparErroBotao();
+    dados.nome = inputNome?.value.trim() || '';
+    setCarregando(true);
+    const { auth, GoogleAuthProvider, signInWithPopup } = window.lumo;
+    try {
+      await signInWithPopup(auth, new GoogleAuthProvider());
+      await aposAutenticar();
+    } catch (e) {
+      if (e.code !== 'auth/popup-closed-by-user') {
+        mostrarErroBotao('Não foi possível entrar com Google. Tente novamente.');
+      }
+    } finally {
+      setCarregando(false);
+    }
+  });
+
+  // ── Termos ──
   const checkTermos = document.getElementById('aceito-termos');
   const btnAceitar  = document.getElementById('btn-aceitar');
 
-  checkTermos.addEventListener('change', () => {
-    btnAceitar.disabled = !checkTermos.checked;
+  checkTermos?.addEventListener('change', () => {
+    if (btnAceitar) btnAceitar.disabled = !checkTermos.checked;
   });
 
-  btnAceitar.addEventListener('click', () => {
-    if (!checkTermos.checked) return;
+  btnAceitar?.addEventListener('click', () => {
+    if (!checkTermos?.checked) return;
     dados.termosAceitos = true;
-    // Atualiza nome na tela de boas-vindas
-    const elNome = document.getElementById('nome-boas-vindas');
-    if (elNome) elNome.textContent = dados.nome || 'Ei';
-    irParaPasso(4);
+    dados.nome = inputNome?.value.trim() || dados.nome;
+    const el = document.getElementById('nome-boas-vindas');
+    if (el) el.textContent = dados.nome || 'guerreiro';
+    irParaStep('step-boas-vindas');
   });
 
-  // Modal de termos completos
   const modalTermos = document.getElementById('modal-termos');
-  document.getElementById('link-termos-completos').addEventListener('click', (e) => {
+  document.getElementById('link-termos-completos')?.addEventListener('click', (e) => {
     e.preventDefault();
-    modalTermos.classList.remove('hidden');
+    modalTermos?.classList.remove('hidden');
   });
-  document.getElementById('modal-termos-fechar').addEventListener('click', () => {
-    modalTermos.classList.add('hidden');
+  document.getElementById('modal-termos-fechar')?.addEventListener('click', () => {
+    modalTermos?.classList.add('hidden');
   });
-  document.getElementById('modal-termos-overlay').addEventListener('click', () => {
-    modalTermos.classList.add('hidden');
+  document.getElementById('modal-termos-overlay')?.addEventListener('click', () => {
+    modalTermos?.classList.add('hidden');
   });
 
-  // ── PASSO 5 — Salvar perfil no Firestore e ir para o app ──
-  document.getElementById('btn-comecar').addEventListener('click', async () => {
-    console.log('Passo 5 clicado');
+  // ── Boas-vindas: salvar perfil + ativar trial + ir para o app ──
+  document.getElementById('btn-comecar')?.addEventListener('click', async () => {
+    const btn = document.getElementById('btn-comecar');
+    if (btn) { btn.classList.add('btn-loading'); btn.textContent = 'Aguarde...'; }
 
-    const btnComecar = document.getElementById('btn-comecar');
-    btnComecar.classList.add('btn-loading');
-    btnComecar.textContent = 'Aguarde...';
-
-    const { auth, db, doc, setDoc } = window.lumo;
-    const uid = auth.currentUser?.uid;
-
-    if (uid) {
-      try {
-        await setDoc(doc(db, 'usuarios', uid), {
-          nome:             dados.nome,
-          email:            auth.currentUser.email || '',
-          startDate:        dados.startDate,
-          impulsosVencidos: 0,
-          recaidas:         0,
-          gatilhos: { lugares: [], apps: [], horarios: [] },
-          config: {
-            fabAtivo:          true,
-            fabDisfarce:       'Calculadora',
-            fabPosicao:        'inferior-direita',
-            fabOpacidade:      100,
-            fabTamanho:        'medio',
-            fabAcaoToque:      'cards',
-            fabAcaoSegurar:    'menu',
-            contatoNome:       '',
-            contatoTelefone:   '',
-          },
-          termos: {
-            aceito:    true,
-            dataAceite: new Date().toISOString(),
-            versao:    '1.0',
-            plataforma: 'web',
-          },
-        });
-        console.log('Perfil salvo no Firestore');
-      } catch (e) {
-        console.log('Erro ao salvar perfil — continuando com sessionStorage');
+    if (window.lumo) {
+      const { auth, db, doc, setDoc } = window.lumo;
+      const uid = auth.currentUser?.uid;
+      if (uid) {
+        const agora    = new Date();
+        const fimTrial = new Date(agora.getTime() + 7 * 24 * 60 * 60 * 1000);
+        try {
+          await setDoc(doc(db, 'usuarios', uid), {
+            perfil: {
+              nome:         dados.nome,
+              email:        auth.currentUser.email || '',
+              startDate:    dados.startDate,
+              dataCadastro: agora.toISOString(),
+              idioma:       'pt',
+              sistema:      'web',
+            },
+            progresso: {
+              impulsosVencidos:  0,
+              recaidas:          0,
+              sequenciaAtual:    0,
+              historicoRecaidas: [],
+            },
+            gatilhos: { lugares: [], apps: [], horarios: [] },
+            config: {
+              fab: {
+                ativo: true, disfarce: 'Calculadora', posicao: 'inferior-direita',
+                opacidade: 100, tamanho: 'medio', acaoToque: 'cards', acaoSegurar: 'menu',
+              },
+              contato:      { nome: '', telefone: '' },
+              notificacoes: false,
+            },
+            termos: {
+              aceito: true, dataAceite: agora.toISOString(), versao: '1.0', plataforma: 'web',
+            },
+            pagamento: {
+              trial: true, trialFim: fimTrial.toISOString(), pago: false,
+              plano: null, assinaturaId: null, proximoVencimento: null, canceladoEm: null,
+            },
+          });
+        } catch (e) { console.log('Erro ao salvar perfil'); }
       }
     }
 
     sessionStorage.setItem('usuario', JSON.stringify({
-      nome:             dados.nome,
-      startDate:        dados.startDate,
-      impulsosVencidos: 0,
-      recaidas:         0,
+      nome: dados.nome, startDate: dados.startDate,
+      impulsosVencidos: 0, recaidas: 0,
     }));
 
-    console.log('Redirecionando para index');
     document.body.style.opacity    = '0';
     document.body.style.transition = 'opacity 0.18s ease';
     setTimeout(() => { window.location.href = 'index.html'; }, 160);
   });
-
-  // ── Helpers ──
-  function formatarData(data) {
-    return data.toLocaleDateString('pt-BR', {
-      day: 'numeric', month: 'long', year: 'numeric',
-    });
-  }
 
   // ── Login direto ("Já tenho conta") ──
   (function () {
@@ -303,19 +292,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const stepLogin = document.getElementById('step-login');
 
     function trocarStep(mostrar, esconder) {
-      esconder.classList.replace('step--visible', 'step--hidden');
-      mostrar.classList.replace('step--hidden', 'step--visible');
+      if (esconder) { esconder.classList.remove('step--visible'); esconder.classList.add('step--hidden'); }
+      if (mostrar)  { mostrar.classList.remove('step--hidden');  mostrar.classList.add('step--visible'); }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     document.getElementById('link-ja-tenho-conta')?.addEventListener('click', (e) => {
       e.preventDefault();
       trocarStep(stepLogin, stepQ1);
+      const bar = document.getElementById('ob-progress-bar');
+      if (bar) bar.style.width = '0%';
     });
 
     document.getElementById('link-voltar-quiz')?.addEventListener('click', (e) => {
       e.preventDefault();
       trocarStep(stepQ1, stepLogin);
+      const bar = document.getElementById('ob-progress-bar');
+      if (bar) bar.style.width = '8%';
     });
 
     const btnLoginDireto  = document.getElementById('btn-login-direto');
@@ -330,14 +323,10 @@ document.addEventListener('DOMContentLoaded', () => {
       erroLogin.style.display = 'block';
     }
 
-    function limparErroLogin() {
-      if (erroLogin) erroLogin.style.display = 'none';
-    }
+    function limparErroLogin() { if (erroLogin) erroLogin.style.display = 'none'; }
 
     function setLoadingLogin(ligado) {
-      [btnLoginDireto, btnGoogleLogin].forEach(btn => {
-        if (btn) btn.classList.toggle('btn-loading', ligado);
-      });
+      [btnLoginDireto, btnGoogleLogin].forEach(btn => btn?.classList.toggle('btn-loading', ligado));
       if (btnLoginDireto) btnLoginDireto.textContent = ligado ? 'Aguarde...' : 'Entrar';
     }
 
@@ -353,23 +342,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (snap.exists() && snap.data()?.termos?.aceito) {
           const d = snap.data();
           sessionStorage.setItem('usuario', JSON.stringify({
-            nome:             d.nome,
-            startDate:        d.startDate,
-            impulsosVencidos: d.impulsosVencidos ?? 0,
-            recaidas:         d.recaidas         ?? 0,
+            nome:             d.perfil?.nome      ?? d.nome      ?? '',
+            startDate:        d.perfil?.startDate ?? d.startDate ?? new Date().toISOString().split('T')[0],
+            impulsosVencidos: d.progresso?.impulsosVencidos ?? d.impulsosVencidos ?? 0,
+            recaidas:         d.progresso?.recaidas          ?? d.recaidas         ?? 0,
           }));
-          document.body.style.opacity    = '0';
+          document.body.style.opacity = '0';
           document.body.style.transition = 'opacity 0.18s ease';
           setTimeout(() => { window.location.href = 'index.html'; }, 160);
         } else {
-          // Auth existe mas onboarding incompleto → vai para cadastro
-          trocarStep(document.getElementById('step-cadastro'), stepLogin);
+          irParaStep('step-cadastro');
         }
       } catch (e) {
-        if (e.code !== 'auth/popup-closed-by-user') {
-          mostrarErroLogin('Email ou senha incorretos.');
-        }
-        console.log('Erro login direto');
+        if (e.code !== 'auth/popup-closed-by-user') mostrarErroLogin('Email ou senha incorretos.');
       } finally {
         setLoadingLogin(false);
       }
@@ -377,7 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnLoginDireto?.addEventListener('click', () => {
       const email = inputLoginEmail?.value.trim() ?? '';
-      const senha = inputLoginSenha?.value ?? '';
+      const senha = inputLoginSenha?.value        ?? '';
       if (!email || !email.includes('@')) { mostrarErroLogin('Esse email não parece certo'); return; }
       if (senha.length < 6) { mostrarErroLogin('Senha muito curta — usa pelo menos 6 letras'); return; }
       const { auth, signInWithEmailAndPassword } = window.lumo;
@@ -386,14 +371,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnGoogleLogin?.addEventListener('click', () => {
       const { auth, GoogleAuthProvider, signInWithPopup } = window.lumo;
-      executarLogin(async () => {
-        await signInWithPopup(auth, new GoogleAuthProvider());
-      });
+      executarLogin(async () => { await signInWithPopup(auth, new GoogleAuthProvider()); });
     });
 
-    [inputLoginEmail, inputLoginSenha].forEach(el => {
-      el?.addEventListener('input', limparErroLogin);
-    });
+    [inputLoginEmail, inputLoginSenha].forEach(el => el?.addEventListener('input', limparErroLogin));
   })();
 
 });

@@ -28,7 +28,8 @@ import {
   setDoc,
   updateDoc,
   deleteDoc,
-  increment
+  increment,
+  arrayUnion
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 // ============================================================
@@ -66,7 +67,8 @@ window.lumo = {
   setDoc,
   updateDoc,
   deleteDoc,
-  increment
+  increment,
+  arrayUnion
 };
 
 console.log("Firebase conectado");
