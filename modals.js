@@ -60,10 +60,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ── FAB abre modal de impulso ──
-  const fab = document.querySelector('.fab');
-  if (fab && modalImpulso) {
-    fab.addEventListener('click', () => window.abrirModal(modalImpulso));
+  // ── Menu dropdown (header) ──
+  const btnMenu      = document.getElementById('btn-menu');
+  const menuDropdown = document.getElementById('menu-dropdown');
+
+  if (btnMenu && menuDropdown) {
+    btnMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menuDropdown.classList.toggle('hidden');
+    });
+
+    menuDropdown.addEventListener('click', (e) => e.stopPropagation());
+
+    document.addEventListener('click', () => menuDropdown.classList.add('hidden'));
   }
 
 });

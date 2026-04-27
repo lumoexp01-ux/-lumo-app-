@@ -53,11 +53,12 @@ function calcularProgresso(dias) {
 // ─────────────────────────────────────────
 
 const usuario = {
-  nome:             '',
-  email:            '',
-  startDate:        new Date().toISOString().split('T')[0],
-  impulsosVencidos: 0,
-  recaidas:         0,
+  nome:              '',
+  email:             '',
+  startDate:         new Date().toISOString().split('T')[0],
+  impulsosVencidos:  0,
+  recaidas:          0,
+  historicoRecaidas: [],
 };
 
 function salvarSessao() {
@@ -185,8 +186,9 @@ function registrarImpulsoVencido() {
   const uid = window.lumo?.auth?.currentUser?.uid;
   if (uid && window.lumo) {
     const { db, doc, updateDoc, increment } = window.lumo;
-    updateDoc(doc(db, 'usuarios', uid), { impulsosVencidos: increment(1) })
-      .catch(() => {});
+    updateDoc(doc(db, 'usuarios', uid), {
+      'progresso.impulsosVencidos': increment(1),
+    }).catch(() => {});
   }
 
   // Debounce de 1.5s para evitar duplo clique
@@ -199,18 +201,20 @@ function registrarImpulsoVencido() {
 
 function registrarRecaida() {
   const hoje = new Date().toISOString().split('T')[0];
-  usuario.startDate = hoje;
-  usuario.recaidas  += 1;
+  usuario.startDate         = hoje;
+  usuario.recaidas         += 1;
+  usuario.historicoRecaidas = [...(usuario.historicoRecaidas || []), hoje];
   salvarSessao();
   renderizarIndex();
 
-  // Persiste no Firestore em background
   const uid = window.lumo?.auth?.currentUser?.uid;
   if (uid && window.lumo) {
-    const { db, doc, updateDoc, increment } = window.lumo;
+    const { db, doc, updateDoc, increment, arrayUnion } = window.lumo;
     updateDoc(doc(db, 'usuarios', uid), {
-      startDate: hoje,
-      recaidas:  increment(1),
+      'perfil.startDate':             hoje,
+      'progresso.recaidas':           increment(1),
+      'progresso.sequenciaAtual':     0,
+      'progresso.historicoRecaidas':  arrayUnion(hoje),
     }).catch(() => {});
   }
 }
@@ -270,13 +274,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const snap = await getDoc(doc(db, 'usuarios', userFirebase.uid));
 
     if (snap.exists()) {
-      // Perfil encontrado → carrega dados do Firestore
+      // Suporta estrutura v2.0 (aninhada) e v1.x (plana)
       const dados = snap.data();
-      usuario.nome             = dados.nome             || '';
-      usuario.email            = dados.email            || userFirebase.email || '';
-      usuario.startDate        = dados.startDate        || new Date().toISOString().split('T')[0];
-      usuario.impulsosVencidos = dados.impulsosVencidos ?? 0;
-      usuario.recaidas         = dados.recaidas         ?? 0;
+      usuario.nome              = dados.perfil?.nome              ?? dados.nome              ?? '';
+      usuario.email             = dados.perfil?.email             ?? dados.email             ?? userFirebase.email ?? '';
+      usuario.startDate         = dados.perfil?.startDate         ?? dados.startDate         ?? new Date().toISOString().split('T')[0];
+      usuario.impulsosVencidos  = dados.progresso?.impulsosVencidos  ?? dados.impulsosVencidos  ?? 0;
+      usuario.recaidas          = dados.progresso?.recaidas          ?? dados.recaidas          ?? 0;
+      usuario.historicoRecaidas = dados.progresso?.historicoRecaidas ?? dados.historicoRecaidas ?? [];
+
+      // Discord — visível apenas para pagantes
+      if (dados.pagamento?.pago === true) {
+        const discordSection = document.getElementById('discord-section');
+        if (discordSection) discordSection.style.display = 'block';
+        // Busca link do Discord no Firestore
+        getDoc(doc(db, 'config-app', 'global')).then(cfg => {
+          if (cfg.exists()) {
+            const link = cfg.data()?.discordLink;
+            const discordLink = document.getElementById('discord-link');
+            if (link && discordLink) discordLink.href = link;
+          }
+        }).catch(() => {});
+      }
 
     } else {
       // Perfil ainda não foi salvo no Firestore (Fragment 4.3 pendente).
@@ -300,17 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderizarIndex();
     ocultarSplash();
 
-    // "Venci esse momento"
-    const btnVenceu = document.getElementById('btn-venceu');
-    if (btnVenceu) {
-      btnVenceu.addEventListener('click', () => {
-        registrarImpulsoVencido();
-        const modal = document.getElementById('modal-impulso');
-        if (modal && window.fecharModal) window.fecharModal(modal);
-      });
-    }
-
-    // "Recomeçar do zero"
+    // "Recomeçar do zero" — modal de recaída na index
     const btnRecomecar = document.getElementById('btn-recomecar');
     if (btnRecomecar) {
       btnRecomecar.addEventListener('click', () => {

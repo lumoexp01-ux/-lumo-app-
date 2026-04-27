@@ -81,33 +81,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (duracao < HOLD_MS) {
-      // Toque rápido → abre modal de impulso
-      const modalImpulso = document.getElementById('modal-impulso');
-      if (modalImpulso) {
-        modalImpulso.classList.remove('hidden');
-        modalImpulso.style.opacity = '0';
-        requestAnimationFrame(() => {
-          modalImpulso.style.transition = 'opacity 0.2s ease';
-          modalImpulso.style.opacity = '1';
-        });
-        document.body.style.overflow = 'hidden';
-      }
+      // Toque rápido → intervenção de crise
+      window.location.href = 'intervencao.html';
     }
   });
 
   // ── Clique normal (desktop) ──
   fab.addEventListener('click', (e) => {
     if (iniciouDrag) return;
-    const modalImpulso = document.getElementById('modal-impulso');
-    if (modalImpulso) {
-      modalImpulso.classList.remove('hidden');
-      modalImpulso.style.opacity = '0';
-      requestAnimationFrame(() => {
-        modalImpulso.style.transition = 'opacity 0.2s ease';
-        modalImpulso.style.opacity = '1';
-      });
-      document.body.style.overflow = 'hidden';
-    }
+    window.location.href = 'intervencao.html';
   });
 
   // ── Menu de ações do FAB (segurar) ──
@@ -118,9 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
       menu.id = 'fab-menu';
       menu.className = 'fab-menu';
       menu.innerHTML = `
-        <div class="fab-menu__item" data-acao="impulso">🛡️ Protocolo</div>
-        <div class="fab-menu__item" data-acao="chat">💬 Chat IA</div>
-        <div class="fab-menu__item" data-acao="respiracao">🌬️ Respiração</div>
+        <div class="fab-menu__item" data-acao="intervencao">🚨 Alerta de Recaída</div>
         <div class="fab-menu__item" data-acao="vermelho">🔴 Tela Vermelha</div>
       `;
       document.body.appendChild(menu);
@@ -166,16 +146,10 @@ document.addEventListener('DOMContentLoaded', () => {
         item.addEventListener('click', () => {
           menu.remove();
           const acao = item.dataset.acao;
-          if (acao === 'chat') {
-            window.location.href = 'chat.html';
+          if (acao === 'intervencao') {
+            window.location.href = 'intervencao.html';
           } else if (acao === 'vermelho') {
             ativarTelaVermelha();
-          } else if (acao === 'impulso' || acao === 'respiracao') {
-            const modalImpulso = document.getElementById('modal-impulso');
-            if (modalImpulso) {
-              modalImpulso.classList.remove('hidden');
-              document.body.style.overflow = 'hidden';
-            }
           }
         });
       });
