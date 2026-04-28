@@ -61,20 +61,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ── Menu dropdown (header) ──
-  console.log('botão encontrado (querySelector .btn-menu):', document.querySelector('.btn-menu'));
-  console.log('botão encontrado (getElementById btn-menu):', document.getElementById('btn-menu'));
-  console.log('menu encontrado (querySelector .menu-dropdown):', document.querySelector('.menu-dropdown'));
-  console.log('menu encontrado (getElementById menu-dropdown):', document.getElementById('menu-dropdown'));
-
   const btnMenu      = document.getElementById('btn-menu');
   const menuDropdown = document.getElementById('menu-dropdown');
 
   if (btnMenu && menuDropdown) {
     btnMenu.addEventListener('click', (e) => {
-      console.log('clicou no botão');
       e.stopPropagation();
       menuDropdown.classList.toggle('hidden');
-      console.log('toggle menu — classes após toggle:', menuDropdown.className);
     });
 
     menuDropdown.addEventListener('click', (e) => e.stopPropagation());

@@ -26,20 +26,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ── Menu de 3 pontos (index.html) ──
-  const btnMenu = document.getElementById('btn-menu');
-  const menuDropdown = document.getElementById('menu-dropdown');
-
-  if (btnMenu && menuDropdown) {
-    btnMenu.addEventListener('click', (e) => {
-      e.stopPropagation();
-      menuDropdown.classList.toggle('hidden');
-    });
-
-    // Fecha ao clicar fora
-    document.addEventListener('click', () => {
-      menuDropdown.classList.add('hidden');
-    });
-  }
 
 });
