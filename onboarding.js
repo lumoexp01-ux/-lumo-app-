@@ -1,6 +1,11 @@
 // onboarding.js v2.0 — Fragmento 2.1
 // Quiz (Q1-Q5) + Slides (S1-S4) + Solução + Cadastro + Termos + Boas-vindas
 
+// Captura qualquer Promise rejeitada sem catch — útil para debug de auth
+window.addEventListener('unhandledrejection', (event) => {
+  console.log('UNHANDLED REJECTION:', event.reason?.code, event.reason?.message, event.reason);
+});
+
 document.addEventListener('DOMContentLoaded', () => {
 
   // ── Estado ──
@@ -164,37 +169,39 @@ document.addEventListener('DOMContentLoaded', () => {
     setCarregando(true);
     dados.nome = nome;
 
-    const { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword } = window.lumo;
     try {
+      const { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword } = window.lumo;
       try {
         await createUserWithEmailAndPassword(auth, email, senha);
       } catch (e) {
+        console.log('CATCH CAPTURADO (createUser):', e.code, e.message);
         if (e.code === 'auth/email-already-in-use') {
           await signInWithEmailAndPassword(auth, email, senha);
         } else { throw e; }
       }
       await aposAutenticar();
     } catch (e) {
+      console.log('CATCH CAPTURADO (btnAuth outer):', e.code, e.message);
       mostrarErroBotao('Email ou senha incorretos.');
-      console.log('Erro auth');
     } finally {
       setCarregando(false);
     }
   });
 
   btnGoogle?.addEventListener('click', async () => {
+    console.log('btnGoogle clicado');
     limparErroBotao();
     dados.nome = inputNome?.value.trim() || '';
     setCarregando(true);
-    const { auth, GoogleAuthProvider, signInWithPopup } = window.lumo;
     try {
+      console.log('window.lumo disponível:', !!window.lumo);
+      const { auth, GoogleAuthProvider, signInWithPopup } = window.lumo;
       console.log('Iniciando Google Auth (cadastro)...');
       const resultado = await signInWithPopup(auth, new GoogleAuthProvider());
       console.log('Sucesso:', resultado.user.email);
       await aposAutenticar();
     } catch (e) {
-      console.log('Código do erro:', e.code);
-      console.log('Mensagem:', e.message);
+      console.log('CATCH CAPTURADO (btnGoogle):', e.code, e.message);
       if (e.code !== 'auth/popup-closed-by-user') {
         mostrarErroBotao('Não foi possível entrar com Google. Tente novamente.');
       }
@@ -276,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
               plano: null, assinaturaId: null, proximoVencimento: null, canceladoEm: null,
             },
           });
-        } catch (e) { console.log('Erro ao salvar perfil'); }
+        } catch (e) { console.log('CATCH CAPTURADO (salvar perfil):', e.code, e.message); }
       }
     }
 
@@ -358,6 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
           irParaStep('step-cadastro');
         }
       } catch (e) {
+        console.log('CATCH CAPTURADO (executarLogin):', e.code, e.message);
         if (e.code !== 'auth/popup-closed-by-user') mostrarErroLogin('Email ou senha incorretos.');
       } finally {
         setLoadingLogin(false);
@@ -374,15 +382,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     btnGoogleLogin?.addEventListener('click', async () => {
-      const { auth, GoogleAuthProvider, signInWithPopup } = window.lumo;
+      console.log('btnGoogleLogin clicado');
       try {
+        console.log('window.lumo disponível:', !!window.lumo);
+        const { auth, GoogleAuthProvider, signInWithPopup } = window.lumo;
         console.log('Iniciando Google Auth (login direto)...');
         const resultado = await signInWithPopup(auth, new GoogleAuthProvider());
         console.log('Sucesso:', resultado.user.email);
-        executarLogin(async () => resultado);
+        await executarLogin(async () => resultado);
       } catch (e) {
-        console.log('Código do erro:', e.code);
-        console.log('Mensagem:', e.message);
+        console.log('CATCH CAPTURADO (btnGoogleLogin):', e.code, e.message);
       }
     });
 
