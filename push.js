@@ -12,41 +12,51 @@ const VAPID_KEY = 'BOjH-OCVsee25cl8QnLWm6aYQeE9w9VbjXLaDpLjoLLbfbTocJ9kGCJtkrxpO
 // ── Inicializa push para o uid autenticado ──
 // Chamada por app.js após auth + carregamento do perfil.
 window.inicializarPush = async function (uid) {
-  if (!uid)                            return;
-  if (!('Notification' in window))     return;
-  if (!('serviceWorker' in navigator)) return;
-  if (!window.lumo?.messaging)         return;
+  console.log('[push] inicializarPush chamada, uid:', !!uid);
+  if (!uid)                            { console.log('[push] PAROU: sem uid'); return; }
+  if (!('Notification' in window))     { console.log('[push] PAROU: Notification API indisponível'); return; }
+  if (!('serviceWorker' in navigator)) { console.log('[push] PAROU: serviceWorker indisponível'); return; }
+  if (!window.lumo?.messaging)         { console.log('[push] PAROU: messaging indisponível, lumo:', !!window.lumo, 'messaging:', !!window.lumo?.messaging); return; }
 
   // Já negou → não insiste
-  if (Notification.permission === 'denied') return;
+  if (Notification.permission === 'denied') { console.log('[push] PAROU: permissão negada anteriormente'); return; }
 
   // iOS fora do modo standalone (PWA não adicionado à tela inicial):
   // push não funciona — config.js cuida do fluxo manual nesse caso.
   const isIOS        = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const isStandalone = window.navigator.standalone === true;
-  if (isIOS && !isStandalone) return;
+  if (isIOS && !isStandalone) { console.log('[push] PAROU: iOS fora do standalone'); return; }
+
+  console.log('[push] permissão atual:', Notification.permission);
 
   try {
     // Registra / reutiliza o SW
+    console.log('[push] registrando SW...');
     const sw = await navigator.serviceWorker.register('/sw.js');
+    console.log('[push] SW registrado:', sw.scope);
 
     // Pede permissão se ainda não foi concedida
     if (Notification.permission !== 'granted') {
+      console.log('[push] solicitando permissão...');
       const perm = await Notification.requestPermission();
+      console.log('[push] resultado da permissão:', perm);
       if (perm !== 'granted') return;
     }
 
     const { messaging, getToken, onMessage, db, doc, updateDoc } = window.lumo;
 
     // Obtém token FCM
+    console.log('[push] obtendo token FCM...');
     const token = await getToken(messaging, {
       vapidKey: VAPID_KEY,
       serviceWorkerRegistration: sw,
     });
+    console.log('[push] token obtido:', !!token);
 
     if (token) {
       // Salva token no Firestore para o Cloud Function usar
       await updateDoc(doc(db, 'usuarios', uid), { pushToken: token });
+      console.log('[push] token salvo no Firestore');
     }
 
     // ── Mensagens em foreground (app aberto) ──
@@ -66,8 +76,7 @@ window.inicializarPush = async function (uid) {
     });
 
   } catch (e) {
-    // Push não disponível ou bloqueado — falha silenciosa
-    console.log('Push:', e.message);
+    console.log('[push] ERRO:', e.code ?? '', e.message);
   }
 };
 
