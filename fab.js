@@ -1,8 +1,77 @@
 // fab.js — Comportamento do FAB (botão flutuante)
-// Fase 2, Fragmento 2.5
-// Responsabilidade: toque rápido, segurar, arrastar, posição em sessão
+// Fragmentos 2.4 + 2.5
+// Responsabilidade: config do Firestore, toque rápido, segurar, arrastar, posição em sessão
+
+// ── Configuração visual do FAB (Fragmento 2.4) ──
+// Chamado por app.js após carregar dados do Firestore.
+// Posição só é aplicada se o usuário não arrastou o FAB nesta sessão.
+
+const DISFARCES_FAB = {
+  'Calculadora': { classe: 'fab--calculadora', html: 'CALC' },
+  'Clima':       { classe: 'fab--clima',       html: '🌤️' },
+  'Lanterna':    { classe: 'fab--lanterna',     html: '🔦' },
+  'Transparente':{ classe: 'fab--transparente', html: '' },
+  'Ponto':       { classe: 'fab--ponto',        html: '<span></span>' },
+};
+
+window.aplicarConfigFab = function (cfg) {
+  const fab = document.querySelector('.fab');
+  if (!fab || !cfg) return;
+
+  // Disfarce
+  const CLASSES_DISFARCE = Object.values(DISFARCES_FAB).map(d => d.classe);
+  fab.classList.remove(...CLASSES_DISFARCE);
+
+  const disfarce = DISFARCES_FAB[cfg.disfarce];
+  if (disfarce) {
+    fab.classList.add(disfarce.classe);
+    fab.innerHTML = disfarce.html;
+    fab.setAttribute('aria-label', cfg.disfarce);
+  }
+
+  // Tamanho
+  const TAMANHOS = { pequeno: '42px', medio: '52px', grande: '64px' };
+  const tam = TAMANHOS[cfg.tamanho] || '52px';
+  fab.style.width  = tam;
+  fab.style.height = tam;
+
+  // Opacidade
+  fab.style.opacity = ((cfg.opacidade ?? 100) / 100).toString();
+
+  // Posição — respeitada só se o usuário não arrastou o FAB nesta sessão
+  if (!sessionStorage.getItem('fab-posicao')) {
+    fab.style.top       = 'auto';
+    fab.style.left      = 'auto';
+    fab.style.right     = 'auto';
+    fab.style.bottom    = 'auto';
+    fab.style.transform = '';
+
+    switch (cfg.posicao) {
+      case 'inferior-esquerda':
+        fab.style.bottom = '28px'; fab.style.left  = '20px';  break;
+      case 'inferior-centro':
+        fab.style.bottom = '28px'; fab.style.left  = '50%';
+        fab.style.transform = 'translateX(-50%)';              break;
+      case 'superior-direita':
+        fab.style.top    = '28px'; fab.style.right = '20px';  break;
+      case 'superior-esquerda':
+        fab.style.top    = '28px'; fab.style.left  = '20px';  break;
+      default: // 'inferior-direita'
+        fab.style.bottom = '28px'; fab.style.right = '20px';  break;
+    }
+  }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
+
+  // ── Ação por URL param (ex: clique em push notification) ──
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('acao') === 'tela-vermelha') {
+    // Remove o param da URL sem recarregar
+    history.replaceState(null, '', window.location.pathname);
+    // Pequeno delay para garantir que o DOM está pronto
+    setTimeout(ativarTelaVermelha, 300);
+  }
 
   const fab = document.querySelector('.fab');
   if (!fab) return;

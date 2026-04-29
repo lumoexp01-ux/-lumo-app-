@@ -216,6 +216,67 @@
       color: var(--text-faint);
       margin-top: 20px;
     }
+
+    /* Seção iOS */
+    .ios-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: var(--border-default);
+    }
+
+    .ios-step:last-of-type {
+      border-bottom: none;
+    }
+
+    .ios-step__num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--purple-primary);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .ios-step__texto {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    .ios-step__texto strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .ios-step__path {
+      display: block;
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--purple-light);
+      font-weight: 500;
+    }
+
+    .ios-resultado {
+      margin: 0 16px 14px;
+      padding: 12px 14px;
+      background: rgba(61, 31, 255, 0.08);
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .ios-resultado strong {
+      color: var(--text-primary);
+    }
   </style>
 </head>
 <body>
@@ -375,6 +436,62 @@
             type="tel"
             placeholder="(00) 00000-0000"
           />
+        </div>
+      </div>
+
+      <!-- ════════════════════════════
+           SEÇÃO: PROTEÇÃO NO IPHONE (só aparece em iOS)
+           ════════════════════════════ -->
+      <div class="config-block hidden" id="ios-section">
+        <div class="config-block__header">
+          <span class="config-block__icon"> </span>
+          <span class="config-block__title">Proteção no iPhone</span>
+        </div>
+
+        <!-- Notificações iOS PWA -->
+        <div class="config-sub" id="ios-push-sub">
+          <div class="config-sub__label">Notificações</div>
+          <div id="ios-push-status" style="font-size:13px; color: var(--text-secondary); line-height:1.5;">
+            Para receber alertas, <strong style="color:var(--text-primary)">adicione o LUMO à tela inicial</strong>
+            (Safari → compartilhar → "Adicionar à Tela de Início") e reabra o app.
+          </div>
+          <button class="btn-primary" id="btn-ativar-push-ios" style="margin-top:12px; padding:12px; font-size:14px; display:none;">
+            Ativar notificações
+          </button>
+        </div>
+
+        <!-- Atalho de acessibilidade — substituto da tela vermelha -->
+        <div class="config-block__header" style="border-top: var(--border-default); margin-top: 4px;">
+          <span class="config-block__icon">🔴</span>
+          <span class="config-block__title">Tela vermelha manual</span>
+        </div>
+
+        <div class="ios-step">
+          <div class="ios-step__num">1</div>
+          <div class="ios-step__texto">
+            Ative <strong>Escala de Cinza</strong>
+            <span class="ios-step__path">Ajustes → Acessibilidade → Tamanho de Texto e Visão → Filtros de Cor → Escala de Cinza</span>
+          </div>
+        </div>
+
+        <div class="ios-step">
+          <div class="ios-step__num">2</div>
+          <div class="ios-step__texto">
+            Ative <strong>Reduzir Ponto Branco</strong> e coloque em 100%
+            <span class="ios-step__path">Ajustes → Acessibilidade → Tamanho de Texto e Visão → Reduzir Ponto Branco</span>
+          </div>
+        </div>
+
+        <div class="ios-step">
+          <div class="ios-step__num">3</div>
+          <div class="ios-step__texto">
+            Configure o <strong>Atalho de Acessibilidade</strong> para acionar os dois acima
+            <span class="ios-step__path">Ajustes → Acessibilidade → Atalho de Acessibilidade → marcar os dois filtros</span>
+          </div>
+        </div>
+
+        <div class="ios-resultado">
+          <strong>Resultado:</strong> três cliques no botão lateral ativa/desativa tela em preto e branco escuro — o mesmo efeito da tela vermelha, quebrando o padrão visual de estimulação.
         </div>
       </div>
 

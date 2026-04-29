@@ -12,6 +12,7 @@
 // ============================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging.js";
 import {
   getAuth,
   onAuthStateChanged,
@@ -28,6 +29,7 @@ import {
   setDoc,
   updateDoc,
   deleteDoc,
+  deleteField,
   increment,
   arrayUnion
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
@@ -46,9 +48,10 @@ const firebaseConfig = {
 
 // ============================================================
 
-const app  = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db   = getFirestore(app);
+const app       = initializeApp(firebaseConfig);
+const auth      = getAuth(app);
+const db        = getFirestore(app);
+const messaging = getMessaging(app);
 
 // Expõe no escopo global para compatibilidade com scripts tradicionais
 window.lumo = {
@@ -67,8 +70,13 @@ window.lumo = {
   setDoc,
   updateDoc,
   deleteDoc,
+  deleteField,
   increment,
-  arrayUnion
+  arrayUnion,
+  // Messaging
+  messaging,
+  getToken,
+  onMessage,
 };
 
 console.log("Firebase conectado");

@@ -59,6 +59,8 @@ const usuario = {
   impulsosVencidos:  0,
   recaidas:          0,
   historicoRecaidas: [],
+  configFab:         {},
+  carta:             null,
 };
 
 function salvarSessao() {
@@ -282,6 +284,22 @@ document.addEventListener('DOMContentLoaded', () => {
       usuario.impulsosVencidos  = dados.progresso?.impulsosVencidos  ?? dados.impulsosVencidos  ?? 0;
       usuario.recaidas          = dados.progresso?.recaidas          ?? dados.recaidas          ?? 0;
       usuario.historicoRecaidas = dados.progresso?.historicoRecaidas ?? dados.historicoRecaidas ?? [];
+      usuario.configFab         = dados.config?.fab                  ?? {};
+      // carta — lida descriptografada do sessionStorage (carta.js descriptografa e salva lá)
+      const sessaoCarta = JSON.parse(sessionStorage.getItem('usuario') || '{}');
+      usuario.carta = sessaoCarta.carta ?? null;
+
+      // Verificação de trial (Fragmento 4.8)
+      // Pula a verificação para v1.x (sem campo pagamento) — não bloqueia
+      const pagamento = dados.pagamento;
+      if (pagamento) {
+        const pago        = pagamento.pago === true;
+        const trialValido = pagamento.trialFim && new Date() < new Date(pagamento.trialFim);
+        if (!pago && !trialValido) {
+          window.location.href = 'pagamento.html';
+          return;
+        }
+      }
 
       // Discord — visível apenas para pagantes
       if (dados.pagamento?.pago === true) {
@@ -317,6 +335,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     salvarSessao();
     renderizarIndex();
+    window.aplicarConfigFab?.(usuario.configFab);
+    window.inicializarPush?.(userFirebase.uid);
     ocultarSplash();
 
     // "Recomeçar do zero" — modal de recaída na index

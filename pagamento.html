@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>LUMO — Continue sua jornada</title>
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .paywall-screen {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 0 20px 48px;
+    }
+
+    /* Header */
+    .paywall-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 52px 0 32px;
+    }
+
+    .paywall-header__logo {
+      font-family: var(--font-display);
+      font-size: 28px;
+      letter-spacing: 0.08em;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+
+    .paywall-header__logo span {
+      color: var(--purple-primary);
+    }
+
+    .paywall-header__logout {
+      font-size: 13px;
+      color: var(--text-muted);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: var(--font-body);
+      padding: 6px 0;
+    }
+
+    /* Hero */
+    .paywall-hero {
+      text-align: center;
+      padding: 8px 0 32px;
+    }
+
+    .paywall-hero__badge {
+      display: inline-block;
+      background: var(--bg-card-accent);
+      border: var(--border-accent);
+      border-radius: 99px;
+      padding: 5px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--purple-light);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .paywall-hero__title {
+      font-family: var(--font-display);
+      font-size: 42px;
+      line-height: 1.05;
+      letter-spacing: 0.03em;
+      color: var(--text-primary);
+      margin-bottom: 14px;
+    }
+
+    .paywall-hero__sub {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    /* Benefícios */
+    .paywall-benefits {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    .benefit-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: var(--border-default);
+      border-radius: 12px;
+    }
+
+    .benefit-item__icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      width: 28px;
+      text-align: center;
+    }
+
+    .benefit-item__text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.35;
+    }
+
+    .benefit-item__text strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* Cards de plano */
+    .plan-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .plan-card {
+      background: var(--bg-card);
+      border: var(--border-default);
+      border-radius: var(--radius-card);
+      padding: 20px;
+      cursor: pointer;
+      position: relative;
+      transition: border-color 0.15s;
+    }
+
+    .plan-card--destaque {
+      border-color: var(--purple-primary);
+      background: var(--bg-card-accent);
+    }
+
+    .plan-card__badge-top {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--purple-primary);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 12px;
+      border-radius: 99px;
+      white-space: nowrap;
+    }
+
+    .plan-card__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .plan-card__nome {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .plan-card__economia {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--purple-light);
+      background: rgba(157, 111, 255, 0.12);
+      padding: 3px 8px;
+      border-radius: 99px;
+    }
+
+    .plan-card__preco {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      margin-bottom: 4px;
+    }
+
+    .plan-card__cifra {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .plan-card__valor {
+      font-family: var(--font-display);
+      font-size: 38px;
+      color: var(--text-primary);
+      line-height: 1;
+      letter-spacing: 0.01em;
+    }
+
+    .plan-card__periodo {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .plan-card__detalhe {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* Botões de CTA */
+    .btn-plano {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 17px;
+      border-radius: var(--radius-btn);
+      border: none;
+      font-family: var(--font-body);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      margin-top: 20px;
+    }
+
+    .btn-plano:active {
+      opacity: 0.88;
+      transform: scale(0.98);
+    }
+
+    .btn-plano--anual {
+      background: var(--purple-primary);
+      color: #fff;
+    }
+
+    .btn-plano--mensal {
+      background: transparent;
+      color: var(--text-secondary);
+      border: var(--border-default);
+    }
+
+    /* Nota de segurança */
+    .paywall-nota {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+
+    .paywall-nota a {
+      color: var(--purple-light);
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="paywall-screen">
+
+    <header class="paywall-header">
+      <div class="paywall-header__logo">LUM<span>O</span></div>
+      <button class="paywall-header__logout" id="btn-logout-paywall">Sair</button>
+    </header>
+
+    <!-- ════════════════════════════
+         HERO
+         ════════════════════════════ -->
+    <div class="paywall-hero">
+      <div class="paywall-hero__badge">Trial encerrado</div>
+      <div class="paywall-hero__title">Sua jornada<br>continua.</div>
+      <p class="paywall-hero__sub">
+        Você usou o LUMO por 7 dias. A luta não acabou — e você não precisa enfrentá-la sozinho.
+      </p>
+    </div>
+
+    <!-- ════════════════════════════
+         BENEFÍCIOS
+         ════════════════════════════ -->
+    <div class="paywall-benefits">
+      <div class="benefit-item">
+        <span class="benefit-item__icon">🛡️</span>
+        <div class="benefit-item__text">
+          <strong>Protocolo de crise</strong> — acesso imediato quando o impulso bater
+        </div>
+      </div>
+      <div class="benefit-item">
+        <span class="benefit-item__icon">📈</span>
+        <div class="benefit-item__text">
+          <strong>Sistema de níveis</strong> — sua jornada registrada e protegida
+        </div>
+      </div>
+      <div class="benefit-item">
+        <span class="benefit-item__icon">💬</span>
+        <div class="benefit-item__text">
+          <strong>Comunidade Discord</strong> — pessoas reais na mesma luta que você
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════
+         PLANOS
+         ════════════════════════════ -->
+    <div class="plan-cards">
+
+      <!-- Anual (destaque) -->
+      <div class="plan-card plan-card--destaque" id="card-anual">
+        <div class="plan-card__badge-top">Melhor escolha</div>
+        <div class="plan-card__header">
+          <span class="plan-card__nome">Anual</span>
+          <span class="plan-card__economia">24% off</span>
+        </div>
+        <div class="plan-card__preco">
+          <span class="plan-card__cifra">R$</span>
+          <span class="plan-card__valor">127</span>
+          <span class="plan-card__periodo">/ano</span>
+        </div>
+        <div class="plan-card__detalhe">R$10,58/mês · menos de R$0,35 por dia</div>
+      </div>
+
+      <!-- Mensal -->
+      <div class="plan-card" id="card-mensal">
+        <div class="plan-card__header">
+          <span class="plan-card__nome">Mensal</span>
+        </div>
+        <div class="plan-card__preco">
+          <span class="plan-card__cifra">R$</span>
+          <span class="plan-card__valor">13</span>
+          <span class="plan-card__periodo">,99/mês</span>
+        </div>
+        <div class="plan-card__detalhe">Cancele quando quiser</div>
+      </div>
+
+    </div>
+
+    <!-- CTA Anual -->
+    <button class="btn-plano btn-plano--anual" id="btn-assinar-anual">
+      Continuar com Anual — R$127/ano
+    </button>
+
+    <!-- CTA Mensal -->
+    <button class="btn-plano btn-plano--mensal" id="btn-assinar-mensal">
+      Continuar com Mensal — R$13,99/mês
+    </button>
+
+    <p class="paywall-nota">
+      Pagamento seguro via Mercado Pago.<br>
+      Cancele a qualquer momento.
+    </p>
+
+  </div>
+
+  <script type="module" src="firebase.js"></script>
+  <script src="app.js"></script>
+  <script src="pagamento.js"></script>
+  <script src="nav.js"></script>
+</body>
+</html>

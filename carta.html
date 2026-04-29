@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>LUMO — Carta do Futuro</title>
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .carta-screen {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding-bottom: 48px;
+    }
+
+    /* Header */
+    .carta-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 52px 20px 20px;
+    }
+
+    .carta-header__back {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: var(--border-default);
+      color: var(--text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      flex-shrink: 0;
+      text-decoration: none;
+    }
+
+    .carta-header__info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .carta-header__title {
+      font-family: var(--font-display);
+      font-size: 28px;
+      color: var(--text-primary);
+      line-height: 1;
+      letter-spacing: 0.04em;
+    }
+
+    .carta-header__sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Conteúdo */
+    .carta-content {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 0 20px;
+    }
+
+    /* Prompt inspirador */
+    .carta-prompt {
+      background: var(--bg-card-accent);
+      border: var(--border-accent);
+      border-radius: var(--radius-card);
+      padding: 16px 18px;
+    }
+
+    .carta-prompt__label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--purple-light);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+
+    .carta-prompt__texto {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .carta-prompt__texto em {
+      color: var(--text-primary);
+      font-style: normal;
+      font-weight: 500;
+    }
+
+    /* Área de escrita */
+    .carta-box {
+      background: var(--bg-card);
+      border: var(--border-default);
+      border-radius: var(--radius-card);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color 0.15s;
+    }
+
+    .carta-box:focus-within {
+      border-color: var(--purple-mid);
+    }
+
+    .carta-box__saudacao {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .carta-textarea {
+      width: 100%;
+      min-height: 220px;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: none;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    .carta-textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .carta-box__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: var(--border-default);
+      padding-top: 10px;
+    }
+
+    .carta-box__chars {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .carta-box__chars--limite {
+      color: #c84040;
+    }
+
+    /* Data de criação */
+    .carta-data {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* Aviso de criptografia */
+    .carta-aviso {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      background: rgba(61, 31, 255, 0.07);
+      border-radius: 10px;
+    }
+
+    .carta-aviso__icon {
+      font-size: 14px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .carta-aviso__texto {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Botões */
+    .carta-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-apagar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--radius-btn);
+      background: transparent;
+      color: #c84040;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      border: 1px solid rgba(138, 32, 32, 0.3);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-apagar:active {
+      background: rgba(138, 32, 32, 0.08);
+    }
+
+    /* Estado: salvando / salvo */
+    .carta-status {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      min-height: 18px;
+      transition: color 0.2s;
+    }
+
+    .carta-status--ok {
+      color: var(--green-win);
+    }
+
+    .carta-status--erro {
+      color: #c84040;
+    }
+  </style>
+</head>
+<body>
+  <div class="carta-screen">
+
+    <!-- ════════════════════════════
+         HEADER
+         ════════════════════════════ -->
+    <header class="carta-header">
+      <a class="carta-header__back" href="index.html" aria-label="Voltar">←</a>
+      <div class="carta-header__info">
+        <div class="carta-header__title">CARTA DO FUTURO</div>
+        <div class="carta-header__sub" id="carta-sub">Escreva para quem você vai ser</div>
+      </div>
+    </header>
+
+    <div class="carta-content">
+
+      <!-- Prompt inspirador -->
+      <div class="carta-prompt">
+        <div class="carta-prompt__label">Por que escrever?</div>
+        <p class="carta-prompt__texto">
+          Quando o impulso vier, sua carta será lida para você.
+          <em>Escreva agora, com clareza.</em>
+          Por que você está lutando? O que você não quer perder?
+          O que você quer se tornar?
+        </p>
+      </div>
+
+      <!-- Área de escrita -->
+      <div class="carta-box">
+        <div class="carta-box__saudacao">Para mim do futuro,</div>
+        <textarea
+          id="carta-textarea"
+          class="carta-textarea"
+          placeholder="Escreva o que você sentiria ao recair agora. O que estaria perdendo. Por que você está lutando. Palavras escritas por você têm mais força do que qualquer outra coisa."
+          maxlength="2000"
+        ></textarea>
+        <div class="carta-box__footer">
+          <span class="carta-box__chars" id="carta-chars">0 / 2000</span>
+          <button class="btn-primary" id="btn-salvar-carta" style="padding: 10px 20px; font-size: 14px;">
+            Salvar carta
+          </button>
+        </div>
+      </div>
+
+      <!-- Status de salvamento -->
+      <div class="carta-status" id="carta-status"></div>
+
+      <!-- Data de criação (aparece após salvar) -->
+      <div class="carta-data hidden" id="carta-data"></div>
+
+      <!-- Aviso de privacidade -->
+      <div class="carta-aviso">
+        <span class="carta-aviso__icon">🔒</span>
+        <span class="carta-aviso__texto">
+          Sua carta é criptografada antes de ser salva. Só você pode lê-la.
+        </span>
+      </div>
+
+      <!-- Apagar carta (aparece só se já existe) -->
+      <div class="carta-actions hidden" id="carta-actions">
+        <button class="btn-apagar" id="btn-apagar-carta">Apagar carta</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="firebase.js"></script>
+  <script src="app.js"></script>
+  <script src="carta.js"></script>
+  <script src="nav.js"></script>
+</body>
+</html>
