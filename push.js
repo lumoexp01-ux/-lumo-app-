@@ -7,7 +7,7 @@
 // ── VAPID Key ──
 // Obter em: Firebase Console → Project Settings → Cloud Messaging
 //           → Web Push certificates → Gerar par de chaves → copiar a chave pública
-const VAPID_KEY = BOjH-OCVsee25cl8QnLWm6aYQeE9w9VbjXLaDpLjoLLbfbTocJ9kGCJtkrxpOvufr7Cfs0QK1cdJQcBwVT5lEV8;
+const VAPID_KEY = 'BOjH-OCVsee25cl8QnLWm6aYQeE9w9VbjXLaDpLjoLLbfbTocJ9kGCJtkrxpOvufr7Cfs0QK1cdJQcBwVT5lEV8';
 
 // ── Inicializa push para o uid autenticado ──
 // Chamada por app.js após auth + carregamento do perfil.

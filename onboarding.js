@@ -188,9 +188,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setCarregando(true);
     const { auth, GoogleAuthProvider, signInWithPopup } = window.lumo;
     try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
+      console.log('Iniciando Google Auth (cadastro)...');
+      const resultado = await signInWithPopup(auth, new GoogleAuthProvider());
+      console.log('Sucesso:', resultado.user.email);
       await aposAutenticar();
     } catch (e) {
+      console.log('Código do erro:', e.code);
+      console.log('Mensagem:', e.message);
       if (e.code !== 'auth/popup-closed-by-user') {
         mostrarErroBotao('Não foi possível entrar com Google. Tente novamente.');
       }
@@ -369,9 +373,17 @@ document.addEventListener('DOMContentLoaded', () => {
       executarLogin(() => signInWithEmailAndPassword(auth, email, senha));
     });
 
-    btnGoogleLogin?.addEventListener('click', () => {
+    btnGoogleLogin?.addEventListener('click', async () => {
       const { auth, GoogleAuthProvider, signInWithPopup } = window.lumo;
-      executarLogin(async () => { await signInWithPopup(auth, new GoogleAuthProvider()); });
+      try {
+        console.log('Iniciando Google Auth (login direto)...');
+        const resultado = await signInWithPopup(auth, new GoogleAuthProvider());
+        console.log('Sucesso:', resultado.user.email);
+        executarLogin(async () => resultado);
+      } catch (e) {
+        console.log('Código do erro:', e.code);
+        console.log('Mensagem:', e.message);
+      }
     });
 
     [inputLoginEmail, inputLoginSenha].forEach(el => el?.addEventListener('input', limparErroLogin));
