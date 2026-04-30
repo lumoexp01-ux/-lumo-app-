@@ -546,6 +546,100 @@
       margin-bottom: 10px;
     }
 
+    /* ── Compromisso Banner ── */
+    .compromisso-banner {
+      margin: 12px 20px 0;
+      background: rgba(61, 31, 255, 0.07);
+      border: 1px solid rgba(61, 31, 255, 0.2);
+      border-radius: var(--radius-card);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .compromisso-banner__icon { font-size: 18px; flex-shrink: 0; }
+    .compromisso-banner__body { flex: 1; min-width: 0; }
+    .compromisso-banner__texto {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .compromisso-banner__meta {
+      font-size: 11px;
+      color: var(--purple-muted);
+      margin-top: 2px;
+    }
+    .compromisso-banner__btn {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--purple-text);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      flex-shrink: 0;
+    }
+
+    /* ── Modal de Compromisso ── */
+    .modal-compromisso {
+      display: flex;
+      flex-direction: column;
+      padding: 0 20px 40px;
+    }
+    .modal-compromisso__title {
+      font-family: var(--font-display);
+      font-size: 32px;
+      color: var(--text-primary);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .modal-compromisso__desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    .compromisso-textarea {
+      width: 100%;
+      min-height: 100px;
+      background: var(--bg-card);
+      border: var(--border-default);
+      border-radius: var(--radius-card);
+      padding: 14px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text-primary);
+      resize: none;
+      box-sizing: border-box;
+      outline: none;
+      line-height: 1.6;
+    }
+    .compromisso-textarea:focus { border-color: rgba(61, 31, 255, 0.4); }
+    .compromisso-counter {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: right;
+      margin-top: 4px;
+      margin-bottom: 20px;
+    }
+    .compromisso-meta-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+    .compromisso-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
     /* ── Splash screen ── */
     #splash {
       position: fixed;
@@ -658,6 +752,19 @@
           <div class="progress-bar__fill" id="progress-fill" style="width: 62%"></div>
         </div>
       </div>
+    </div>
+
+    <!-- ════════════════════════════
+         COMPROMISSO BANNER
+         Oculto por padrão; app.js exibe quando compromisso.ativo=true
+         ════════════════════════════ -->
+    <div class="compromisso-banner hidden" id="compromisso-banner">
+      <span class="compromisso-banner__icon">🤝</span>
+      <div class="compromisso-banner__body">
+        <div class="compromisso-banner__texto" id="compromisso-texto"></div>
+        <div class="compromisso-banner__meta" id="compromisso-meta"></div>
+      </div>
+      <button class="compromisso-banner__btn" id="btn-ver-compromisso">Ver</button>
     </div>
 
     <!-- ════════════════════════════
@@ -780,6 +887,12 @@
         <div class="quick-card__title">Configurações</div>
         <div class="quick-card__desc">FAB, contato, perfil</div>
       </a>
+
+      <div class="quick-card" id="btn-abrir-compromisso" role="button">
+        <span class="quick-card__icon">🤝</span>
+        <div class="quick-card__title">Compromisso</div>
+        <div class="quick-card__desc">Defina uma meta pessoal</div>
+      </div>
 
     </div>
 
@@ -918,6 +1031,42 @@
       <!-- Botões -->
       <button class="btn-restart" id="btn-recomecar">Recomeçar do zero</button>
       <button class="btn-ghost" id="btn-cancelar">Cancelar</button>
+
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════
+       MODAL DE COMPROMISSO
+       ════════════════════════════ -->
+  <div class="overlay hidden" id="modal-compromisso">
+    <div class="modal modal-compromisso">
+
+      <div class="modal__handle"></div>
+
+      <div class="modal-compromisso__title">Compromisso</div>
+      <p class="modal-compromisso__desc">Escreva sua razão para continuar. Isso aparece na tela principal como lembrete.</p>
+
+      <textarea
+        id="compromisso-input"
+        class="compromisso-textarea"
+        maxlength="200"
+        placeholder="Ex: Faço isso pelos meus filhos. Pela minha saúde. Por mim."
+      ></textarea>
+      <div class="compromisso-counter"><span id="compromisso-count">0</span>/200</div>
+
+      <div class="compromisso-meta-label">Meta (opcional)</div>
+      <div class="compromisso-chips">
+        <div class="chip" data-dias="7">7 dias</div>
+        <div class="chip" data-dias="14">14 dias</div>
+        <div class="chip" data-dias="30">30 dias</div>
+        <div class="chip" data-dias="60">60 dias</div>
+        <div class="chip" data-dias="90">90 dias</div>
+      </div>
+
+      <button class="btn-restart" id="btn-salvar-compromisso">Ativar compromisso</button>
+      <button class="btn-ghost" id="btn-cancelar-compromisso" style="display:none;">Cancelar compromisso</button>
+      <button class="btn-ghost" id="btn-fechar-compromisso">Fechar</button>
 
     </div>
   </div>

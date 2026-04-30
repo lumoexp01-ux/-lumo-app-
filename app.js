@@ -61,6 +61,7 @@ const usuario = {
   historicoRecaidas: [],
   configFab:         {},
   carta:             null,
+  compromisso:       null,
 };
 
 function salvarSessao() {
@@ -222,6 +223,131 @@ function registrarRecaida() {
 }
 
 // ─────────────────────────────────────────
+// MODO COMPROMISSO (Fragmento 5.5)
+// ─────────────────────────────────────────
+
+function renderizarCompromisso() {
+  const c      = usuario.compromisso;
+  const banner = document.getElementById('compromisso-banner');
+  if (!banner) return;
+
+  if (!c?.ativo) { banner.classList.add('hidden'); return; }
+  banner.classList.remove('hidden');
+
+  const elTexto = document.getElementById('compromisso-texto');
+  const elMeta  = document.getElementById('compromisso-meta');
+  if (elTexto) elTexto.textContent = c.texto || '';
+
+  if (elMeta) {
+    if (c.meta && c.inicio) {
+      const fim = new Date(c.inicio + 'T12:00:00');
+      fim.setDate(fim.getDate() + c.meta);
+      if (new Date() >= fim) {
+        elMeta.textContent  = 'Meta atingida!';
+        elMeta.style.color  = 'var(--green-win)';
+      } else {
+        const dias = Math.ceil((fim - new Date()) / (1000 * 60 * 60 * 24));
+        elMeta.textContent = `Meta: ${c.meta} dias · Faltam ${dias}`;
+        elMeta.style.color = '';
+      }
+    } else {
+      elMeta.textContent = '';
+    }
+  }
+}
+
+let _compromissoIniciado = false;
+function inicializarModalCompromisso() {
+  if (_compromissoIniciado) { renderizarCompromisso(); return; }
+  _compromissoIniciado = true;
+
+  const modal       = document.getElementById('modal-compromisso');
+  const inputTexto  = document.getElementById('compromisso-input');
+  const counter     = document.getElementById('compromisso-count');
+  const btnSalvar   = document.getElementById('btn-salvar-compromisso');
+  const btnCancelar = document.getElementById('btn-cancelar-compromisso');
+  const btnFechar   = document.getElementById('btn-fechar-compromisso');
+  if (!modal) return;
+
+  function abrirModalCompromisso() {
+    const c    = usuario.compromisso;
+    const chips = modal.querySelectorAll('.chip');
+    if (c?.ativo) {
+      if (inputTexto) inputTexto.value = c.texto || '';
+      if (counter)    counter.textContent = (c.texto || '').length;
+      chips.forEach(ch => ch.classList.toggle('active', Number(ch.dataset.dias) === c.meta));
+      if (btnCancelar) btnCancelar.style.display = 'block';
+      if (btnSalvar)   btnSalvar.textContent = 'Salvar alterações';
+    } else {
+      if (inputTexto) inputTexto.value = '';
+      if (counter)    counter.textContent = 0;
+      chips.forEach(ch => ch.classList.remove('active'));
+      if (btnCancelar) btnCancelar.style.display = 'none';
+      if (btnSalvar)   btnSalvar.textContent = 'Ativar compromisso';
+    }
+    window.abrirModal(modal);
+  }
+
+  document.getElementById('btn-abrir-compromisso')?.addEventListener('click', abrirModalCompromisso);
+  document.getElementById('btn-ver-compromisso')?.addEventListener('click', abrirModalCompromisso);
+
+  inputTexto?.addEventListener('input', () => {
+    if (counter) counter.textContent = inputTexto.value.length;
+  });
+
+  modal.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const jaAtivo = chip.classList.contains('active');
+      modal.querySelectorAll('.chip').forEach(ch => ch.classList.remove('active'));
+      if (!jaAtivo) chip.classList.add('active');
+    });
+  });
+
+  btnSalvar?.addEventListener('click', async () => {
+    const texto = inputTexto?.value.trim() || '';
+    if (!texto) { inputTexto?.focus(); return; }
+
+    const uid = window.lumo?.auth?.currentUser?.uid;
+    if (!uid) return;
+
+    const chipAtivo = modal.querySelector('.chip.active');
+    const meta  = chipAtivo ? Number(chipAtivo.dataset.dias) : null;
+    const hoje  = new Date().toISOString().split('T')[0];
+    const compromisso = {
+      ativo:  true,
+      texto,
+      meta,
+      inicio: usuario.compromisso?.inicio ?? hoje,
+    };
+
+    usuario.compromisso = compromisso;
+    renderizarCompromisso();
+    window.fecharModal(modal);
+
+    const { db, doc, updateDoc } = window.lumo;
+    updateDoc(doc(db, 'usuarios', uid), { compromisso }).catch(() => {});
+  });
+
+  btnCancelar?.addEventListener('click', async () => {
+    const uid = window.lumo?.auth?.currentUser?.uid;
+    if (!uid) return;
+
+    usuario.compromisso = null;
+    renderizarCompromisso();
+    window.fecharModal(modal);
+
+    const { db, doc, updateDoc, deleteField } = window.lumo;
+    updateDoc(doc(db, 'usuarios', uid), { compromisso: deleteField() }).catch(() => {});
+  });
+
+  btnFechar?.addEventListener('click', () => window.fecharModal(modal));
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) window.fecharModal(modal);
+  });
+}
+
+// ─────────────────────────────────────────
 // INICIALIZAÇÃO
 // ─────────────────────────────────────────
 
@@ -287,7 +413,8 @@ document.addEventListener('DOMContentLoaded', () => {
       usuario.configFab         = dados.config?.fab                  ?? {};
       // carta — lida descriptografada do sessionStorage (carta.js descriptografa e salva lá)
       const sessaoCarta = JSON.parse(sessionStorage.getItem('usuario') || '{}');
-      usuario.carta = sessaoCarta.carta ?? null;
+      usuario.carta       = sessaoCarta.carta ?? null;
+      usuario.compromisso = dados.compromisso  ?? null;
 
       // Verificação de trial (Fragmento 4.8)
       // Pula a verificação para v1.x (sem campo pagamento) — não bloqueia
@@ -335,6 +462,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     salvarSessao();
     renderizarIndex();
+    renderizarCompromisso();
+    inicializarModalCompromisso();
     window.aplicarConfigFab?.(usuario.configFab);
     window.inicializarPush?.(userFirebase.uid);
     ocultarSplash();
