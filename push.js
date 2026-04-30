@@ -32,7 +32,7 @@ window.inicializarPush = async function (uid) {
   try {
     // Registra / reutiliza o SW
     console.log('[push] registrando SW...');
-    const sw = await navigator.serviceWorker.register('/sw.js');
+    const sw = await navigator.serviceWorker.register('./sw.js');
     console.log('[push] SW registrado:', sw.scope);
 
     // Pede permissão se ainda não foi concedida
