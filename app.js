@@ -62,6 +62,7 @@ const usuario = {
   configFab:         {},
   carta:             null,
   compromisso:       null,
+  idioma:            'pt',
 };
 
 function salvarSessao() {
@@ -92,15 +93,18 @@ function renderizarIndex() {
 
   // Card de rank — nível
   const elNivel = document.getElementById('rank-nivel');
-  if (elNivel) elNivel.textContent = nivel.nome.toUpperCase();
+  if (elNivel) elNivel.textContent = (window.t?.('nivel.' + nivel.nome) ?? nivel.nome).toUpperCase();
 
   // Card de rank — próximo nível
   const elProximo = document.getElementById('rank-proximo');
   if (elProximo) {
     if (nivel.proximo) {
-      elProximo.innerHTML = `Próximo: <strong>${nivel.proximo}</strong> em ${nivel.diasFaltam} dias`;
+      const proxLabel = window.t?.('index.proximo-label') ?? 'Próximo:';
+      const proxNome  = window.t?.('nivel.' + nivel.proximo) ?? nivel.proximo;
+      const unitDias  = window.t?.('unit.dias') ?? 'dias';
+      elProximo.innerHTML = `${proxLabel} <strong>${proxNome}</strong> em ${nivel.diasFaltam} ${unitDias}`;
     } else {
-      elProximo.textContent = 'Nível máximo atingido.';
+      elProximo.textContent = window.t?.('index.nivel-max') ?? 'Nível máximo atingido.';
     }
   }
 
@@ -415,6 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const sessaoCarta = JSON.parse(sessionStorage.getItem('usuario') || '{}');
       usuario.carta       = sessaoCarta.carta ?? null;
       usuario.compromisso = dados.compromisso  ?? null;
+      usuario.idioma      = dados.perfil?.idioma ?? window.lumoI18n?.detectar() ?? 'pt';
 
       // Verificação de trial (Fragmento 4.8)
       // Pula a verificação para v1.x (sem campo pagamento) — não bloqueia
@@ -461,6 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     salvarSessao();
+    window.lumoI18n?.aplicar(usuario.idioma);
     renderizarIndex();
     renderizarCompromisso();
     inicializarModalCompromisso();

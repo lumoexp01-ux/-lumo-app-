@@ -722,8 +722,8 @@
 
         <!-- Menu dropdown -->
         <div class="menu-dropdown hidden" id="menu-dropdown">
-          <a class="menu-dropdown__item" href="config.html">Configurações</a>
-          <div class="menu-dropdown__item menu-dropdown__item--danger" id="btn-recaida">Registrar recaída</div>
+          <a class="menu-dropdown__item" href="config.html" data-i18n="menu.config">Configurações</a>
+          <div class="menu-dropdown__item menu-dropdown__item--danger" id="btn-recaida" data-i18n="menu.recaida">Registrar recaída</div>
         </div>
       </div>
     </header>
@@ -734,7 +734,7 @@
     <div class="rank-card">
       <div class="rank-card__top">
         <div>
-          <div class="rank-card__label">Seu nível</div>
+          <div class="rank-card__label" data-i18n="index.nivel-label">Seu nível</div>
           <div class="rank-card__level" id="rank-nivel">CAPITÃO</div>
           <div class="rank-card__next" id="rank-proximo">
             Próximo: <strong>Major</strong> em 13 dias
@@ -745,7 +745,7 @@
 
       <div class="rank-card__progress">
         <div class="rank-card__progress-header">
-          <span class="rank-card__progress-label">Progresso no nível</span>
+          <span class="rank-card__progress-label" data-i18n="index.progresso-label">Progresso no nível</span>
           <span class="rank-card__progress-pct" id="progress-pct">62%</span>
         </div>
         <div class="progress-bar">
@@ -771,57 +771,57 @@
          LINHA DE NÍVEIS
          ════════════════════════════ -->
     <div class="levels-section">
-      <div class="levels-section__title">Jornada</div>
+      <div class="levels-section__title" data-i18n="index.jornada">Jornada</div>
       <div class="scroll-row">
 
         <div class="level-chip level-chip--done">
-          <span class="level-chip__name">Soldado</span>
-          <span class="level-chip__days">0–6 dias</span>
+          <span class="level-chip__name" data-i18n="nivel.Soldado">Soldado</span>
+          <span class="level-chip__days" data-i18n="chip.soldado">0–6 dias</span>
         </div>
 
         <div class="level-chip level-chip--done">
-          <span class="level-chip__name">Cabo</span>
-          <span class="level-chip__days">7–13 dias</span>
+          <span class="level-chip__name" data-i18n="nivel.Cabo">Cabo</span>
+          <span class="level-chip__days" data-i18n="chip.cabo">7–13 dias</span>
         </div>
 
         <div class="level-chip level-chip--done">
-          <span class="level-chip__name">Sargento</span>
-          <span class="level-chip__days">14–20 dias</span>
+          <span class="level-chip__name" data-i18n="nivel.Sargento">Sargento</span>
+          <span class="level-chip__days" data-i18n="chip.sargento">14–20 dias</span>
         </div>
 
         <div class="level-chip level-chip--done">
-          <span class="level-chip__name">Tenente</span>
-          <span class="level-chip__days">21–29 dias</span>
+          <span class="level-chip__name" data-i18n="nivel.Tenente">Tenente</span>
+          <span class="level-chip__days" data-i18n="chip.tenente">21–29 dias</span>
         </div>
 
         <div class="level-chip level-chip--active">
-          <span class="level-chip__name">Capitão</span>
-          <span class="level-chip__days">30–44 dias</span>
+          <span class="level-chip__name" data-i18n="nivel.Capitão">Capitão</span>
+          <span class="level-chip__days" data-i18n="chip.capitao">30–44 dias</span>
         </div>
 
         <div class="level-chip level-chip--locked">
-          <span class="level-chip__name">Major</span>
-          <span class="level-chip__days">45–59 dias</span>
+          <span class="level-chip__name" data-i18n="nivel.Major">Major</span>
+          <span class="level-chip__days" data-i18n="chip.major">45–59 dias</span>
         </div>
 
         <div class="level-chip level-chip--locked">
-          <span class="level-chip__name">Coronel</span>
-          <span class="level-chip__days">60–89 dias</span>
+          <span class="level-chip__name" data-i18n="nivel.Coronel">Coronel</span>
+          <span class="level-chip__days" data-i18n="chip.coronel">60–89 dias</span>
         </div>
 
         <div class="level-chip level-chip--locked">
-          <span class="level-chip__name">General</span>
-          <span class="level-chip__days">90–119 dias</span>
+          <span class="level-chip__name" data-i18n="nivel.General">General</span>
+          <span class="level-chip__days" data-i18n="chip.general">90–119 dias</span>
         </div>
 
         <div class="level-chip level-chip--locked">
-          <span class="level-chip__name">Rei</span>
-          <span class="level-chip__days">120–179 dias</span>
+          <span class="level-chip__name" data-i18n="nivel.Rei">Rei</span>
+          <span class="level-chip__days" data-i18n="chip.rei">120–179 dias</span>
         </div>
 
         <div class="level-chip level-chip--locked">
-          <span class="level-chip__name">Monge</span>
-          <span class="level-chip__days">180+ dias</span>
+          <span class="level-chip__name" data-i18n="nivel.Monge">Monge</span>
+          <span class="level-chip__days" data-i18n="chip.monge">180+ dias</span>
         </div>
 
       </div>
@@ -835,22 +835,22 @@
 
         <div class="stat-card">
           <div class="stat-card__value text-display stat-card__value--green" id="stat-dias">47</div>
-          <div class="stat-card__label">Dias de controle</div>
+          <div class="stat-card__label" data-i18n="stat.dias">Dias de controle</div>
         </div>
 
         <div class="stat-card">
           <div class="stat-card__value text-display" style="color: var(--purple-text);" id="stat-impulsos">12</div>
-          <div class="stat-card__label">Impulsos vencidos</div>
+          <div class="stat-card__label" data-i18n="stat.impulsos">Impulsos vencidos</div>
         </div>
 
         <div class="stat-card">
           <div class="stat-card__value text-display stat-card__value--red" id="stat-recaidas">3</div>
-          <div class="stat-card__label">Recaídas</div>
+          <div class="stat-card__label" data-i18n="stat.recaidas">Recaídas</div>
         </div>
 
         <div class="stat-card">
           <div class="stat-card__value text-display" id="stat-sequencia">47</div>
-          <div class="stat-card__label">Sequência atual</div>
+          <div class="stat-card__label" data-i18n="stat.sequencia">Sequência atual</div>
         </div>
 
       </div>
@@ -860,7 +860,7 @@
          BOTÃO DE CRISE
          ════════════════════════════ -->
     <div class="crisis-section">
-      <button class="btn-crisis" id="btn-crise">
+      <button class="btn-crisis" id="btn-crise" data-i18n="index.btn-crise">
         Alerta de Recaída
       </button>
     </div>
@@ -872,26 +872,26 @@
 
       <a class="quick-card" href="triggers.html">
         <span class="quick-card__icon">⚡</span>
-        <div class="quick-card__title">Meus gatilhos</div>
-        <div class="quick-card__desc">Conheça seus riscos</div>
+        <div class="quick-card__title" data-i18n="quick.gatilhos-title">Meus gatilhos</div>
+        <div class="quick-card__desc" data-i18n="quick.gatilhos-desc">Conheça seus riscos</div>
       </a>
 
       <a class="quick-card" href="carta.html">
         <span class="quick-card__icon">✉️</span>
-        <div class="quick-card__title">Carta do futuro</div>
-        <div class="quick-card__desc">Palavras suas, para o momento certo</div>
+        <div class="quick-card__title" data-i18n="quick.carta-title">Carta do futuro</div>
+        <div class="quick-card__desc" data-i18n="quick.carta-desc">Palavras suas, para o momento certo</div>
       </a>
 
       <a class="quick-card" href="config.html">
         <span class="quick-card__icon">⚙️</span>
-        <div class="quick-card__title">Configurações</div>
-        <div class="quick-card__desc">FAB, contato, perfil</div>
+        <div class="quick-card__title" data-i18n="quick.config-title">Configurações</div>
+        <div class="quick-card__desc" data-i18n="quick.config-desc">FAB, contato, perfil</div>
       </a>
 
       <div class="quick-card" id="btn-abrir-compromisso" role="button">
         <span class="quick-card__icon">🤝</span>
-        <div class="quick-card__title">Compromisso</div>
-        <div class="quick-card__desc">Defina uma meta pessoal</div>
+        <div class="quick-card__title" data-i18n="quick.compromisso-title">Compromisso</div>
+        <div class="quick-card__desc" data-i18n="quick.compromisso-desc">Defina uma meta pessoal</div>
       </div>
 
     </div>
@@ -904,8 +904,8 @@
       <a class="discord-card" id="discord-link" href="#" target="_blank" rel="noopener">
         <span class="discord-card__icon">💬</span>
         <div>
-          <div class="discord-card__title">Grupo de apoio LUMO</div>
-          <div class="discord-card__desc">Você não está sozinho</div>
+          <div class="discord-card__title" data-i18n="discord.title">Grupo de apoio LUMO</div>
+          <div class="discord-card__desc" data-i18n="discord.desc">Você não está sozinho</div>
         </div>
         <span class="discord-card__arrow">›</span>
       </a>
@@ -918,6 +918,7 @@
        ════════════════════════════ -->
   <button class="fab" aria-label="Apoio rápido">🛡️</button>
 
+  <script src="i18n.js"></script>
   <script type="module" src="firebase.js"></script>
   <script src="modals.js"></script>
   <script src="app.js"></script>
@@ -935,8 +936,8 @@
       <div class="modal__handle"></div>
 
       <!-- Título -->
-      <div class="modal-impulse__title">Você consegue.</div>
-      <p class="modal-impulse__subtitle"><span id="modal-impulso-nome">Rafael</span>, respira. Um passo de cada vez.</p>
+      <div class="modal-impulse__title" data-i18n="impulso.title">Você consegue.</div>
+      <p class="modal-impulse__subtitle"><span id="modal-impulso-nome">Rafael</span><span data-i18n="impulso.subtitle">, respira. Um passo de cada vez.</span></p>
 
       <!-- Widget de respiração — animação CSS pura -->
       <div class="breath-section">
@@ -944,11 +945,11 @@
           <div class="breath-circle__label">Respira</div>
         </div>
         <div class="breath-rhythm">
-          <span class="breath-rhythm__step">Inspire 4s</span>
+          <span class="breath-rhythm__step" data-i18n="impulso.inspire">Inspire 4s</span>
           <span class="breath-rhythm__sep"></span>
-          <span class="breath-rhythm__step">Segure 4s</span>
+          <span class="breath-rhythm__step" data-i18n="impulso.segure">Segure 4s</span>
           <span class="breath-rhythm__sep"></span>
-          <span class="breath-rhythm__step">Solte 4s</span>
+          <span class="breath-rhythm__step" data-i18n="impulso.solte">Solte 4s</span>
         </div>
       </div>
 
@@ -958,23 +959,23 @@
         <div class="action-step">
           <span class="action-step__num">1</span>
           <div class="action-step__body">
-            <span class="action-step__title">Saia do ambiente</span>
-            <span class="action-step__desc">Mude de cômodo agora. Anda 10 passos.</span>
+            <span class="action-step__title" data-i18n="impulso.step1-title">Saia do ambiente</span>
+            <span class="action-step__desc" data-i18n="impulso.step1-desc">Mude de cômodo agora. Anda 10 passos.</span>
           </div>
         </div>
 
         <div class="action-step">
           <span class="action-step__num">2</span>
           <div class="action-step__body">
-            <span class="action-step__title">Beba água gelada</span>
-            <span class="action-step__desc">Devagar. Sinta a temperatura.</span>
+            <span class="action-step__title" data-i18n="impulso.step2-title">Beba água gelada</span>
+            <span class="action-step__desc" data-i18n="impulso.step2-desc">Devagar. Sinta a temperatura.</span>
           </div>
         </div>
 
         <div class="action-step">
           <span class="action-step__num">3</span>
           <div class="action-step__body">
-            <span class="action-step__title">Lembre do seu nível</span>
+            <span class="action-step__title" data-i18n="impulso.step3-title">Lembre do seu nível</span>
             <span class="action-step__desc" id="modal-impulso-nivel">Você é Capitão. 47 dias não se jogam fora.</span>
           </div>
         </div>
@@ -982,8 +983,8 @@
         <div class="action-step">
           <span class="action-step__num">4</span>
           <div class="action-step__body">
-            <span class="action-step__title">Fale com a IA</span>
-            <span class="action-step__desc">Se precisar de mais apoio, o chat está aqui.</span>
+            <span class="action-step__title" data-i18n="impulso.step4-title">Fale com a IA</span>
+            <span class="action-step__desc" data-i18n="impulso.step4-desc">Se precisar de mais apoio, o chat está aqui.</span>
           </div>
         </div>
 
@@ -992,9 +993,9 @@
       <!-- Botões -->
       <button class="btn-win" id="btn-venceu">
         <span class="btn-win__icon">✓</span>
-        Venci esse momento
+        <span data-i18n="impulso.btn-venceu">Venci esse momento</span>
       </button>
-      <button class="btn-ghost" id="btn-mais-ajuda">Preciso de mais ajuda</button>
+      <button class="btn-ghost" id="btn-mais-ajuda" data-i18n="impulso.btn-ajuda">Preciso de mais ajuda</button>
 
     </div>
   </div>
@@ -1021,15 +1022,15 @@
       <div class="anchor-card">
         <span class="anchor-card__icon">🎖️</span>
         <div class="anchor-card__body">
-          <span class="anchor-card__label">Você chegou até aqui</span>
+          <span class="anchor-card__label" data-i18n="recaida.anchor-label">Você chegou até aqui</span>
           <span class="anchor-card__level" id="anchor-nivel">CAPITÃO</span>
           <span class="anchor-card__days" id="anchor-dias">47 dias construídos</span>
-          <span class="anchor-card__cta">Volte a ser isso.</span>
+          <span class="anchor-card__cta" data-i18n="recaida.anchor-cta">Volte a ser isso.</span>
         </div>
       </div>
 
       <!-- Botões -->
-      <button class="btn-restart" id="btn-recomecar">Recomeçar do zero</button>
+      <button class="btn-restart" id="btn-recomecar" data-i18n="recaida.btn-recomecar">Recomeçar do zero</button>
       <button class="btn-ghost" id="btn-cancelar">Cancelar</button>
 
     </div>
@@ -1044,18 +1045,19 @@
 
       <div class="modal__handle"></div>
 
-      <div class="modal-compromisso__title">Compromisso</div>
-      <p class="modal-compromisso__desc">Escreva sua razão para continuar. Isso aparece na tela principal como lembrete.</p>
+      <div class="modal-compromisso__title" data-i18n="compromisso.title">Compromisso</div>
+      <p class="modal-compromisso__desc" data-i18n="compromisso.desc">Escreva sua razão para continuar. Isso aparece na tela principal como lembrete.</p>
 
       <textarea
         id="compromisso-input"
         class="compromisso-textarea"
         maxlength="200"
         placeholder="Ex: Faço isso pelos meus filhos. Pela minha saúde. Por mim."
+        data-i18n-ph="compromisso.placeholder"
       ></textarea>
       <div class="compromisso-counter"><span id="compromisso-count">0</span>/200</div>
 
-      <div class="compromisso-meta-label">Meta (opcional)</div>
+      <div class="compromisso-meta-label" data-i18n="compromisso.meta-label">Meta (opcional)</div>
       <div class="compromisso-chips">
         <div class="chip" data-dias="7">7 dias</div>
         <div class="chip" data-dias="14">14 dias</div>
@@ -1064,9 +1066,9 @@
         <div class="chip" data-dias="90">90 dias</div>
       </div>
 
-      <button class="btn-restart" id="btn-salvar-compromisso">Ativar compromisso</button>
-      <button class="btn-ghost" id="btn-cancelar-compromisso" style="display:none;">Cancelar compromisso</button>
-      <button class="btn-ghost" id="btn-fechar-compromisso">Fechar</button>
+      <button class="btn-restart" id="btn-salvar-compromisso" data-i18n="compromisso.btn-ativar">Ativar compromisso</button>
+      <button class="btn-ghost" id="btn-cancelar-compromisso" style="display:none;" data-i18n="compromisso.btn-cancelar">Cancelar compromisso</button>
+      <button class="btn-ghost" id="btn-fechar-compromisso" data-i18n="btn.fechar">Fechar</button>
 
     </div>
   </div>
