@@ -92,15 +92,19 @@
 
     if (!labelEl) return;
 
-    const FASES = [
-      { label: 'Inspire...', sub: '4 segundos' },
-      { label: 'Segure...', sub: '4 segundos' },
-      { label: 'Solte...',  sub: '4 segundos' },
-    ];
+    function getFases() {
+      const tr = window.t || (k => k);
+      return [
+        { label: tr('iv.respiracao.inspire'), sub: tr('iv.respiracao.sublabel') },
+        { label: tr('iv.respiracao.segure'),  sub: tr('iv.respiracao.sublabel') },
+        { label: tr('iv.respiracao.solte'),   sub: tr('iv.respiracao.sublabel') },
+      ];
+    }
 
     let tempoRestante = 30;
     let faseTick      = 0;
     let faseIndex     = 0;
+    let FASES         = getFases();
 
     labelEl.textContent    = FASES[0].label;
     sublabelEl.textContent = FASES[0].sub;
@@ -118,6 +122,7 @@
 
       // Ciclo de fase a cada 4s
       if (faseTick >= 4) {
+        FASES     = getFases();
         faseTick  = 0;
         faseIndex = (faseIndex + 1) % FASES.length;
         labelEl.textContent    = FASES[faseIndex].label;

@@ -485,7 +485,7 @@
       </div>
 
       <div class="iv-footer">
-        <button class="btn-primary" id="btn-respiracao-ok">Continuar</button>
+        <button class="btn-primary" id="btn-respiracao-ok" data-i18n="iv.respiracao.btn">Continuar</button>
       </div>
     </div>
 
@@ -493,15 +493,15 @@
          ETAPA 2 — ESCOLHA
          ════════════════════════════ -->
     <div class="step-wrapper step--hidden" id="step-escolha">
-      <h1 class="iv-title">Como quer ser ajudado?</h1>
+      <h1 class="iv-title" data-i18n="iv.escolha.titulo">Como quer ser ajudado?</h1>
 
       <div class="choice-cards">
 
         <button class="choice-card" id="choice-rapida">
           <span class="choice-card__icon">⚡</span>
           <div>
-            <div class="choice-card__title">Ajuda Rápida</div>
-            <div class="choice-card__desc">Pergunta + lembrete + ação prática</div>
+            <div class="choice-card__title" data-i18n="iv.escolha.rapida.title">Ajuda Rápida</div>
+            <div class="choice-card__desc" data-i18n="iv.escolha.rapida.desc">Pergunta + lembrete + ação prática</div>
           </div>
           <span class="choice-card__arrow">›</span>
         </button>
@@ -510,8 +510,8 @@
         <button class="choice-card" id="choice-discord">
           <span class="choice-card__icon">💬</span>
           <div>
-            <div class="choice-card__title">Converse com alguém de verdade</div>
-            <div class="choice-card__desc">Entre no grupo de apoio</div>
+            <div class="choice-card__title" data-i18n="iv.escolha.discord.title">Converse com alguém de verdade</div>
+            <div class="choice-card__desc" data-i18n="iv.escolha.discord.desc">Entre no grupo de apoio</div>
           </div>
           <span class="choice-card__arrow">›</span>
         </button>
@@ -536,7 +536,7 @@
       </div>
 
       <div class="iv-footer">
-        <button class="btn-primary" id="btn-pergunta-ok">Continuar</button>
+        <button class="btn-primary" id="btn-pergunta-ok" data-i18n="iv.pergunta.btn">Continuar</button>
       </div>
     </div>
 
@@ -551,7 +551,7 @@
       </div>
 
       <div class="iv-footer">
-        <button class="btn-primary" id="btn-lembrete-ok">Continuar</button>
+        <button class="btn-primary" id="btn-lembrete-ok" data-i18n="iv.lembrete.btn">Continuar</button>
       </div>
     </div>
 
@@ -559,7 +559,7 @@
          ETAPA 5 — AÇÃO
          ════════════════════════════ -->
     <div class="step-wrapper step--hidden" id="step-acao">
-      <h1 class="iv-title">Agora faça isso:</h1>
+      <h1 class="iv-title" data-i18n="iv.acao.titulo">Agora faça isso:</h1>
 
       <div class="iv-acao-card">
         <p class="iv-acao-text" id="acao-texto">
@@ -572,7 +572,7 @@
       </div>
 
       <div class="iv-footer">
-        <button class="btn-primary" id="btn-acao-ok">Já fiz. Continuar</button>
+        <button class="btn-primary" id="btn-acao-ok" data-i18n="iv.acao.btn">Já fiz. Continuar</button>
       </div>
     </div>
 
@@ -582,8 +582,8 @@
     <div class="step-wrapper step--hidden" id="step-vitoria">
       <div class="iv-vitoria">
         <div class="iv-vitoria__icon">✓</div>
-        <h1 class="iv-title">Mais uma vitória.</h1>
-        <p class="iv-subtitle">Você é isso.</p>
+        <h1 class="iv-title" data-i18n="iv.vitoria.titulo">Mais uma vitória.</h1>
+        <p class="iv-subtitle" data-i18n="iv.vitoria.subtitle">Você é isso.</p>
       </div>
     </div>
 
@@ -591,23 +591,23 @@
          ETAPA 6 — CHECK-IN
          ════════════════════════════ -->
     <div class="step-wrapper step--hidden" id="step-checkin">
-      <h1 class="iv-title">Como você está agora?</h1>
+      <h1 class="iv-title" data-i18n="iv.checkin.titulo">Como você está agora?</h1>
 
       <div class="checkin-options">
 
         <button class="btn-checkin btn-checkin--ok" id="btn-checkin-ok">
           <span class="btn-checkin__icon">✓</span>
-          Estou melhor
+          <span data-i18n="iv.checkin.ok">Estou melhor</span>
         </button>
 
         <button class="btn-checkin btn-checkin--help" id="btn-checkin-help">
           <span class="btn-checkin__icon">↺</span>
-          Ainda preciso de ajuda
+          <span data-i18n="iv.checkin.help">Ainda preciso de ajuda</span>
         </button>
 
         <button class="btn-checkin btn-checkin--relapse" id="btn-checkin-recaida">
           <span class="btn-checkin__icon">✕</span>
-          Tive uma recaída
+          <span data-i18n="iv.checkin.recaida">Tive uma recaída</span>
         </button>
 
       </div>
@@ -629,12 +629,13 @@ Vai deixar isso acabar agora?
       </p>
 
       <div class="confronto-actions">
-        <button class="btn-recomecar" id="btn-recomecar">Recomeçar do zero</button>
-        <button class="btn-ghost" id="btn-nao-recair">Não vou recair</button>
+        <button class="btn-recomecar" id="btn-recomecar" data-i18n="iv.confronto.btn-recomecar">Recomeçar do zero</button>
+        <button class="btn-ghost" id="btn-nao-recair" data-i18n="iv.confronto.btn-nao">Não vou recair</button>
       </div>
     </div>
   </div>
 
+  <script src="i18n.js"></script>
   <script type="module" src="firebase.js"></script>
   <script src="dados/perguntas.js"></script>
   <script src="dados/lembretes.js"></script>

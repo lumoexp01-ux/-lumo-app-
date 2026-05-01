@@ -287,7 +287,7 @@
          ════════════════════════════ -->
     <header class="config-header">
       <a class="config-header__back" href="index.html" aria-label="Voltar">←</a>
-      <div class="config-header__title">CONFIGURAÇÕES</div>
+      <div class="config-header__title" data-i18n="config.title">CONFIGURAÇÕES</div>
     </header>
 
     <div class="config-content">
@@ -298,26 +298,26 @@
       <div class="config-block">
         <div class="config-block__header">
           <span class="config-block__icon">👤</span>
-          <span class="config-block__title">Seu perfil</span>
+          <span class="config-block__title" data-i18n="config.perfil.titulo">Seu perfil</span>
         </div>
 
         <div class="config-row">
-          <span class="config-row__label">Nome</span>
+          <span class="config-row__label" data-i18n="config.perfil.nome">Nome</span>
           <span class="config-row__value" id="config-perfil-nome">—</span>
         </div>
 
         <div class="config-row">
-          <span class="config-row__label">Email</span>
+          <span class="config-row__label" data-i18n="config.perfil.email">Email</span>
           <span class="config-row__value" id="config-perfil-email" style="font-size:12px; color: var(--text-secondary);">—</span>
         </div>
 
         <div class="config-row">
-          <span class="config-row__label">Início da jornada</span>
+          <span class="config-row__label" data-i18n="config.perfil.inicio">Início da jornada</span>
           <span class="config-row__value" id="config-perfil-data">—</span>
         </div>
 
         <div class="config-row" style="border-bottom: none;">
-          <span class="config-row__label">Nível atual</span>
+          <span class="config-row__label" data-i18n="config.perfil.nivel">Nível atual</span>
           <span class="badge" id="config-perfil-nivel">—</span>
         </div>
       </div>
@@ -328,14 +328,14 @@
       <div class="config-block">
         <div class="config-block__header">
           <span class="config-block__icon">🛡️</span>
-          <span class="config-block__title">Botão de apoio</span>
+          <span class="config-block__title" data-i18n="config.fab.titulo">Botão de apoio</span>
         </div>
 
         <!-- Toggle ativar/desativar -->
         <div class="config-toggle-row">
           <div class="config-toggle-row__left">
-            <span class="config-toggle-row__title">Ativar botão de apoio</span>
-            <span class="config-toggle-row__sub">Aparece sobre outros apps</span>
+            <span class="config-toggle-row__title" data-i18n="config.fab.ativar">Ativar botão de apoio</span>
+            <span class="config-toggle-row__sub" data-i18n="config.fab.sub">Aparece sobre outros apps</span>
           </div>
           <label class="toggle">
             <input type="checkbox" id="fab-toggle" checked />
@@ -345,30 +345,30 @@
 
         <!-- Disfarce -->
         <div class="config-sub">
-          <div class="config-sub__label">Disfarce</div>
+          <div class="config-sub__label" data-i18n="config.fab.disfarce">Disfarce</div>
           <div class="config-sub__chips" id="config-chips-disfarce">
-            <div class="chip active" data-valor="Calculadora">Calculadora</div>
-            <div class="chip" data-valor="Clima">Clima</div>
-            <div class="chip" data-valor="Lanterna">Lanterna</div>
-            <div class="chip" data-valor="Transparente">Transparente</div>
-            <div class="chip" data-valor="Ponto">Ponto</div>
+            <div class="chip active" data-valor="Calculadora" data-i18n="config.fab.calculadora">Calculadora</div>
+            <div class="chip" data-valor="Clima" data-i18n="config.fab.clima">Clima</div>
+            <div class="chip" data-valor="Lanterna" data-i18n="config.fab.lanterna">Lanterna</div>
+            <div class="chip" data-valor="Transparente" data-i18n="config.fab.transparente">Transparente</div>
+            <div class="chip" data-valor="Ponto" data-i18n="config.fab.ponto">Ponto</div>
           </div>
         </div>
 
         <!-- Posição -->
         <div class="config-sub">
-          <div class="config-sub__label">Posição na tela</div>
+          <div class="config-sub__label" data-i18n="config.fab.posicao">Posição na tela</div>
           <div class="config-sub__chips" id="config-chips-posicao">
-            <div class="chip active" data-valor="inferior-direita">Inf. direita</div>
-            <div class="chip" data-valor="inferior-esquerda">Inf. esquerda</div>
-            <div class="chip" data-valor="lateral-direita">Lat. direita</div>
-            <div class="chip" data-valor="lateral-esquerda">Lat. esquerda</div>
+            <div class="chip active" data-valor="inferior-direita" data-i18n="config.fab.inf-dir">Inf. direita</div>
+            <div class="chip" data-valor="inferior-esquerda" data-i18n="config.fab.inf-esq">Inf. esquerda</div>
+            <div class="chip" data-valor="lateral-direita" data-i18n="config.fab.lat-dir">Lat. direita</div>
+            <div class="chip" data-valor="lateral-esquerda" data-i18n="config.fab.lat-esq">Lat. esquerda</div>
           </div>
         </div>
 
         <!-- Opacidade -->
         <div class="config-sub">
-          <div class="config-sub__label">Opacidade</div>
+          <div class="config-sub__label" data-i18n="config.fab.opacidade">Opacidade</div>
           <div class="config-sub__chips" id="config-chips-opacidade">
             <div class="chip" data-valor="20">20%</div>
             <div class="chip" data-valor="50">50%</div>
@@ -378,32 +378,32 @@
 
         <!-- Tamanho -->
         <div class="config-sub">
-          <div class="config-sub__label">Tamanho</div>
+          <div class="config-sub__label" data-i18n="config.fab.tamanho">Tamanho</div>
           <div class="config-sub__chips" id="config-chips-tamanho">
-            <div class="chip" data-valor="pequeno">Pequeno</div>
-            <div class="chip active" data-valor="medio">Médio</div>
-            <div class="chip" data-valor="grande">Grande</div>
+            <div class="chip" data-valor="pequeno" data-i18n="config.fab.pequeno">Pequeno</div>
+            <div class="chip active" data-valor="medio" data-i18n="config.fab.medio">Médio</div>
+            <div class="chip" data-valor="grande" data-i18n="config.fab.grande">Grande</div>
           </div>
         </div>
 
         <!-- Ação no toque -->
         <div class="config-sub">
-          <div class="config-sub__label">Toque rápido abre</div>
+          <div class="config-sub__label" data-i18n="config.fab.acao-toque">Toque rápido abre</div>
           <div class="config-sub__chips" id="config-chips-acao-toque">
-            <div class="chip active" data-valor="cards">Protocolo</div>
-            <div class="chip" data-valor="chat">Chat IA</div>
-            <div class="chip" data-valor="respiracao">Respiração</div>
-            <div class="chip" data-valor="vermelho">Tela Vermelha</div>
-            <div class="chip" data-valor="lumo">Abrir LUMO</div>
+            <div class="chip active" data-valor="cards" data-i18n="config.fab.protocolo">Protocolo</div>
+            <div class="chip" data-valor="chat" data-i18n="config.fab.chat">Chat IA</div>
+            <div class="chip" data-valor="respiracao" data-i18n="config.fab.respiracao">Respiração</div>
+            <div class="chip" data-valor="vermelho" data-i18n="config.fab.vermelho">Tela Vermelha</div>
+            <div class="chip" data-valor="lumo" data-i18n="config.fab.abrir-lumo">Abrir LUMO</div>
           </div>
         </div>
 
         <!-- Ação ao segurar -->
         <div class="config-sub" style="border-bottom: none;">
-          <div class="config-sub__label">Segurar abre</div>
+          <div class="config-sub__label" data-i18n="config.fab.acao-segurar">Segurar abre</div>
           <div class="config-sub__chips" id="config-chips-acao-segurar">
-            <div class="chip active" data-valor="menu">Menu completo</div>
-            <div class="chip" data-valor="contato">Contato</div>
+            <div class="chip active" data-valor="menu" data-i18n="config.fab.menu">Menu completo</div>
+            <div class="chip" data-valor="contato" data-i18n="config.fab.contato">Contato</div>
           </div>
         </div>
 
@@ -415,11 +415,11 @@
       <div class="config-block">
         <div class="config-block__header">
           <span class="config-block__icon">🤝</span>
-          <span class="config-block__title">Contato de confiança</span>
+          <span class="config-block__title" data-i18n="config.contato.titulo">Contato de confiança</span>
         </div>
 
         <div class="config-sub">
-          <div class="config-sub__label">Nome</div>
+          <div class="config-sub__label" data-i18n="config.contato.nome">Nome</div>
           <input
             id="config-contato-nome"
             class="config-input"
@@ -429,7 +429,7 @@
         </div>
 
         <div class="config-sub" style="border-bottom: none;">
-          <div class="config-sub__label">Telefone</div>
+          <div class="config-sub__label" data-i18n="config.contato.tel">Telefone</div>
           <input
             id="config-contato-tel"
             class="config-input"
@@ -498,12 +498,13 @@
       <!-- ════════════════════════════
            BOTÃO SAIR
            ════════════════════════════ -->
-      <button class="btn-logout" onclick="logout()">Sair da conta</button>
+      <button class="btn-logout" onclick="logout()" data-i18n="config.logout">Sair da conta</button>
 
-      <div class="config-version">LUMO v0.1 · MVP</div>
+      <div class="config-version" data-i18n="config.version">LUMO v0.1 · MVP</div>
 
     </div>
   </div>
+  <script src="i18n.js"></script>
   <script type="module" src="firebase.js"></script>
   <script src="app.js"></script>
   <script src="config.js"></script>
