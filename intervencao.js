@@ -89,6 +89,7 @@
     const fillEl     = document.getElementById('breath-fill');
     const timerEl    = document.getElementById('breath-timer');
     const btnOk      = document.getElementById('btn-respiracao-ok');
+    const btnPular   = document.getElementById('btn-pular-respiracao');
 
     if (!labelEl) return;
 
@@ -108,6 +109,11 @@
 
     labelEl.textContent    = FASES[0].label;
     sublabelEl.textContent = FASES[0].sub;
+
+    // Botão Pular aparece após 5s
+    setTimeout(() => {
+      if (btnPular) btnPular.style.display = 'block';
+    }, 5000);
 
     const intervalo = setInterval(() => {
       tempoRestante--;
@@ -129,30 +135,33 @@
         sublabelEl.textContent = FASES[faseIndex].sub;
       }
 
-      // Libera botão após 30s
+      // Libera botão Continuar após 30s
       if (tempoRestante <= 0) {
         clearInterval(intervalo);
         if (btnOk) btnOk.style.display = 'block';
+        if (btnPular) btnPular.style.display = 'none';
       }
     }, 1000);
+
+    return intervalo;
   }
 
   // ── Ciclo: pergunta → lembrete → ação ──
   function iniciarCiclo() {
     const usuario  = carregarUsuario();
-    const pergunta = sortear(PERGUNTAS, perguntasUsadas);
+    const pergunta = sortear(getPERGUNTAS(), perguntasUsadas);
 
     // Primeiro ciclo: usar carta se existir
     let lembrete;
     if (primeiroCiclo && usuario.carta?.conteudo) {
-      lembrete = { ...LEMBRETE_CARTA };
-      lembretesUsados.push(LEMBRETE_CARTA.id);
+      lembrete = getLEMBRETECARTA();
+      lembretesUsados.push(lembrete.id);
     } else {
-      lembrete = sortear(LEMBRETES, lembretesUsados);
+      lembrete = sortear(getLEMBRETES(), lembretesUsados);
     }
     primeiroCiclo = false;
 
-    const acao = sortear(ACOES, acoesUsadas);
+    const acao = sortear(getACOES(), acoesUsadas);
 
     // Preencher pergunta
     const perguntaTextoEl = document.getElementById('pergunta-texto');
@@ -283,6 +292,9 @@
     // RESPIRAÇÃO
     iniciarRespiracao();
     document.getElementById('btn-respiracao-ok')?.addEventListener('click', () => {
+      irParaStep('step-escolha');
+    });
+    document.getElementById('btn-pular-respiracao')?.addEventListener('click', () => {
       irParaStep('step-escolha');
     });
 

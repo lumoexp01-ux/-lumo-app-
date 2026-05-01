@@ -206,6 +206,7 @@ const STRINGS = {
     'iv.respiracao.solte':          'Solte...',
     'iv.respiracao.sublabel':       '4 segundos',
     'iv.respiracao.btn':            'Continuar',
+    'iv.respiracao.pular':          'Pular',
     'iv.escolha.titulo':            'Como quer ser ajudado?',
     'iv.escolha.rapida.title':      'Ajuda Rápida',
     'iv.escolha.rapida.desc':       'Pergunta + lembrete + ação prática',
@@ -413,6 +414,7 @@ const STRINGS = {
     'iv.respiracao.solte':      'Exhale...',
     'iv.respiracao.sublabel':   '4 seconds',
     'iv.respiracao.btn':        'Continue',
+    'iv.respiracao.pular':      'Skip',
     'iv.escolha.titulo':        'How would you like help?',
     'iv.escolha.rapida.title':  'Quick Help',
     'iv.escolha.rapida.desc':   'Question + reminder + practical action',
@@ -620,6 +622,7 @@ const STRINGS = {
     'iv.respiracao.solte':      'Exhala...',
     'iv.respiracao.sublabel':   '4 segundos',
     'iv.respiracao.btn':        'Continuar',
+    'iv.respiracao.pular':      'Omitir',
     'iv.escolha.titulo':        '¿Cómo quieres que te ayude?',
     'iv.escolha.rapida.title':  'Ayuda Rápida',
     'iv.escolha.rapida.desc':   'Pregunta + recordatorio + acción práctica',
@@ -648,6 +651,12 @@ const SUPORTADOS = Object.keys(STRINGS);
 window.lumoI18n = {
   detectar(preferencia) {
     if (preferencia && SUPORTADOS.includes(preferencia)) return preferencia;
+    // 1º: idioma salvo pelo usuário
+    try {
+      const salvo = localStorage.getItem('lumo-idioma');
+      if (salvo && SUPORTADOS.includes(salvo)) return salvo;
+    } catch (_) {}
+    // 2º: idioma do navegador
     const nav = (navigator.language || 'pt').slice(0, 2).toLowerCase();
     return SUPORTADOS.includes(nav) ? nav : 'pt';
   },
@@ -655,6 +664,7 @@ window.lumoI18n = {
   aplicar(idioma) {
     _idioma = SUPORTADOS.includes(idioma) ? idioma : this.detectar(idioma);
     _t = STRINGS[_idioma];
+    try { localStorage.setItem('lumo-idioma', _idioma); } catch (_) {}
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const k = el.dataset.i18n;
       if (_t[k] !== undefined) el.textContent = _t[k];
@@ -677,7 +687,7 @@ window.lumoI18n = {
 
 window.t = (chave, vars) => window.lumoI18n.t(chave, vars);
 
-// Aplica automaticamente ao carregar, usando o idioma do navegador
+// Aplica automaticamente ao carregar — prioridade: localStorage > navegador
 document.addEventListener('DOMContentLoaded', () => {
   window.lumoI18n.aplicar(window.lumoI18n.detectar());
 });
