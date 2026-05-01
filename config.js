@@ -159,8 +159,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('config-contato-nome')?.addEventListener('input', onContatoChange);
   document.getElementById('config-contato-tel')?.addEventListener('input', onContatoChange);
 
-  // ── Seção iOS (Fragmento 5.4) ──
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  // ── Seção iOS ──
+  const isIOS = window.lumoPlatform?.isIOS ?? /iPad|iPhone|iPod/.test(navigator.userAgent);
   if (isIOS) {
     const iosSection = document.getElementById('ios-section');
     if (iosSection) iosSection.classList.remove('hidden');

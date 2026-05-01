@@ -225,6 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const el = document.getElementById('nome-boas-vindas');
     if (el) el.textContent = dados.nome || 'guerreiro';
     irParaStep('step-boas-vindas');
+    mostrarCardInstalacao();
   });
 
   const modalTermos = document.getElementById('modal-termos');
@@ -238,6 +239,24 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('modal-termos-overlay')?.addEventListener('click', () => {
     modalTermos?.classList.add('hidden');
   });
+
+  // ── Card de instalação na tela de boas-vindas ──
+  function mostrarCardInstalacao() {
+    const plat = window.lumoPlatform;
+    if (!plat || plat.isPWA || plat.isWeb) return;
+
+    const card   = document.getElementById('instalar-card');
+    const titulo = document.getElementById('instalar-titulo');
+    const desc   = document.getElementById('instalar-desc');
+    const icon   = document.getElementById('instalar-icon');
+    if (!card) return;
+
+    const chave = plat.isIOS ? 'ios' : 'android';
+    if (icon)  icon.textContent  = plat.isIOS ? '📱' : '📲';
+    if (titulo) titulo.textContent = window.t?.(`ob.bv.instalar-${chave}.titulo`) || '';
+    if (desc)   desc.textContent   = window.t?.(`ob.bv.instalar-${chave}.desc`)   || '';
+    card.classList.remove('hidden');
+  }
 
   // ── Boas-vindas: salvar perfil + ativar trial + ir para o app ──
   document.getElementById('btn-comecar')?.addEventListener('click', async () => {
@@ -257,8 +276,8 @@ document.addEventListener('DOMContentLoaded', () => {
               email:        auth.currentUser.email || '',
               startDate:    dados.startDate,
               dataCadastro: agora.toISOString(),
-              idioma:       'pt',
-              sistema:      'web',
+              idioma:       window.lumoI18n?.idioma || 'pt',
+              sistema:      window.lumoPlatform?.plataforma || 'web',
             },
             progresso: {
               impulsosVencidos:  0,

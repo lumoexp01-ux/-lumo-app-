@@ -157,7 +157,11 @@ const STRINGS = {
     'ob.bv.badge':          '✦ Dia 0 de controle',
     'ob.bv.preview-label':  'Seu botão de emergência',
     'ob.bv.preview-hint':   'Quando o impulso bater — toque aqui. Menos de 5 segundos para a ajuda.',
-    'ob.bv.btn':            'Começar jornada',
+    'ob.bv.btn':                     'Começar jornada',
+    'ob.bv.instalar-ios.titulo':     'Adicione à tela inicial',
+    'ob.bv.instalar-ios.desc':       'Safari → compartilhar → "Adicionar à Tela de Início"',
+    'ob.bv.instalar-android.titulo': 'Instale o LUMO como app',
+    'ob.bv.instalar-android.desc':   'Chrome → menu (⋮) → "Adicionar à tela inicial"',
 
     // ── Config ──────────────────────────────────────────────────
     'config.title':             'CONFIGURAÇÕES',
@@ -367,7 +371,11 @@ const STRINGS = {
     'ob.bv.badge':          '✦ Day 0 of control',
     'ob.bv.preview-label':  'Your emergency button',
     'ob.bv.preview-hint':   'When the urge hits — tap here. Less than 5 seconds to help.',
-    'ob.bv.btn':            'Start my journey',
+    'ob.bv.btn':                     'Start my journey',
+    'ob.bv.instalar-ios.titulo':     'Add to Home Screen',
+    'ob.bv.instalar-ios.desc':       'Safari → share → "Add to Home Screen"',
+    'ob.bv.instalar-android.titulo': 'Install LUMO as an app',
+    'ob.bv.instalar-android.desc':   'Chrome → menu (⋮) → "Add to Home Screen"',
 
     'config.title':             'SETTINGS',
     'config.perfil.titulo':     'Your profile',
@@ -575,7 +583,11 @@ const STRINGS = {
     'ob.bv.badge':          '✦ Día 0 de control',
     'ob.bv.preview-label':  'Tu botón de emergencia',
     'ob.bv.preview-hint':   'Cuando llegue el impulso — toca aquí. Menos de 5 segundos para la ayuda.',
-    'ob.bv.btn':            'Comenzar jornada',
+    'ob.bv.btn':                     'Comenzar jornada',
+    'ob.bv.instalar-ios.titulo':     'Añadir a la pantalla de inicio',
+    'ob.bv.instalar-ios.desc':       'Safari → compartir → "Añadir a pantalla de inicio"',
+    'ob.bv.instalar-android.titulo': 'Instalar LUMO como app',
+    'ob.bv.instalar-android.desc':   'Chrome → menú (⋮) → "Añadir a pantalla de inicio"',
 
     'config.title':             'CONFIGURACIÓN',
     'config.perfil.titulo':     'Tu perfil',

@@ -358,6 +358,20 @@
       cursor: pointer;
     }
 
+    /* ── Card de instalação ── */
+    .instalar-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(61, 31, 255, 0.06);
+      border: 1px solid rgba(61, 31, 255, 0.2);
+      border-radius: var(--radius-card);
+      padding: 16px;
+    }
+    .instalar-card__icon { font-size: 24px; flex-shrink: 0; }
+    .instalar-card__titulo { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .instalar-card__desc { font-size: 12px; color: var(--text-secondary); margin-top: 4px; line-height: 1.5; }
+
     /* ── Boas-vindas ── */
     .welcome-logo {
       display: flex;
@@ -887,6 +901,15 @@
           <span class="welcome-identity__badge" data-i18n="ob.bv.badge">✦ Dia 0 de controle</span>
         </div>
 
+        <!-- Card de instalação — JS preenche conforme plataforma -->
+        <div class="instalar-card hidden" id="instalar-card">
+          <span class="instalar-card__icon" id="instalar-icon">📱</span>
+          <div>
+            <div class="instalar-card__titulo" id="instalar-titulo"></div>
+            <div class="instalar-card__desc" id="instalar-desc"></div>
+          </div>
+        </div>
+
         <div class="welcome-crisis-preview">
           <p class="welcome-crisis-preview__label" data-i18n="ob.bv.preview-label">Seu botão de emergência</p>
           <button class="btn-crisis" id="btn-crise-preview" style="pointer-events:none;" data-i18n="index.btn-crise">
@@ -947,6 +970,7 @@
   </div>
 
   <script src="i18n.js"></script>
+  <script src="platform.js"></script>
   <script type="module" src="firebase.js"></script>
   <script src="onboarding.js"></script>
   <script src="nav.js"></script>
