@@ -323,6 +323,23 @@
       </div>
 
       <!-- ════════════════════════════
+           SEÇÃO: IDIOMA
+           ════════════════════════════ -->
+      <div class="config-block">
+        <div class="config-block__header">
+          <span class="config-block__icon">🌐</span>
+          <span class="config-block__title" data-i18n="config.idioma.titulo">Idioma</span>
+        </div>
+        <div class="config-sub" style="border-bottom: none;">
+          <div class="config-sub__chips" id="config-chips-idioma">
+            <div class="chip" data-valor="pt">Português</div>
+            <div class="chip" data-valor="en">English</div>
+            <div class="chip" data-valor="es">Español</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════
            SEÇÃO: BOTÃO DE APOIO (FAB)
            ════════════════════════════ -->
       <div class="config-block">
@@ -330,6 +347,9 @@
           <span class="config-block__icon">🛡️</span>
           <span class="config-block__title" data-i18n="config.fab.titulo">Botão de apoio</span>
         </div>
+
+        <!-- Nota de plataforma — JS exibe conforme sistema -->
+        <div id="fab-plat-note" class="hidden" style="padding:10px 16px; font-size:12px; color:var(--text-secondary); background:rgba(61,31,255,0.04); border-bottom:var(--border-default); line-height:1.5;"></div>
 
         <!-- Toggle ativar/desativar -->
         <div class="config-toggle-row">

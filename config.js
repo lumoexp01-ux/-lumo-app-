@@ -159,6 +159,47 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('config-contato-nome')?.addEventListener('input', onContatoChange);
   document.getElementById('config-contato-tel')?.addEventListener('input', onContatoChange);
 
+  // ── Seletor de idioma ──
+  (function () {
+    const chipsIdioma = document.getElementById('config-chips-idioma');
+    if (!chipsIdioma) return;
+
+    // Marca chip ativo conforme idioma atual
+    function atualizarChipAtivo() {
+      const atual = window.lumoI18n?.idioma || 'pt';
+      chipsIdioma.querySelectorAll('.chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.valor === atual);
+      });
+    }
+    atualizarChipAtivo();
+
+    chipsIdioma.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const novoIdioma = chip.dataset.valor;
+        window.lumoI18n?.aplicar(novoIdioma);
+        atualizarChipAtivo();
+        // Salva no Firestore se autenticado
+        if (uidAtual) {
+          updateDoc(doc(db, 'usuarios', uidAtual), { 'perfil.idioma': novoIdioma }).catch(() => {});
+        }
+      });
+    });
+  })();
+
+  // ── Nota de plataforma no FAB ──
+  (function () {
+    const notaEl = document.getElementById('fab-plat-note');
+    if (!notaEl) return;
+    const plat = window.lumoPlatform;
+    let chave = null;
+    if (plat?.isIOS)  chave = 'config.fab.nota-ios';
+    else if (plat?.isWeb) chave = 'config.fab.nota-web';
+    if (chave) {
+      notaEl.textContent = window.t?.(chave) || '';
+      notaEl.classList.remove('hidden');
+    }
+  })();
+
   // ── Seção iOS ──
   const isIOS = window.lumoPlatform?.isIOS ?? /iPad|iPhone|iPod/.test(navigator.userAgent);
   if (isIOS) {
