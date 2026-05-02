@@ -254,6 +254,13 @@ h1, h2, h3 {
   border: none;
   cursor: pointer;
   transition: opacity 0.15s, transform 0.1s;
+  animation: pulse-crisis 8s infinite ease-out;
+}
+
+@keyframes pulse-crisis {
+  0% { box-shadow: 0 0 0 0 rgba(204, 32, 32, 0.4); }
+  70% { box-shadow: 0 0 0 15px rgba(204, 32, 32, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(204, 32, 32, 0); }
 }
 
 .btn-crisis:active {

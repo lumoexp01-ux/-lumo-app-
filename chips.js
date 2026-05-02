@@ -73,9 +73,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const risco = document.getElementById('pattern-risk-text');
     if (risco) {
-      risco.innerHTML = partes
-        .map(p => `<span>${p}</span>`)
-        .join(' · ');
+      risco.textContent = '';
+      partes.forEach((p, index) => {
+        const span = document.createElement('span');
+        span.textContent = p;
+        risco.appendChild(span);
+        if (index < partes.length - 1) {
+          risco.appendChild(document.createTextNode(' · '));
+        }
+      });
     }
   }
 

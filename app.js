@@ -102,7 +102,7 @@ function renderizarIndex() {
       const proxLabel = window.t?.('index.proximo-label') ?? 'Próximo:';
       const proxNome  = window.t?.('nivel.' + nivel.proximo) ?? nivel.proximo;
       const unitDias  = window.t?.('unit.dias') ?? 'dias';
-      elProximo.innerHTML = `${proxLabel} <strong>${proxNome}</strong> em ${nivel.diasFaltam} ${unitDias}`;
+      elProximo.innerHTML = sanitizar(proxLabel) + ' <strong>' + sanitizar(proxNome) + '</strong> em ' + sanitizar(nivel.diasFaltam) + ' ' + sanitizar(unitDias);
     } else {
       elProximo.textContent = window.t?.('index.nivel-max') ?? 'Nível máximo atingido.';
     }
@@ -110,7 +110,14 @@ function renderizarIndex() {
 
   // Barra de progresso
   const elBarra = document.getElementById('progress-fill');
-  if (elBarra) elBarra.style.width = `${progresso}%`;
+  if (elBarra) {
+    elBarra.style.width = '0%';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        elBarra.style.width = `${progresso}%`;
+      });
+    });
+  }
   const elPct = document.getElementById('progress-pct');
   if (elPct) elPct.textContent = `${progresso}%`;
 
@@ -387,20 +394,17 @@ async function logout() {
 document.addEventListener('DOMContentLoaded', () => {
   if (!document.getElementById('rank-nivel')) return;
 
-  console.log('Index aberto, verificando auth');
-
   const { auth, db, onAuthStateChanged, doc, getDoc } = window.lumo;
 
   onAuthStateChanged(auth, async (userFirebase) => {
 
     // Não autenticado → onboarding
     if (!userFirebase) {
-      console.log('Auth não detectado, voltando para onboarding');
       window.location.href = 'onboarding.html';
       return;
     }
 
-    console.log('Auth detectado: ' + userFirebase.uid);
+    console.log('Usuário autenticado');
 
     // Busca perfil no Firestore
     const snap = await getDoc(doc(db, 'usuarios', userFirebase.uid));
@@ -452,14 +456,12 @@ document.addEventListener('DOMContentLoaded', () => {
       // Fallback: usa sessionStorage se o usuário veio direto do onboarding.
       const sessao = JSON.parse(sessionStorage.getItem('usuario') || 'null');
       if (sessao?.nome) {
-        console.log('Perfil não encontrado no Firestore — usando sessionStorage');
         usuario.nome             = sessao.nome;
         usuario.email            = userFirebase.email || '';
         usuario.startDate        = sessao.startDate        || new Date().toISOString().split('T')[0];
         usuario.impulsosVencidos = sessao.impulsosVencidos ?? 0;
         usuario.recaidas         = sessao.recaidas         ?? 0;
       } else {
-        console.log('Perfil não encontrado, voltando para onboarding');
         window.location.href = 'onboarding.html';
         return;
       }

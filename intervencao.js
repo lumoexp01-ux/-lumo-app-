@@ -225,8 +225,11 @@
     const modal    = document.getElementById('modal-confronto');
 
     if (msgEl) {
-      msgEl.innerHTML = '<strong>' + linhas[0] + '</strong>'
-        + linhas.slice(1).join('\n');
+      msgEl.textContent = '';
+      const strong = document.createElement('strong');
+      strong.textContent = linhas[0];
+      msgEl.appendChild(strong);
+      msgEl.appendChild(document.createTextNode('\\n' + linhas.slice(1).join('\\n')));
     }
     modal?.classList.remove('hidden');
   }
