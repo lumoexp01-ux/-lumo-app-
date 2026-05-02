@@ -123,8 +123,8 @@
       const pct = Math.round(((30 - tempoRestante) / 30) * 100);
       if (fillEl) fillEl.style.width = pct + '%';
       if (timerEl) timerEl.textContent = tempoRestante > 0
-        ? tempoRestante + 's restantes'
-        : 'Pronto.';
+        ? tempoRestante + (window.t?.('iv.restantes') || 's restantes')
+        : (window.t?.('iv.pronto') || 'Pronto.');
 
       // Ciclo de fase a cada 4s
       if (faseTick >= 4) {

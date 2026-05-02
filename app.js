@@ -89,7 +89,8 @@ function renderizarIndex() {
 
   // Badge de dias (header)
   const elDias = document.getElementById('badge-dias');
-  if (elDias) elDias.textContent = `${dias} dias`;
+  const unitDias = window.t?.('unit.dias') ?? 'dias';
+  if (elDias) elDias.textContent = `${dias} ${unitDias}`;
 
   // Card de rank — nível
   const elNivel = document.getElementById('rank-nivel');

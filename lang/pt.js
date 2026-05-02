@@ -16,6 +16,7 @@ export default {
   'index.nivel-max':      'Nível máximo atingido.',
   'index.progresso-label':'Progresso no nível',
   'index.jornada':        'Jornada',
+  'index.ativo':          'Ativo',
   'index.btn-crise':      'Alerta de Recaída',
 
   'stat.dias':      'Dias de controle',
@@ -87,4 +88,24 @@ export default {
 
   'menu.config':  'Configurações',
   'menu.recaida': 'Registrar recaída',
+
+  'ob.cadastro.hint-auth': 'Já tem conta? Digite seu email e senha para entrar.',
+  'ob.termos.h1': '1. Sobre o aplicativo',
+  'ob.termos.p1': 'O LUMO é um aplicativo digital de apoio comportamental, projetado para auxiliar no controle de hábitos e impulsos. Não constitui serviço médico, psicológico ou terapêutico profissional.',
+  'ob.termos.h2': '2. Não substitui tratamento',
+  'ob.termos.p2': 'O LUMO não substitui acompanhamento médico ou psicológico. Em caso de sofrimento emocional intenso, procure ajuda profissional. No Brasil: CVV pelo número 188.',
+  'ob.termos.h3': '3. Idade mínima',
+  'ob.termos.p3': 'O uso do aplicativo é permitido apenas para maiores de 18 anos.',
+  'ob.bv.bem-vindo': 'Bem-vindo, ',
+  'ob.bv.guerreiro': 'guerreiro',
+
+  'iv.restantes': 's restantes',
+  'iv.pronto': 'Pronto.',
+
+  'err.nome': 'Precisa do seu nome para continuar',
+  'err.email': 'Esse email não parece certo',
+  'err.senha': 'Senha muito curta — usa pelo menos 6 letras',
+  'err.login': 'Email ou senha incorretos.',
+  'err.google': 'Não foi possível entrar com Google. Tente novamente.',
+  'err.conexao': 'Sem conexão agora. Tenta em alguns segundos.'
 };

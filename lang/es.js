@@ -15,6 +15,7 @@ export default {
   'index.nivel-max':      'Nivel máximo alcanzado.',
   'index.progresso-label':'Progreso en el nivel',
   'index.jornada':        'Jornada',
+  'index.ativo':          'Activo',
   'index.btn-crise':      'Alerta de recaída',
 
   'stat.dias':      'Días de control',
@@ -86,4 +87,24 @@ export default {
 
   'menu.config':  'Configuración',
   'menu.recaida': 'Registrar recaída',
+
+  'ob.cadastro.hint-auth': '¿Ya tienes una cuenta? Ingresa tu correo y contraseña para iniciar sesión.',
+  'ob.termos.h1': '1. Sobre la aplicación',
+  'ob.termos.p1': 'LUMO es una aplicación digital de apoyo conductual, diseñada para ayudar en el control de hábitos e impulsos. No constituye un servicio médico, psicológico o terapéutico profesional.',
+  'ob.termos.h2': '2. No reemplaza el tratamiento',
+  'ob.termos.p2': 'LUMO no reemplaza el seguimiento médico o psicológico. En caso de sufrimiento emocional intenso, busca ayuda profesional.',
+  'ob.termos.h3': '3. Edad mínima',
+  'ob.termos.p3': 'El uso de la aplicación solo está permitido para mayores de 18 años.',
+  'ob.bv.bem-vindo': 'Bienvenido, ',
+  'ob.bv.guerreiro': 'guerrero',
+
+  'iv.restantes': 's restantes',
+  'iv.pronto': 'Listo.',
+
+  'err.nome': 'Necesitamos tu nombre para continuar',
+  'err.email': 'Este correo no parece correcto',
+  'err.senha': 'Contraseña muy corta — usa al menos 6 caracteres',
+  'err.login': 'Correo o contraseña incorrectos.',
+  'err.google': 'No se pudo iniciar sesión con Google. Inténtalo de nuevo.',
+  'err.conexao': 'Sin conexión ahora. Intenta en unos segundos.'
 };

@@ -15,6 +15,7 @@ export default {
   'index.nivel-max':      'Maximum level reached.',
   'index.progresso-label':'Level progress',
   'index.jornada':        'Journey',
+  'index.ativo':          'Active',
   'index.btn-crise':      'Crisis Alert',
 
   'stat.dias':      'Days of control',
@@ -86,4 +87,24 @@ export default {
 
   'menu.config':  'Settings',
   'menu.recaida': 'Log a relapse',
+
+  'ob.cadastro.hint-auth': 'Already have an account? Enter your email and password to log in.',
+  'ob.termos.h1': '1. About the application',
+  'ob.termos.p1': 'LUMO is a digital behavioral support application designed to assist in controlling habits and urges. It does not constitute a professional medical, psychological, or therapeutic service.',
+  'ob.termos.h2': '2. Does not replace treatment',
+  'ob.termos.p2': 'LUMO does not replace medical or psychological follow-up. In case of intense emotional distress, seek professional help.',
+  'ob.termos.h3': '3. Minimum age',
+  'ob.termos.p3': 'The use of the application is only allowed for users over 18 years old.',
+  'ob.bv.bem-vindo': 'Welcome, ',
+  'ob.bv.guerreiro': 'warrior',
+
+  'iv.restantes': 's remaining',
+  'iv.pronto': 'Ready.',
+
+  'err.nome': 'We need your name to continue',
+  'err.email': 'This email doesn\\'t look right',
+  'err.senha': 'Password is too short — use at least 6 characters',
+  'err.login': 'Incorrect email or password.',
+  'err.google': 'Could not sign in with Google. Try again.',
+  'err.conexao': 'No connection right now. Try again in a few seconds.'
 };

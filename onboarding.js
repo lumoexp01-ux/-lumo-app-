@@ -162,9 +162,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const email = inputEmail?.value.trim() ?? '';
     const senha = inputSenha?.value        ?? '';
 
-    if (!nome)                    { mostrarErro(inputNome,  'Precisa do seu nome para continuar'); return; }
-    if (!email || !email.includes('@')) { mostrarErro(inputEmail, 'Esse email não parece certo'); return; }
-    if (senha.length < 6)         { mostrarErro(inputSenha, 'Senha muito curta — usa pelo menos 6 letras'); return; }
+    if (!nome)                    { mostrarErro(inputNome,  window.t?.('err.nome') || 'Precisa do seu nome para continuar'); return; }
+    if (!email || !email.includes('@')) { mostrarErro(inputEmail, window.t?.('err.email') || 'Esse email não parece certo'); return; }
+    if (senha.length < 6)         { mostrarErro(inputSenha, window.t?.('err.senha') || 'Senha muito curta — usa pelo menos 6 letras'); return; }
 
     limparErroBotao();
     setCarregando(true);
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       await aposAutenticar();
     } catch (e) {
-      mostrarErroBotao('Email ou senha incorretos.');
+      mostrarErroBotao(window.t?.('err.login') || 'Email ou senha incorretos.');
     } finally {
       setCarregando(false);
     }
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
       await aposAutenticar();
     } catch (e) {
       if (e.code !== 'auth/popup-closed-by-user') {
-        mostrarErroBotao('Não foi possível entrar com Google. Tente novamente.');
+        mostrarErroBotao(window.t?.('err.google') || 'Não foi possível entrar com Google. Tente novamente.');
       }
     } finally {
       setCarregando(false);
@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dados.termosAceitos = true;
     dados.nome = inputNome?.value.trim() || dados.nome;
     const el = document.getElementById('nome-boas-vindas');
-    if (el) el.textContent = dados.nome || 'guerreiro';
+    if (el) el.textContent = dados.nome || window.t?.('ob.bv.guerreiro') || 'guerreiro';
     irParaStep('step-boas-vindas');
     mostrarCardInstalacao();
   });
@@ -358,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function executarLogin(loginFn) {
-      if (!window.lumo) { mostrarErroLogin('Sem conexão agora. Tenta em alguns segundos.'); return; }
+      if (!window.lumo) { mostrarErroLogin(window.t?.('err.conexao') || 'Sem conexão agora. Tenta em alguns segundos.'); return; }
       const { auth, db, doc, getDoc } = window.lumo;
       setLoadingLogin(true);
       limparErroLogin();
@@ -381,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
           irParaStep('step-cadastro');
         }
       } catch (e) {
-        if (e.code !== 'auth/popup-closed-by-user') mostrarErroLogin('Email ou senha incorretos.');
+        if (e.code !== 'auth/popup-closed-by-user') mostrarErroLogin(window.t?.('err.login') || 'Email ou senha incorretos.');
       } finally {
         setLoadingLogin(false);
       }
@@ -390,8 +390,8 @@ document.addEventListener('DOMContentLoaded', () => {
     btnLoginDireto?.addEventListener('click', () => {
       const email = inputLoginEmail?.value.trim() ?? '';
       const senha = inputLoginSenha?.value        ?? '';
-      if (!email || !email.includes('@')) { mostrarErroLogin('Esse email não parece certo'); return; }
-      if (senha.length < 6) { mostrarErroLogin('Senha muito curta — usa pelo menos 6 letras'); return; }
+      if (!email || !email.includes('@')) { mostrarErroLogin(window.t?.('err.email') || 'Esse email não parece certo'); return; }
+      if (senha.length < 6) { mostrarErroLogin(window.t?.('err.senha') || 'Senha muito curta — usa pelo menos 6 letras'); return; }
       const { auth, signInWithEmailAndPassword } = window.lumo;
       executarLogin(() => signInWithEmailAndPassword(auth, email, senha));
     });

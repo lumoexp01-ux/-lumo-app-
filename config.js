@@ -53,7 +53,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (elNivel && startDate && typeof calcularDias === 'function') {
       const dias  = calcularDias(startDate);
       const nivel = calcularNivel(dias);
-      elNivel.textContent = `${nivel.nome} · ${dias} dias`;
+      const nomeNivel = window.t?.('nivel.' + nivel.nome) || nivel.nome;
+      const unitDias  = window.t?.('unit.dias') || 'dias';
+      elNivel.textContent = `${nomeNivel} · ${dias} ${unitDias}`;
     }
   }
 
