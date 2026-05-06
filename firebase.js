@@ -13,6 +13,7 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging.js";
+import { getFunctions, httpsCallable }       from "https://www.gstatic.com/firebasejs/10.7.0/firebase-functions.js";
 import {
   getAuth,
   onAuthStateChanged,
@@ -52,6 +53,7 @@ const app       = initializeApp(firebaseConfig);
 const auth      = getAuth(app);
 const db        = getFirestore(app);
 const messaging = getMessaging(app);
+const functions = getFunctions(app, 'us-central1');
 
 // Expõe no escopo global para compatibilidade com scripts tradicionais
 window.lumo = {
@@ -77,6 +79,9 @@ window.lumo = {
   messaging,
   getToken,
   onMessage,
+  // Cloud Functions
+  functions,
+  httpsCallable,
 };
 
 console.log("Firebase conectado");

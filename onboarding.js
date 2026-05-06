@@ -255,18 +255,32 @@ document.addEventListener('DOMContentLoaded', () => {
     card.classList.remove('hidden');
   }
 
-  // ── Boas-vindas: salvar perfil + ativar trial + ir para o app ──
+  // ── Gera (ou recupera) deviceId heurístico para anti-trial-infinito ──
+  function obterOuGerarDeviceId() {
+    try {
+      let id = localStorage.getItem('lumo-device-id');
+      if (!id) {
+        id = (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36));
+        localStorage.setItem('lumo-device-id', id);
+      }
+      return id;
+    } catch (_) { return ''; }
+  }
+
+  // ── Boas-vindas: salvar perfil + ativar trial (CF) + ir para o app ──
   document.getElementById('btn-comecar')?.addEventListener('click', async () => {
     const btn = document.getElementById('btn-comecar');
     if (btn) { btn.classList.add('btn-loading'); btn.textContent = 'Aguarde...'; }
 
     if (window.lumo) {
-      const { auth, db, doc, setDoc } = window.lumo;
+      const { auth, db, doc, setDoc, functions, httpsCallable } = window.lumo;
       const uid = auth.currentUser?.uid;
       if (uid) {
-        const agora    = new Date();
-        const fimTrial = new Date(agora.getTime() + 7 * 24 * 60 * 60 * 1000);
+        const agora = new Date();
         try {
+          // 1. Criar doc do usuário — SEM campo `pagamento`
+          //    (regras do Firestore bloqueiam create com esse campo;
+          //     o campo é escrito apenas pela Cloud Function ativarTrial)
           await setDoc(doc(db, 'usuarios', uid), {
             perfil: {
               nome:         dados.nome,
@@ -294,12 +308,24 @@ document.addEventListener('DOMContentLoaded', () => {
             termos: {
               aceito: true, dataAceite: agora.toISOString(), versao: '1.0', plataforma: 'web',
             },
-            pagamento: {
-              trial: true, trialFim: fimTrial.toISOString(), pago: false,
-              plano: null, assinaturaId: null, proximoVencimento: null, canceladoEm: null,
-            },
           });
-        } catch (e) {}
+
+          // 2. Ativar trial via Cloud Function (escreve `pagamento` no servidor)
+          const ativarFn  = httpsCallable(functions, 'ativarTrial');
+          const resultado = await ativarFn({ deviceId: obterOuGerarDeviceId() });
+
+          if (!resultado.data?.sucesso) {
+            // Email ou device já usou trial — vai direto para o paywall
+            document.body.style.opacity    = '0';
+            document.body.style.transition = 'opacity 0.18s ease';
+            setTimeout(() => { window.location.href = 'pagamento.html'; }, 160);
+            return;
+          }
+        } catch (_) {
+          // Falha de rede não bloqueia o usuário — guard.js fará a verificação
+          // na próxima tela. Firestore rules protegem os dados em qualquer caso.
+          console.log('Aviso: trial não confirmado ainda — será verificado no app');
+        }
       }
     }
 
