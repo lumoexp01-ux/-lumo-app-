@@ -392,8 +392,8 @@
         </div>
         <div class="plan-card__preco">
           <span class="plan-card__cifra">R$</span>
-          <span class="plan-card__valor">11</span>
-          <span class="plan-card__periodo">,99/mês</span>
+          <span class="plan-card__valor">11<span style="font-size: 20px;">,99</span></span>
+          <span class="plan-card__periodo">/mês</span>
         </div>
         <div class="plan-card__detalhe" data-i18n="pay.plano-mensal-detalhe">Cancele quando quiser</div>
       </div>
@@ -423,7 +423,7 @@
   <script src="platform.js"></script>
   <script type="module" src="firebase.js"></script>
   <script type="module">
-    import { Purchases } from 'https://esm.sh/@revenuecat/purchases-js@7';
+    import { Purchases } from 'https://esm.sh/@revenuecat/purchases-js@1.38.0';
     window.Purchases = Purchases;
     window.dispatchEvent(new Event('rc-pronto'));
   </script>
