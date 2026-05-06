@@ -17,7 +17,7 @@ setGlobalOptions({ region: 'us-central1', maxInstances: 10 });
 // Lê `pagamento` direto do Firestore via Admin SDK.
 // trialFim é Timestamp nativo — usa .toMillis() para comparar.
 // ─────────────────────────────────────────────────────────────────────────────
-exports.verificarAcesso = onCall({ cors: true }, async (request) => {
+exports.verificarAcesso = onCall({ cors: true, invoker: 'public' }, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Login necessário.');
   }
@@ -75,7 +75,7 @@ exports.verificarAcesso = onCall({ cors: true }, async (request) => {
 //   3. deviceId encodado em base64url antes de virar ID de documento
 //      (evita injeção de "/" no path do Firestore)
 // ─────────────────────────────────────────────────────────────────────────────
-exports.ativarTrial = onCall({ cors: true }, async (request) => {
+exports.ativarTrial = onCall({ cors: true, invoker: 'public' }, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Login necessário.');
   }
@@ -171,7 +171,7 @@ exports.ativarTrial = onCall({ cors: true }, async (request) => {
 // entitlement ativo usando a chave pública.
 // O webhook (7.4) mantém as renovações e cancelamentos sincronizados.
 // ─────────────────────────────────────────────────────────────────────────────
-exports.ativarPagamento = onCall(async (request) => {
+exports.ativarPagamento = onCall({ cors: true, invoker: 'public' }, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Login necessário.');
   }

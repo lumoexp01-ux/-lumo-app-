@@ -375,14 +375,14 @@
         <div class="plan-card__badge-top" data-i18n="pay.plano-anual-badge">Melhor escolha</div>
         <div class="plan-card__header">
           <span class="plan-card__nome" data-i18n="pay.plano-anual-nome">Anual</span>
-          <span class="plan-card__economia">24% off</span>
+          <span class="plan-card__economia">19% off</span>
         </div>
         <div class="plan-card__preco">
           <span class="plan-card__cifra">R$</span>
-          <span class="plan-card__valor">127</span>
+          <span class="plan-card__valor">117</span>
           <span class="plan-card__periodo">/ano</span>
         </div>
-        <div class="plan-card__detalhe" data-i18n="pay.plano-anual-detalhe">R$10,58/mês · menos de R$0,35 por dia</div>
+        <div class="plan-card__detalhe" data-i18n="pay.plano-anual-detalhe">R$9,75/mês · menos de R$0,32 por dia</div>
       </div>
 
       <!-- Mensal -->
@@ -392,7 +392,7 @@
         </div>
         <div class="plan-card__preco">
           <span class="plan-card__cifra">R$</span>
-          <span class="plan-card__valor">13</span>
+          <span class="plan-card__valor">11</span>
           <span class="plan-card__periodo">,99/mês</span>
         </div>
         <div class="plan-card__detalhe" data-i18n="pay.plano-mensal-detalhe">Cancele quando quiser</div>
@@ -402,12 +402,12 @@
 
     <!-- CTA Anual -->
     <button class="btn-plano btn-plano--anual" id="btn-assinar-anual" data-i18n="pay.btn-anual">
-      Continuar com Anual — R$127/ano
+      Continuar com Anual — R$117/ano
     </button>
 
     <!-- CTA Mensal -->
     <button class="btn-plano btn-plano--mensal" id="btn-assinar-mensal" data-i18n="pay.btn-mensal">
-      Continuar com Mensal — R$13,99/mês
+      Continuar com Mensal — R$11,99/mês
     </button>
 
     <!-- Erro de checkout (RC/Stripe) -->
@@ -423,7 +423,7 @@
   <script src="platform.js"></script>
   <script type="module" src="firebase.js"></script>
   <script type="module">
-    import { Purchases } from 'https://cdn.jsdelivr.net/npm/@revenuecat/purchases-js@7/dist/package.esm.js';
+    import { Purchases } from 'https://esm.sh/@revenuecat/purchases-js@7';
     window.Purchases = Purchases;
     window.dispatchEvent(new Event('rc-pronto'));
   </script>
