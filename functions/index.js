@@ -17,7 +17,7 @@ setGlobalOptions({ region: 'us-central1', maxInstances: 10 });
 // Lê `pagamento` direto do Firestore via Admin SDK.
 // trialFim é Timestamp nativo — usa .toMillis() para comparar.
 // ─────────────────────────────────────────────────────────────────────────────
-exports.verificarAcesso = onCall(async (request) => {
+exports.verificarAcesso = onCall({ cors: true }, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Login necessário.');
   }
@@ -75,7 +75,7 @@ exports.verificarAcesso = onCall(async (request) => {
 //   3. deviceId encodado em base64url antes de virar ID de documento
 //      (evita injeção de "/" no path do Firestore)
 // ─────────────────────────────────────────────────────────────────────────────
-exports.ativarTrial = onCall(async (request) => {
+exports.ativarTrial = onCall({ cors: true }, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Login necessário.');
   }
