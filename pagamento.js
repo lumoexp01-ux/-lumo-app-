@@ -1,8 +1,13 @@
-// pagamento.js — Fragmento 7.2
+// pagamento.js — Fragmento 7.3
 // Paywall: verifica acesso via CF, exibe estado correto, recovery de trial.
+// RevenueCat purchases-js integrado para checkout via Stripe.
 
 (function () {
   'use strict';
+
+  // ── Constantes RevenueCat ─────────────────────────────────────────────────
+  const RC_KEY         = 'strp_sb_MiOlkXfcKatnRgaZDFrOBLBR';
+  const RC_ENTITLEMENT = 'lumo Pro';
 
   // ── Cálculo de nível inline (sem depender de app.js) ─────────────────────
   const NIVEIS = [
@@ -28,6 +33,11 @@
     return NIVEIS.find(n => dias <= n.ate) || NIVEIS[NIVEIS.length - 1];
   }
 
+  // ── Estado RevenueCat ─────────────────────────────────────────────────────
+  let rcInstance = null;
+  let pkgAnual   = null;
+  let pkgMensal  = null;
+
   // ── Recuperar deviceId do localStorage ───────────────────────────────────
   function obterDeviceId() {
     try { return localStorage.getItem('lumo-device-id') || ''; } catch (_) { return ''; }
@@ -39,8 +49,15 @@
     let t = 0;
     const id = setInterval(function () {
       if (window.lumo?.auth) { clearInterval(id); cb(); return; }
-      if (++t > 60) clearInterval(id); // 3s timeout — não travar para sempre
+      if (++t > 60) clearInterval(id); // 3s timeout
     }, 50);
+  }
+
+  // ── Aguarda window.Purchases (RC SDK carregado como módulo) ──────────────
+  function aguardarPurchases(cb) {
+    if (window.Purchases) { cb(); return; }
+    window.addEventListener('rc-pronto', cb, { once: true });
+    setTimeout(cb, 5000); // timeout de segurança — não travar para sempre
   }
 
   // ── Remover overlay de carregamento ──────────────────────────────────────
@@ -100,15 +117,14 @@
 
         if (resultado.data?.sucesso) {
           btn.textContent = window.t?.('pay.recuperar-ok') || 'Período gratuito ativado! Entrando...';
-          
-          // Desativar cards e botões para evitar checkout acidental
-          const cAnual = document.getElementById('card-anual');
+
+          const cAnual  = document.getElementById('card-anual');
           const cMensal = document.getElementById('card-mensal');
-          const bAnual = document.getElementById('btn-assinar-anual');
+          const bAnual  = document.getElementById('btn-assinar-anual');
           const bMensal = document.getElementById('btn-assinar-mensal');
-          if (cAnual) cAnual.style.pointerEvents = 'none';
+          if (cAnual)  cAnual.style.pointerEvents  = 'none';
           if (cMensal) cMensal.style.pointerEvents = 'none';
-          if (bAnual) bAnual.disabled = true;
+          if (bAnual)  bAnual.disabled  = true;
           if (bMensal) bMensal.disabled = true;
 
           setTimeout(function () {
@@ -125,11 +141,104 @@
         btn.disabled    = false;
         btn.textContent = window.t?.('pay.btn-recuperar') || 'Ativar meus 7 dias grátis';
         if (erroEl) {
-          erroEl.textContent  = window.t?.('pay.recuperar-erro') || 'Não foi possível ativar. Verifique sua conexão.';
+          erroEl.textContent   = window.t?.('pay.recuperar-erro') || 'Não foi possível ativar. Verifique sua conexão.';
           erroEl.style.display = 'block';
         }
       }
     });
+  }
+
+  // ── Inicializar RevenueCat em background ──────────────────────────────────
+  async function inicializarRC(uid) {
+    await new Promise(function (resolve) { aguardarPurchases(resolve); });
+    if (!window.Purchases) return;
+
+    try {
+      rcInstance = window.Purchases.configure(RC_KEY, uid);
+      const offerings = await rcInstance.getOfferings();
+      const pkgs      = offerings.current?.availablePackages ?? [];
+
+      pkgAnual  = pkgs.find(function (p) {
+        return p.packageType === 'ANNUAL' || p.identifier === '$rc_annual';
+      }) ?? pkgs.find(function (p) {
+        return p.packageType === 'YEARLY' || p.identifier === '$rc_yearly';
+      }) ?? (pkgs.length > 0 ? pkgs[0] : null);
+
+      pkgMensal = pkgs.find(function (p) {
+        return p.packageType === 'MONTHLY' || p.identifier === '$rc_monthly';
+      }) ?? (pkgs.length > 1 ? pkgs[1] : null);
+
+      // Detectar retorno de redirect Stripe: se entitlement já ativo, registrar e entrar
+      const info = await rcInstance.getCustomerInfo();
+      if (info?.entitlements?.active?.[RC_ENTITLEMENT]) {
+        await ativarAcesso('desconhecido');
+      }
+    } catch (e) {
+      console.warn('[RC] inicialização:', e?.message ?? e);
+    }
+  }
+
+  // ── Registrar pagamento no Firestore via CF ───────────────────────────────
+  async function ativarAcesso(plano) {
+    try {
+      const lumo     = window.lumo;
+      const ativarFn = lumo.httpsCallable(lumo.functions, 'ativarPagamento');
+      await ativarFn({ plano });
+    } catch (_) {
+      // Falha na CF — redirecionar mesmo assim; guard.js verificará no acesso
+    }
+    window.location.replace('index.html');
+  }
+
+  // ── Executar checkout RevenueCat/Stripe ───────────────────────────────────
+  async function executarCheckout(pkg, plano) {
+    const btnAnual  = document.getElementById('btn-assinar-anual');
+    const btnMensal = document.getElementById('btn-assinar-mensal');
+    const erroEl    = document.getElementById('erro-checkout');
+
+    if (btnAnual)  btnAnual.disabled  = true;
+    if (btnMensal) btnMensal.disabled = true;
+    if (erroEl)    erroEl.style.display = 'none';
+
+    // Dar feedback visual que o usuário está sendo redirecionado
+    const btnClicado = plano === 'anual' ? btnAnual : btnMensal;
+    const textoOriginal = btnClicado ? btnClicado.textContent : '';
+    if (btnClicado) {
+      btnClicado.textContent = window.t?.('pay.redirecionando') || 'Redirecionando para pagamento seguro...';
+    }
+
+    try {
+      const { customerInfo } = await rcInstance.purchasePackage(pkg);
+
+      if (customerInfo?.entitlements?.active?.[RC_ENTITLEMENT]) {
+        await ativarAcesso(plano);
+        return;
+      }
+
+      // Entitlement pode demorar a propagar — verificar via CF como fallback
+      const lumo        = window.lumo;
+      const verificarFn = lumo.httpsCallable(lumo.functions, 'verificarAcesso');
+      const resultado   = await verificarFn();
+      if (resultado.data?.acesso) {
+        window.location.replace('index.html');
+      } else {
+        throw new Error('entitlement-pendente');
+      }
+
+    } catch (err) {
+      const cancelado = err?.errorCode === 'PURCHASE_CANCELLED'
+                     || err?.code      === 'PURCHASE_CANCELLED'
+                     || err?.message?.toLowerCase().includes('cancel')
+                     || err?.userCancelled === true;
+
+      if (!cancelado && erroEl) {
+        erroEl.textContent   = window.t?.('pay.erro-pagamento') || 'Não foi possível processar o pagamento. Tente novamente.';
+        erroEl.style.display = 'block';
+      }
+      if (btnAnual)  btnAnual.disabled  = false;
+      if (btnMensal) btnMensal.disabled = false;
+      if (btnClicado && textoOriginal) btnClicado.textContent = textoOriginal;
+    }
   }
 
   // ── Inicializar paywall ───────────────────────────────────────────────────
@@ -171,15 +280,20 @@
         wiredRecovery(lumo);
         revelarPaywall();
 
+        // RC em background — não bloqueia exibição do paywall
+        inicializarRC(user.uid);
+
       } catch (_) {
         // CF indisponível — mostrar paywall de forma segura (só planos)
         revelarPaywall();
         wiredRecovery(lumo);
+        const currentUser = lumo.auth.currentUser;
+        if (currentUser) inicializarRC(currentUser.uid);
       }
     });
   }
 
-  // ── Wire-up: logout ───────────────────────────────────────────────────────
+  // ── Wire-up: logout e cards ───────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('btn-logout-paywall')?.addEventListener('click', function () {
       if (window.logout) window.logout();
@@ -193,7 +307,7 @@
       document.getElementById('btn-assinar-mensal')?.click();
     });
 
-    // Botões de assinatura — integração RevenueCat no Fragmento 7.3
+    // Botões de assinatura
     document.getElementById('btn-assinar-anual')?.addEventListener('click', function () {
       iniciarCheckout('anual');
     });
@@ -204,10 +318,20 @@
     aguardarLumo(inicializar);
   });
 
-  // ── Checkout — substituído por RevenueCat no Fragmento 7.3 ───────────────
+  // ── Checkout via RevenueCat ───────────────────────────────────────────────
   function iniciarCheckout(plano) {
-    // TODO 7.3: iniciar purchasePackage() do RevenueCat aqui
-    console.log('Checkout pendente — Fragmento 7.3:', plano);
+    const pkg = plano === 'anual' ? pkgAnual : pkgMensal;
+
+    if (!rcInstance || !pkg) {
+      const erroEl = document.getElementById('erro-checkout');
+      if (erroEl) {
+        erroEl.textContent   = window.t?.('pay.erro-rc') || 'Pagamento indisponível. Aguarde e tente novamente.';
+        erroEl.style.display = 'block';
+      }
+      return;
+    }
+
+    executarCheckout(pkg, plano);
   }
 
 })();

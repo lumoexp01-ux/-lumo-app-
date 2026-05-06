@@ -258,6 +258,9 @@ const STRINGS = {
     'pay.recuperando':        'Ativando...',
     'pay.recuperar-ok':       'Período gratuito ativado! Entrando...',
     'pay.recuperar-erro':     'Não foi possível ativar. Verifique sua conexão e tente novamente.',
+    'pay.redirecionando':      'Redirecionando para pagamento seguro...',
+    'pay.erro-rc':            'Pagamento indisponível no momento. Aguarde e tente novamente.',
+    'pay.erro-pagamento':     'Não foi possível processar o pagamento. Tente novamente.',
   },
 
   // ══════════════════════════════════════════════════════════════
@@ -500,6 +503,9 @@ const STRINGS = {
     'pay.recuperando':        'Activating...',
     'pay.recuperar-ok':       'Free trial activated! Entering...',
     'pay.recuperar-erro':     'Could not activate. Check your connection and try again.',
+    'pay.redirecionando':      'Redirecting to secure payment...',
+    'pay.erro-rc':            'Payment unavailable at the moment. Please wait and try again.',
+    'pay.erro-pagamento':     'Could not process the payment. Please try again.',
   },
 
   // ══════════════════════════════════════════════════════════════
@@ -742,6 +748,9 @@ const STRINGS = {
     'pay.recuperando':        'Activando...',
     'pay.recuperar-ok':       '¡Período gratuito activado! Entrando...',
     'pay.recuperar-erro':     'No se pudo activar. Verifica tu conexión e inténtalo de nuevo.',
+    'pay.redirecionando':      'Redirigiendo al pago seguro...',
+    'pay.erro-rc':            'Pago no disponible en este momento. Espera e inténtalo de nuevo.',
+    'pay.erro-pagamento':     'No se pudo procesar el pago. Inténtalo de nuevo.',
   },
 };
 

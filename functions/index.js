@@ -164,6 +164,64 @@ exports.ativarTrial = onCall(async (request) => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// ativarPagamento — chamado pelo cliente após purchasePackage() RC ser concluído
+//
+// Registra pagamento no Firestore APENAS se o RevenueCat confirmar o
+// entitlement ativo usando a chave pública.
+// O webhook (7.4) mantém as renovações e cancelamentos sincronizados.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.ativarPagamento = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Login necessário.');
+  }
+
+  const uid = request.auth.uid;
+  const RC_PUBLIC_KEY = 'strp_sb_MiOlkXfcKatnRgaZDFrOBLBR';
+  const planoDesejado = request.data?.plano || 'desconhecido';
+
+  try {
+    // 1. Validação server-side no RevenueCat
+    const response = await fetch(`https://api.revenuecat.com/v1/subscribers/${uid}`, {
+      headers: {
+        'Authorization': `Bearer ${RC_PUBLIC_KEY}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    const rcData = await response.json();
+    const entitlement = rcData?.subscriber?.entitlements?.['lumo Pro'];
+    const expiracao = entitlement?.expires_date;
+
+    // Se não tem o entitlement ou já expirou, barra a requisição!
+    if (!expiracao || new Date(expiracao).getTime() < Date.now()) {
+      console.warn('Tentativa de acesso não confirmada pelo RC:', uid);
+      throw new HttpsError('permission-denied', 'Pagamento não confirmado pelo provedor.');
+    }
+
+    // 2. Se o RC confirmou, atualiza o Firestore de forma segura
+    const identifier = entitlement.product_identifier || planoDesejado;
+
+    await admin.firestore().doc(`usuarios/${uid}`).set({
+      pagamento: {
+        pago:       true,
+        trial:      false,
+        trialUsado: true,
+        plano:      identifier,
+        pagoEm:     admin.firestore.Timestamp.fromDate(new Date()),
+      },
+    }, { merge: true });
+
+    console.log('Pagamento ativado via RC:', uid, identifier);
+    return { sucesso: true };
+  } catch (err) {
+    if (err.code) throw err;
+    console.error('Erro ao verificar RC API:', err);
+    throw new HttpsError('internal', 'Erro ao registrar pagamento.');
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // webhookRevenueCat — adicionado no Fragmento 7.4
 // verificarDiscord    — adicionado no Fragmento 7.5
 // ─────────────────────────────────────────────────────────────────────────────

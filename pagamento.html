@@ -410,6 +410,9 @@
       Continuar com Mensal — R$13,99/mês
     </button>
 
+    <!-- Erro de checkout (RC/Stripe) -->
+    <p id="erro-checkout" style="display:none; text-align:center; font-size:13px; color:#e57373; margin-top:10px; line-height:1.4;"></p>
+
     <p class="paywall-nota" data-i18n="pay.nota">
       Pagamento seguro via Stripe · Cancele a qualquer momento.
     </p>
@@ -419,6 +422,11 @@
   <script src="i18n.js"></script>
   <script src="platform.js"></script>
   <script type="module" src="firebase.js"></script>
+  <script type="module">
+    import { Purchases } from 'https://cdn.jsdelivr.net/npm/@revenuecat/purchases-js@7/dist/package.esm.js';
+    window.Purchases = Purchases;
+    window.dispatchEvent(new Event('rc-pronto'));
+  </script>
   <script src="pagamento.js"></script>
 </body>
 </html>
