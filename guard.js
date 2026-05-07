@@ -30,6 +30,14 @@
       // Sem usuário = auth guard das próprias páginas cuida do redirect
       if (!user) return;
 
+      // Recém-cadastrado: onboarding confirmou trial antes de redirecionar.
+      // Pular verificação nesta primeira carga para evitar race condition
+      // entre o batch do ativarTrial e a leitura do verificarAcesso.
+      if (sessionStorage.getItem('recemCadastrado')) {
+        sessionStorage.removeItem('recemCadastrado');
+        return;
+      }
+
       var verificarFn = lumo.httpsCallable(lumo.functions, 'verificarAcesso');
       verificarFn()
         .then(function (resultado) {

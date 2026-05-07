@@ -321,6 +321,10 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { window.location.href = 'pagamento.html'; }, 160);
             return;
           }
+
+          // Trial ativado com sucesso — flag para guard.js ignorar a verificação
+          // na primeira carga do index.html (evita race condition com Firestore)
+          sessionStorage.setItem('recemCadastrado', 'true');
         } catch (_) {
           // Falha de rede não bloqueia o usuário — guard.js fará a verificação
           // na próxima tela. Firestore rules protegem os dados em qualquer caso.
