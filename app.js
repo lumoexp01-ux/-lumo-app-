@@ -430,8 +430,12 @@ document.addEventListener('DOMContentLoaded', () => {
       // Pula a verificação para v1.x (sem campo pagamento) — não bloqueia
       const pagamento = dados.pagamento;
       if (pagamento) {
-        const pago        = pagamento.pago === true;
-        const trialValido = pagamento.trialFim && new Date() < new Date(pagamento.trialFim);
+        const pago     = pagamento.pago === true;
+        const trialFim = pagamento.trialFim;
+        // trialFim pode ser Timestamp do Firestore (tem .toMillis) ou string ISO
+        const trialFimMs = trialFim?.toMillis?.()
+          ?? (trialFim ? new Date(trialFim).getTime() : 0);
+        const trialValido = !isNaN(trialFimMs) && trialFimMs > 0 && Date.now() < trialFimMs;
         if (!pago && !trialValido) {
           window.location.href = 'pagamento.html';
           return;
