@@ -20,7 +20,7 @@ function calcularDias(startDate) {
   // Força noon local para evitar o parse UTC que desloca o dia no fuso brasileiro
   const agora  = new Date();
   const inicio = new Date(startDate + 'T12:00:00');
-  return Math.floor((agora - inicio) / (1000 * 60 * 60 * 24));
+  return Math.max(0, Math.floor((agora - inicio) / (1000 * 60 * 60 * 24)));
 }
 
 function calcularNivel(dias) {
@@ -426,21 +426,8 @@ document.addEventListener('DOMContentLoaded', () => {
       usuario.compromisso = dados.compromisso  ?? null;
       usuario.idioma      = dados.perfil?.idioma ?? window.lumoI18n?.detectar() ?? 'pt';
 
-      // Verificação de trial (Fragmento 4.8)
-      // Pula a verificação para v1.x (sem campo pagamento) — não bloqueia
-      const pagamento = dados.pagamento;
-      if (pagamento) {
-        const pago     = pagamento.pago === true;
-        const trialFim = pagamento.trialFim;
-        // trialFim pode ser Timestamp do Firestore (tem .toMillis) ou string ISO
-        const trialFimMs = trialFim?.toMillis?.()
-          ?? (trialFim ? new Date(trialFim).getTime() : 0);
-        const trialValido = !isNaN(trialFimMs) && trialFimMs > 0 && Date.now() < trialFimMs;
-        if (!pago && !trialValido) {
-          window.location.href = 'pagamento.html';
-          return;
-        }
-      }
+      // Verificação de acesso feita exclusivamente pelo guard.js (server-side).
+      // app.js não redireciona — evita race condition com Timestamp do Firestore.
 
       // Discord — visível apenas para pagantes
       if (dados.pagamento?.pago === true) {
