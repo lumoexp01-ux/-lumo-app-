@@ -1,13 +1,11 @@
-// pagamento.js — Fragmento 7.3
-// Paywall: verifica acesso via CF, exibe estado correto, recovery de trial.
-// RevenueCat purchases-js integrado para checkout via Stripe.
+// pagamento.js — Fragmento 7.3 (rev. Web Purchase Link)
+// Checkout via redirect para RC Web Purchase Link — sem SDK no browser.
 
 (function () {
   'use strict';
 
-  // ── Constantes RevenueCat ─────────────────────────────────────────────────
-  const RC_KEY         = 'strp_sb_MiOlkXfcKatnRgaZDFrOBLBR';
-  const RC_ENTITLEMENT = 'lumo Pro';
+  // ── URL de compra RevenueCat ──────────────────────────────────────────────
+  const RC_PURCHASE_URL = 'https://pay.rev.cat/zqyguswcactkzrjp/';
 
   // ── Cálculo de nível inline (sem depender de app.js) ─────────────────────
   const NIVEIS = [
@@ -33,11 +31,6 @@
     return NIVEIS.find(n => dias <= n.ate) || NIVEIS[NIVEIS.length - 1];
   }
 
-  // ── Estado RevenueCat ─────────────────────────────────────────────────────
-  let rcInstance = null;
-  let pkgAnual   = null;
-  let pkgMensal  = null;
-
   // ── Recuperar deviceId do localStorage ───────────────────────────────────
   function obterDeviceId() {
     try { return localStorage.getItem('lumo-device-id') || ''; } catch (_) { return ''; }
@@ -51,13 +44,6 @@
       if (window.lumo?.auth) { clearInterval(id); cb(); return; }
       if (++t > 60) clearInterval(id); // 3s timeout
     }, 50);
-  }
-
-  // ── Aguarda window.Purchases (RC SDK carregado como módulo) ──────────────
-  function aguardarPurchases(cb) {
-    if (window.Purchases) { cb(); return; }
-    window.addEventListener('rc-pronto', cb, { once: true });
-    setTimeout(cb, 5000); // timeout de segurança — não travar para sempre
   }
 
   // ── Remover overlay de carregamento ──────────────────────────────────────
@@ -97,7 +83,6 @@
       const section = document.getElementById('section-trial-virgem');
       if (section) section.classList.remove('hidden');
     }
-    // trialVirgem === false → hero padrão (trial encerrado), só planos
   }
 
   // ── Wire-up do botão de recuperação de trial ─────────────────────────────
@@ -131,7 +116,6 @@
             window.location.replace('index.html');
           }, 1500);
         } else {
-          // trial-ja-usado ou email-ja-usou-trial → esconder seção, mostrar só planos
           const section = document.getElementById('section-trial-virgem');
           if (section) section.classList.add('hidden');
           adaptarHero(false);
@@ -148,97 +132,27 @@
     });
   }
 
-  // ── Inicializar RevenueCat em background ──────────────────────────────────
-  async function inicializarRC(uid) {
-    await new Promise(function (resolve) { aguardarPurchases(resolve); });
-    if (!window.Purchases) return;
+  // ── Verificar retorno do RC após pagamento bem-sucedido ───────────────────
+  // Chamado quando URL tem ?status=sucesso (redirect do RC após checkout)
+  async function verificarRetornoRC(lumo) {
+    const erroEl = document.getElementById('erro-checkout');
 
     try {
-      rcInstance = window.Purchases.configure(RC_KEY, uid);
-      const offerings = await rcInstance.getOfferings();
-      const pkgs      = offerings.current?.availablePackages ?? [];
-
-      pkgAnual  = pkgs.find(function (p) {
-        return p.packageType === 'ANNUAL' || p.identifier === '$rc_annual';
-      }) ?? pkgs.find(function (p) {
-        return p.packageType === 'YEARLY' || p.identifier === '$rc_yearly';
-      }) ?? (pkgs.length > 0 ? pkgs[0] : null);
-
-      pkgMensal = pkgs.find(function (p) {
-        return p.packageType === 'MONTHLY' || p.identifier === '$rc_monthly';
-      }) ?? (pkgs.length > 1 ? pkgs[1] : null);
-
-      // Detectar retorno de redirect Stripe: se entitlement já ativo, registrar e entrar
-      const info = await rcInstance.getCustomerInfo();
-      if (info?.entitlements?.active?.[RC_ENTITLEMENT]) {
-        await ativarAcesso('desconhecido');
-      }
-    } catch (e) {
-      console.warn('[RC] inicialização:', e?.message ?? e);
-    }
-  }
-
-  // ── Registrar pagamento no Firestore via CF ───────────────────────────────
-  async function ativarAcesso(plano) {
-    try {
-      const lumo     = window.lumo;
       const ativarFn = lumo.httpsCallable(lumo.functions, 'ativarPagamento');
-      await ativarFn({ plano });
-    } catch (_) {
-      // Falha na CF — redirecionar mesmo assim; guard.js verificará no acesso
-    }
-    window.location.replace('index.html');
-  }
-
-  // ── Executar checkout RevenueCat/Stripe ───────────────────────────────────
-  async function executarCheckout(pkg, plano) {
-    const btnAnual  = document.getElementById('btn-assinar-anual');
-    const btnMensal = document.getElementById('btn-assinar-mensal');
-    const erroEl    = document.getElementById('erro-checkout');
-
-    if (btnAnual)  btnAnual.disabled  = true;
-    if (btnMensal) btnMensal.disabled = true;
-    if (erroEl)    erroEl.style.display = 'none';
-
-    // Dar feedback visual que o usuário está sendo redirecionado
-    const btnClicado = plano === 'anual' ? btnAnual : btnMensal;
-    const textoOriginal = btnClicado ? btnClicado.textContent : '';
-    if (btnClicado) {
-      btnClicado.textContent = window.t?.('pay.redirecionando') || 'Redirecionando para pagamento seguro...';
-    }
-
-    try {
-      const { customerInfo } = await rcInstance.purchasePackage(pkg);
-
-      if (customerInfo?.entitlements?.active?.[RC_ENTITLEMENT]) {
-        await ativarAcesso(plano);
-        return;
-      }
-
-      // Entitlement pode demorar a propagar — verificar via CF como fallback
-      const lumo        = window.lumo;
-      const verificarFn = lumo.httpsCallable(lumo.functions, 'verificarAcesso');
-      const resultado   = await verificarFn();
-      if (resultado.data?.acesso) {
+      const resultado = await ativarFn({ plano: 'web' });
+      if (resultado.data?.sucesso) {
         window.location.replace('index.html');
-      } else {
-        throw new Error('entitlement-pendente');
+        return true;
       }
-
-    } catch (err) {
-      const cancelado = err?.errorCode === 'PURCHASE_CANCELLED'
-                     || err?.code      === 'PURCHASE_CANCELLED'
-                     || err?.message?.toLowerCase().includes('cancel')
-                     || err?.userCancelled === true;
-
-      if (!cancelado && erroEl) {
-        erroEl.textContent   = window.t?.('pay.erro-pagamento') || 'Não foi possível processar o pagamento. Tente novamente.';
-        erroEl.style.display = 'block';
-      }
-      if (btnAnual)  btnAnual.disabled  = false;
-      if (btnMensal) btnMensal.disabled = false;
-      if (btnClicado && textoOriginal) btnClicado.textContent = textoOriginal;
+    } catch (_) {
+      // CF retornou erro (entitlement não confirmado pelo RC)
     }
+
+    if (erroEl) {
+      erroEl.textContent   = window.t?.('pay.erro-pagamento') || 'Pagamento não confirmado. Se o problema persistir, entre em contato com o suporte.';
+      erroEl.style.display = 'block';
+    }
+    return false;
   }
 
   // ── Inicializar paywall ───────────────────────────────────────────────────
@@ -251,21 +165,31 @@
         return;
       }
 
+      // Retorno do RC após pagamento: ?status=sucesso na URL
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('status') === 'sucesso') {
+        // Limpar parâmetro da URL antes de qualquer coisa
+        window.history.replaceState({}, '', 'pagamento.html');
+        const ativado = await verificarRetornoRC(lumo);
+        if (ativado) return; // redirect para index.html já iniciado
+        // CF falhou — mostrar paywall com mensagem de erro já exibida
+        revelarPaywall();
+        wiredRecovery(lumo);
+        return;
+      }
+
       // Verificar acesso via Cloud Function
       try {
         const verificarFn = lumo.httpsCallable(lumo.functions, 'verificarAcesso');
         const resultado   = await verificarFn();
 
         if (resultado.data?.acesso) {
-          // Usuário já tem acesso (trial ativo ou pago) — redirecionar
           window.location.replace('index.html');
           return;
         }
 
-        // Sem acesso — exibir paywall no estado correto
         const trialVirgem = resultado.data?.trialVirgem === true;
 
-        // Carregar dados do usuário para senso de perda (Firestore ou sessionStorage)
         let dadosUsuario = null;
         try {
           const snap = await lumo.getDoc(lumo.doc(lumo.db, 'usuarios', user.uid));
@@ -280,17 +204,29 @@
         wiredRecovery(lumo);
         revelarPaywall();
 
-        // RC em background — não bloqueia exibição do paywall
-        inicializarRC(user.uid);
-
       } catch (_) {
-        // CF indisponível — mostrar paywall de forma segura (só planos)
         revelarPaywall();
         wiredRecovery(lumo);
-        const currentUser = lumo.auth.currentUser;
-        if (currentUser) inicializarRC(currentUser.uid);
       }
     });
+  }
+
+  // ── Checkout: redirect para RC Web Purchase Link ──────────────────────────
+  function iniciarCheckout() {
+    const user = window.lumo?.auth?.currentUser;
+    if (!user) return;
+
+    const btnAnual  = document.getElementById('btn-assinar-anual');
+    const btnMensal = document.getElementById('btn-assinar-mensal');
+    if (btnAnual)  btnAnual.disabled  = true;
+    if (btnMensal) btnMensal.disabled = true;
+
+    const erroEl = document.getElementById('erro-checkout');
+    if (erroEl) erroEl.style.display = 'none';
+
+    // Redireciona para RC com o UID do usuário — RC atribui o entitlement ao UID correto
+    const url = RC_PURCHASE_URL + '?app_user_id=' + encodeURIComponent(user.uid);
+    window.location.href = url;
   }
 
   // ── Wire-up: logout e cards ───────────────────────────────────────────────
@@ -299,7 +235,6 @@
       if (window.logout) window.logout();
     });
 
-    // Clique nos cards redireciona para o botão correspondente
     document.getElementById('card-anual')?.addEventListener('click', function () {
       document.getElementById('btn-assinar-anual')?.click();
     });
@@ -307,31 +242,10 @@
       document.getElementById('btn-assinar-mensal')?.click();
     });
 
-    // Botões de assinatura
-    document.getElementById('btn-assinar-anual')?.addEventListener('click', function () {
-      iniciarCheckout('anual');
-    });
-    document.getElementById('btn-assinar-mensal')?.addEventListener('click', function () {
-      iniciarCheckout('mensal');
-    });
+    document.getElementById('btn-assinar-anual')?.addEventListener('click', iniciarCheckout);
+    document.getElementById('btn-assinar-mensal')?.addEventListener('click', iniciarCheckout);
 
     aguardarLumo(inicializar);
   });
-
-  // ── Checkout via RevenueCat ───────────────────────────────────────────────
-  function iniciarCheckout(plano) {
-    const pkg = plano === 'anual' ? pkgAnual : pkgMensal;
-
-    if (!rcInstance || !pkg) {
-      const erroEl = document.getElementById('erro-checkout');
-      if (erroEl) {
-        erroEl.textContent   = window.t?.('pay.erro-rc') || 'Pagamento indisponível. Aguarde e tente novamente.';
-        erroEl.style.display = 'block';
-      }
-      return;
-    }
-
-    executarCheckout(pkg, plano);
-  }
 
 })();
