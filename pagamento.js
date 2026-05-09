@@ -103,14 +103,8 @@
         if (resultado.data?.sucesso) {
           btn.textContent = window.t?.('pay.recuperar-ok') || 'Período gratuito ativado! Entrando...';
 
-          const cAnual  = document.getElementById('card-anual');
-          const cMensal = document.getElementById('card-mensal');
-          const bAnual  = document.getElementById('btn-assinar-anual');
-          const bMensal = document.getElementById('btn-assinar-mensal');
-          if (cAnual)  cAnual.style.pointerEvents  = 'none';
-          if (cMensal) cMensal.style.pointerEvents = 'none';
-          if (bAnual)  bAnual.disabled  = true;
-          if (bMensal) bMensal.disabled = true;
+          const bAssinar  = document.getElementById('btn-assinar');
+          if (bAssinar)  bAssinar.disabled  = true;
 
           setTimeout(function () {
             window.location.replace('index.html');
@@ -216,10 +210,13 @@
     const user = window.lumo?.auth?.currentUser;
     if (!user) return;
 
-    const btnAnual  = document.getElementById('btn-assinar-anual');
-    const btnMensal = document.getElementById('btn-assinar-mensal');
-    if (btnAnual)  btnAnual.disabled  = true;
-    if (btnMensal) btnMensal.disabled = true;
+    const btnAssinar = document.getElementById('btn-assinar');
+    if (btnAssinar) {
+      // Salvar texto original (feedback de loading)
+      btnAssinar.dataset.textoOriginal = btnAssinar.textContent;
+      btnAssinar.textContent = window.t?.('pay.redirecionando') || 'Redirecionando...';
+      btnAssinar.disabled = true;
+    }
 
     const erroEl = document.getElementById('erro-checkout');
     if (erroEl) erroEl.style.display = 'none';
@@ -235,15 +232,7 @@
       if (window.logout) window.logout();
     });
 
-    document.getElementById('card-anual')?.addEventListener('click', function () {
-      document.getElementById('btn-assinar-anual')?.click();
-    });
-    document.getElementById('card-mensal')?.addEventListener('click', function () {
-      document.getElementById('btn-assinar-mensal')?.click();
-    });
-
-    document.getElementById('btn-assinar-anual')?.addEventListener('click', iniciarCheckout);
-    document.getElementById('btn-assinar-mensal')?.addEventListener('click', iniciarCheckout);
+    document.getElementById('btn-assinar')?.addEventListener('click', iniciarCheckout);
 
     aguardarLumo(inicializar);
   });
