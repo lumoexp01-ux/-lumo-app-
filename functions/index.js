@@ -4,7 +4,7 @@
 
 'use strict';
 
-const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
 const { setGlobalOptions }   = require('firebase-functions/v2');
 const admin = require('firebase-admin');
 
@@ -190,7 +190,7 @@ exports.ativarPagamento = onCall({ cors: true, invoker: 'public' }, async (reque
     });
 
     const rcData = await response.json();
-    const entitlement = rcData?.subscriber?.entitlements?.['lumo Pro'];
+    const entitlement = rcData?.subscriber?.entitlements?.['lumo_pro'];
     const expiracao = entitlement?.expires_date;
 
     // Se não tem o entitlement ou já expirou, barra a requisição!
@@ -222,6 +222,55 @@ exports.ativarPagamento = onCall({ cors: true, invoker: 'public' }, async (reque
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// webhookRevenueCat — adicionado no Fragmento 7.4
-// verificarDiscord    — adicionado no Fragmento 7.5
+// webhookRevenueCat — Atualiza status do assinante em caso de renovação/cancelamento
 // ─────────────────────────────────────────────────────────────────────────────
+exports.webhookRevenueCat = onRequest(async (req, res) => {
+  // Verificar segredo do webhook
+  const auth = req.headers['authorization'] ?? '';
+  if (auth !== 'ant10112005') {
+    return res.status(401).send('Não autorizado');
+  }
+
+  try {
+    const event = req.body?.event;
+    if (!event) return res.status(400).send('Sem evento');
+
+    const uid = event.app_user_id;
+    if (!uid) return res.status(400).send('Sem UID');
+
+    const ref = admin.firestore().doc(`usuarios/${uid}`);
+
+    switch (event.type) {
+      case "INITIAL_PURCHASE":
+      case "RENEWAL":
+      case "PRODUCT_CHANGE":
+        await ref.set({
+          pagamento: {
+            pago: true,
+            trial: false,
+            proximoVencimento: event.expiration_at_ms ? new Date(event.expiration_at_ms).toISOString() : null,
+          }
+        }, { merge: true });
+        console.log(`Webhook: Assinatura renovada/ativada para UID ${uid}`);
+        break;
+
+      case "CANCELLATION":
+      case "EXPIRATION":
+        await ref.set({
+          pagamento: {
+            pago: false,
+            canceladoEm: new Date().toISOString()
+          }
+        }, { merge: true });
+        console.log(`Webhook: Assinatura expirada/cancelada para UID ${uid}`);
+        break;
+    }
+
+    res.json({ received: true });
+  } catch (err) {
+    console.error('Erro no webhook:', err);
+    res.status(500).send('Erro interno');
+  }
+});
+
+// Force redeploy 2
