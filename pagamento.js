@@ -5,7 +5,7 @@
   'use strict';
 
   // ── URL de compra RevenueCat ──────────────────────────────────────────────
-  const RC_PURCHASE_URL = 'https://pay.rev.cat/zqyguswcactkzrjp/';
+  const RC_PURCHASE_URL = 'https://pay.rev.cat/sandbox/bzvefsatehwoqmrs/';
 
   // ── Cálculo de nível inline (sem depender de app.js) ─────────────────────
   const NIVEIS = [
