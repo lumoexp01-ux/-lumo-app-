@@ -208,7 +208,11 @@
   // ── Checkout: redirect para RC Web Purchase Link ──────────────────────────
   function iniciarCheckout() {
     const user = window.lumo?.auth?.currentUser;
-    if (!user) return;
+    
+    if (!user) {
+      alert("Erro interno: Autenticação não carregada. Por favor, recarregue a página (Ctrl + F5).");
+      return;
+    }
 
     const btnAssinar = document.getElementById('btn-assinar');
     if (btnAssinar) {
@@ -223,7 +227,11 @@
 
     // Redireciona para RC com o UID do usuário — RC atribui o entitlement ao UID correto
     const url = RC_PURCHASE_URL + '?app_user_id=' + encodeURIComponent(user.uid);
-    window.location.href = url;
+    
+    // Fallback de segurança para garantir o redirecionamento
+    setTimeout(() => {
+      window.location.assign(url);
+    }, 100);
   }
 
   // ── Wire-up: logout e cards ───────────────────────────────────────────────
