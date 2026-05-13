@@ -225,13 +225,17 @@
     const erroEl = document.getElementById('erro-checkout');
     if (erroEl) erroEl.style.display = 'none';
 
-    // Redireciona para RC com o UID do usuário — RC atribui o entitlement ao UID correto
+    // Abre checkout RC em nova aba — RC atribui o entitlement ao UID correto
     const url = RC_PURCHASE_URL + '?app_user_id=' + encodeURIComponent(user.uid);
-    
-    // Fallback de segurança para garantir o redirecionamento
-    setTimeout(() => {
-      window.location.assign(url);
-    }, 100);
+    window.open(url, '_blank');
+
+    // Restaurar botão (página continua aberta)
+    if (btnAssinar) {
+      setTimeout(function () {
+        btnAssinar.textContent = btnAssinar.dataset.textoOriginal || 'Ver Planos e Assinar';
+        btnAssinar.disabled = false;
+      }, 1500);
+    }
   }
 
   // ── Wire-up: logout e cards ───────────────────────────────────────────────
