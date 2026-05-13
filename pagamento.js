@@ -226,7 +226,7 @@
     if (erroEl) erroEl.style.display = 'none';
 
     // Abre checkout RC em nova aba — RC atribui o entitlement ao UID correto
-    const url = RC_PURCHASE_URL + '?app_user_id=' + encodeURIComponent(user.uid);
+    const url = RC_PURCHASE_URL + '_user_id=' + encodeURIComponent(user.uid);
     window.open(url, '_blank');
 
     // Restaurar botão (página continua aberta)
