@@ -6,7 +6,11 @@
 
 const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
 const { setGlobalOptions }   = require('firebase-functions/v2');
+const { defineSecret }       = require('firebase-functions/params');
 const admin = require('firebase-admin');
+
+const RC_SECRET_KEY  = defineSecret('RC_SECRET_KEY');
+const WEBHOOK_SECRET = defineSecret('WEBHOOK_SECRET');
 
 admin.initializeApp();
 setGlobalOptions({ region: 'us-central1', maxInstances: 10 });
@@ -171,17 +175,18 @@ exports.ativarTrial = onCall({ cors: true, invoker: 'public' }, async (request) 
 // entitlement ativo usando a chave pública.
 // O webhook (7.4) mantém as renovações e cancelamentos sincronizados.
 // ─────────────────────────────────────────────────────────────────────────────
-exports.ativarPagamento = onCall({ cors: true, invoker: 'public' }, async (request) => {
+exports.ativarPagamento = onCall({ cors: true, invoker: 'public', secrets: [RC_SECRET_KEY] }, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Login necessário.');
   }
 
   const uid = request.auth.uid;
-  const RC_PUBLIC_KEY = 'strp_sb_MiOlkXfcKatnRgaZDFrOBLBR';
+  const RC_PUBLIC_KEY = RC_SECRET_KEY.value();
   const planoDesejado = request.data?.plano || 'desconhecido';
 
   try {
     // 1. Validação server-side no RevenueCat
+    console.log('[ativarPagamento] Consultando RC para uid:', uid);
     const response = await fetch(`https://api.revenuecat.com/v1/subscribers/${uid}`, {
       headers: {
         'Authorization': `Bearer ${RC_PUBLIC_KEY}`,
@@ -189,13 +194,17 @@ exports.ativarPagamento = onCall({ cors: true, invoker: 'public' }, async (reque
       }
     });
 
+    console.log('[ativarPagamento] RC status HTTP:', response.status);
     const rcData = await response.json();
+    console.log('[ativarPagamento] RC entitlements:', JSON.stringify(rcData?.subscriber?.entitlements ?? {}));
+
     const entitlement = rcData?.subscriber?.entitlements?.['lumo_pro'];
     const expiracao = entitlement?.expires_date;
+    console.log('[ativarPagamento] entitlement lumo_pro:', entitlement ?? 'não encontrado');
 
     // Se não tem o entitlement ou já expirou, barra a requisição!
     if (!expiracao || new Date(expiracao).getTime() < Date.now()) {
-      console.warn('Tentativa de acesso não confirmada pelo RC:', uid);
+      console.warn('[ativarPagamento] Acesso negado. RC status:', response.status, '| entitlements disponíveis:', Object.keys(rcData?.subscriber?.entitlements ?? {}));
       throw new HttpsError('permission-denied', 'Pagamento não confirmado pelo provedor.');
     }
 
@@ -224,10 +233,10 @@ exports.ativarPagamento = onCall({ cors: true, invoker: 'public' }, async (reque
 // ─────────────────────────────────────────────────────────────────────────────
 // webhookRevenueCat — Atualiza status do assinante em caso de renovação/cancelamento
 // ─────────────────────────────────────────────────────────────────────────────
-exports.webhookRevenueCat = onRequest(async (req, res) => {
+exports.webhookRevenueCat = onRequest({ secrets: [WEBHOOK_SECRET] }, async (req, res) => {
   // Verificar segredo do webhook
   const auth = req.headers['authorization'] ?? '';
-  if (auth !== 'ant10112005') {
+  if (auth !== WEBHOOK_SECRET.value()) {
     return res.status(401).send('Não autorizado');
   }
 
