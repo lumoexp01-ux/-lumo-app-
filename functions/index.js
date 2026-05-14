@@ -185,26 +185,32 @@ exports.ativarPagamento = onCall({ cors: true, invoker: 'public', secrets: [RC_S
   const planoDesejado = request.data?.plano || 'desconhecido';
 
   try {
-    // 1. Validação server-side no RevenueCat
-    console.log('[ativarPagamento] Consultando RC para uid:', uid);
-    const response = await fetch(`https://api.revenuecat.com/v1/subscribers/${uid}`, {
-      headers: {
-        'Authorization': `Bearer ${RC_PUBLIC_KEY}`,
-        'Accept': 'application/json'
+    // 1. Validação server-side no RevenueCat (API v2 — aceita sk_ key)
+    const RC_PROJECT_ID = 'proj24316807';
+    console.log('[ativarPagamento] Consultando RC v2 para uid:', uid);
+    const response = await fetch(
+      `https://api.revenuecat.com/v2/projects/${RC_PROJECT_ID}/customers/${uid}/entitlements`,
+      {
+        headers: {
+          'Authorization': `Bearer ${RC_PUBLIC_KEY}`,
+          'Accept': 'application/json'
+        }
       }
-    });
+    );
 
     console.log('[ativarPagamento] RC status HTTP:', response.status);
     const rcData = await response.json();
-    console.log('[ativarPagamento] RC entitlements:', JSON.stringify(rcData?.subscriber?.entitlements ?? {}));
+    console.log('[ativarPagamento] RC entitlements v2:', JSON.stringify(rcData));
 
-    const entitlement = rcData?.subscriber?.entitlements?.['lumo_pro'];
-    const expiracao = entitlement?.expires_date;
+    // V2 retorna { items: [ { lookup_key, expires_at, ... } ] }
+    const items = rcData?.items ?? [];
+    const entitlement = items.find(e => e.lookup_key === 'lumo_pro');
+    const expiracao = entitlement?.expires_at;
     console.log('[ativarPagamento] entitlement lumo_pro:', entitlement ?? 'não encontrado');
 
     // Se não tem o entitlement ou já expirou, barra a requisição!
     if (!expiracao || new Date(expiracao).getTime() < Date.now()) {
-      console.warn('[ativarPagamento] Acesso negado. RC status:', response.status, '| entitlements disponíveis:', Object.keys(rcData?.subscriber?.entitlements ?? {}));
+      console.warn('[ativarPagamento] Acesso negado. RC status:', response.status, '| itens disponíveis:', items.map(e => e.lookup_key));
       throw new HttpsError('permission-denied', 'Pagamento não confirmado pelo provedor.');
     }
 
