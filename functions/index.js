@@ -181,18 +181,21 @@ exports.ativarPagamento = onCall({ cors: true, invoker: 'public', secrets: [RC_S
   }
 
   const uid = request.auth.uid;
-  const RC_PUBLIC_KEY = RC_SECRET_KEY.value();
   const planoDesejado = request.data?.plano || 'desconhecido';
 
   try {
-    // 1. Validação server-side no RevenueCat (API v2 — aceita sk_ key)
-    const RC_PROJECT_ID = 'proj24316807';
-    console.log('[ativarPagamento] Consultando RC v2 para uid:', uid);
+    // 1. Validação server-side no RevenueCat
+    // v1 API usa a chave pública (strp_sb_) como Bearer token.
+    // RC armazena o customer com prefixo "_user_id=" pois é assim que o
+    // Web Purchase Link passa o app_user_id na URL.
+    const RC_V1_KEY    = 'strp_sb_MiOlkXfcKatnRgaZDFrOBLBR'; // chave pública — seguro no servidor
+    const rcCustomerId = `_user_id=${uid}`;
+    console.log('[ativarPagamento] Consultando RC v1 para customer:', rcCustomerId);
     const response = await fetch(
-      `https://api.revenuecat.com/v2/projects/${RC_PROJECT_ID}/customers/${uid}/entitlements`,
+      `https://api.revenuecat.com/v1/subscribers/${rcCustomerId}`,
       {
         headers: {
-          'Authorization': `Bearer ${RC_PUBLIC_KEY}`,
+          'Authorization': `Bearer ${RC_V1_KEY}`,
           'Accept': 'application/json'
         }
       }
@@ -200,17 +203,15 @@ exports.ativarPagamento = onCall({ cors: true, invoker: 'public', secrets: [RC_S
 
     console.log('[ativarPagamento] RC status HTTP:', response.status);
     const rcData = await response.json();
-    console.log('[ativarPagamento] RC entitlements v2:', JSON.stringify(rcData));
+    console.log('[ativarPagamento] RC entitlements:', JSON.stringify(rcData?.subscriber?.entitlements ?? {}));
 
-    // V2 retorna { items: [ { lookup_key, expires_at, ... } ] }
-    const items = rcData?.items ?? [];
-    const entitlement = items.find(e => e.lookup_key === 'lumo_pro');
-    const expiracao = entitlement?.expires_at;
+    const entitlement = rcData?.subscriber?.entitlements?.['lumo_pro'];
+    const expiracao   = entitlement?.expires_date;
     console.log('[ativarPagamento] entitlement lumo_pro:', entitlement ?? 'não encontrado');
 
     // Se não tem o entitlement ou já expirou, barra a requisição!
     if (!expiracao || new Date(expiracao).getTime() < Date.now()) {
-      console.warn('[ativarPagamento] Acesso negado. RC status:', response.status, '| itens disponíveis:', items.map(e => e.lookup_key));
+      console.warn('[ativarPagamento] Acesso negado. RC status:', response.status, '| entitlements disponíveis:', Object.keys(rcData?.subscriber?.entitlements ?? {}));
       throw new HttpsError('permission-denied', 'Pagamento não confirmado pelo provedor.');
     }
 
