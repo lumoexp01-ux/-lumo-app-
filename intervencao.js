@@ -1,10 +1,11 @@
-// intervencao.js v2.2 — Fluxo completo de intervenção de crise
+// intervencao.js v2.3 — Fluxo de intervenção de crise personalizado por níveis
 // Requer: dados/perguntas.js, dados/lembretes.js, dados/acoes.js
 
 (function () {
 
   // ── Estado do ciclo ──
   let primeiroCiclo   = true;
+  let nivelAtual      = null; // 'leve' | 'moderado' | 'critico'
   let perguntasUsadas = [];
   let lembretesUsados = [];
   let acoesUsadas     = [];
@@ -54,9 +55,11 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // ── Sorteio sem repetição ──
+  // ── Sorteio sem repetição por Nível Escolhido ──
   function sortear(banco, usados) {
-    const disponiveis = banco.filter(item => !usados.includes(item.id));
+    const lista = banco[nivelAtual]; // usa o nível escolhido ('leve' | 'moderado' | 'critico')
+    if (!lista) return null;
+    const disponiveis = lista.filter(item => !usados.includes(item.id));
     if (disponiveis.length === 0) {
       usados.length = 0;
       return sortear(banco, usados);
@@ -166,8 +169,8 @@
     // Preencher pergunta
     const perguntaTextoEl = document.getElementById('pergunta-texto');
     const chipsEl         = document.getElementById('pergunta-chips');
-    if (perguntaTextoEl) perguntaTextoEl.textContent = pergunta.texto;
-    if (chipsEl) {
+    if (perguntaTextoEl && pergunta) perguntaTextoEl.textContent = pergunta.texto;
+    if (chipsEl && pergunta) {
       chipsEl.innerHTML = '';
       pergunta.opcoes.forEach(opcao => {
         const btn = document.createElement('button');
@@ -183,13 +186,19 @@
 
     // Preencher lembrete
     const lembreteEl = document.getElementById('lembrete-texto');
-    if (lembreteEl) lembreteEl.textContent = aplicarContexto(lembrete.template, usuario);
+    if (lembreteEl && lembrete) lembreteEl.textContent = aplicarContexto(lembrete.template, usuario);
 
     // Preencher ação
-    const acaoEl    = document.getElementById('acao-texto');
-    const retornoEl = document.getElementById('acao-retorno');
-    if (acaoEl)    acaoEl.textContent    = acao.texto;
-    if (retornoEl) retornoEl.textContent = acao.retorno;
+    const acaoEl        = document.getElementById('acao-texto');
+    const retornoEl     = document.getElementById('acao-retorno');
+    const cienciaEl     = document.getElementById('acao-ciencia');
+    if (acaoEl && acao)    acaoEl.textContent    = acao.texto;
+    if (retornoEl && acao) retornoEl.textContent = acao.retorno;
+
+    // Ciência explicada
+    if (cienciaEl && acao) {
+      cienciaEl.innerHTML = '<strong>Por que funciona:</strong> ' + acao.ciencia;
+    }
 
     irParaStep('step-pergunta');
   }
@@ -229,7 +238,7 @@
       const strong = document.createElement('strong');
       strong.textContent = linhas[0];
       msgEl.appendChild(strong);
-      msgEl.appendChild(document.createTextNode('\\n' + linhas.slice(1).join('\\n')));
+      msgEl.appendChild(document.createTextNode('\n' + linhas.slice(1).join('\n')));
     }
     modal?.classList.remove('hidden');
   }
@@ -295,10 +304,19 @@
     // RESPIRAÇÃO
     iniciarRespiracao();
     document.getElementById('btn-respiracao-ok')?.addEventListener('click', () => {
-      irParaStep('step-escolha');
+      irParaStep('step-nivel');
     });
     document.getElementById('btn-pular-respiracao')?.addEventListener('click', () => {
-      irParaStep('step-escolha');
+      irParaStep('step-nivel');
+    });
+
+    // TELA DE NÍVEL DE CRISES
+    document.querySelectorAll('.btn-level-select').forEach(btn => {
+      btn.addEventListener('click', () => {
+        nivelAtual = btn.dataset.nivel;
+        console.log('Nível selecionado:', nivelAtual);
+        irParaStep('step-escolha');
+      });
     });
 
     // ESCOLHA
@@ -328,9 +346,9 @@
       setTimeout(irParaIndex, 1800);
     });
 
-    // CHECK-IN: preciso de mais ajuda → novo ciclo
+    // CHECK-IN: preciso de mais ajuda → volta para escolher o nível de crise
     document.getElementById('btn-checkin-help')?.addEventListener('click', () => {
-      iniciarCiclo();
+      irParaStep('step-nivel');
     });
 
     // CHECK-IN: tive uma recaída
@@ -345,18 +363,18 @@
       irParaIndex();
     });
 
-    // CONFRONTO: não vou recair → novo ciclo
+    // CONFRONTO: não vou recair → novo ciclo (reavalia o nível do impulso)
     document.getElementById('btn-nao-recair')?.addEventListener('click', () => {
       document.getElementById('modal-confronto')?.classList.add('hidden');
-      iniciarCiclo();
+      irParaStep('step-nivel');
     });
 
-    // Discord: visível apenas para pagantes
-    const usuario = carregarUsuario();
-    if (usuario.pago === true) {
-      const discordBtn = document.getElementById('choice-discord');
-      if (discordBtn) discordBtn.style.display = 'flex';
-    }
+    // Discord — oculto até Fase 7.5 (pós-lançamento)
+    // const usuario = carregarUsuario();
+    // if (usuario.pago === true) {
+    //   const discordBtn = document.getElementById('choice-discord');
+    //   if (discordBtn) discordBtn.style.display = 'flex';
+    // }
 
   });
 

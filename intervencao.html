@@ -451,6 +451,73 @@
     }
 
     .btn-recomecar:active { opacity: 0.85; }
+
+    /* ── Estilos da nova Tela de Nível ── */
+    .btn-level-select {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 18px;
+      border-radius: var(--radius-btn);
+      color: #fff;
+      font-family: var(--font-body);
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.1s, opacity 0.15s;
+      text-align: center;
+    }
+
+    .btn-level-select:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+
+    .btn-level-select__label {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .btn-level-select__desc {
+      font-size: 12px;
+      opacity: 0.85;
+      margin-top: 4px;
+      font-weight: 400;
+    }
+
+    .btn-level-select--leve {
+      background: #1a5f3f; /* Verde oliva premium discreto e relaxante */
+    }
+
+    .btn-level-select--moderado {
+      background: #cc6600;
+    }
+
+    .btn-level-select--critico {
+      background: var(--red-crisis); /* #cc2020 */
+      animation: pulse-crisis-btn 2s infinite ease-out;
+    }
+
+    @keyframes pulse-crisis-btn {
+      0% { box-shadow: 0 0 0 0 rgba(204, 32, 32, 0.4); }
+      70% { box-shadow: 0 0 0 12px rgba(204, 32, 32, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(204, 32, 32, 0); }
+    }
+
+    .acao-ciencia {
+      font-size: 0.75rem;
+      color: var(--text-secondary); /* opaco */
+      opacity: 0.7;
+      font-style: italic;
+      margin-top: 10px;
+      padding: 8px 12px;
+      border-left: 2px solid var(--border-default);
+      line-height: 1.4;
+      text-align: left;
+    }
   </style>
 </head>
 <body>
@@ -491,6 +558,31 @@
     </div>
 
     <!-- ════════════════════════════
+         ETAPA DE SELEÇÃO DE NÍVEL DE CRISES
+         ════════════════════════════ -->
+    <div class="step-wrapper step--hidden" id="step-nivel">
+      <h1 class="iv-title" data-i18n="iv.nivel.titulo">Como está o seu impulso agora?</h1>
+      <p class="iv-subtitle" data-i18n="iv.nivel.subtitulo">Isso ajuda a escolher o melhor suporte</p>
+
+      <div class="choice-cards flex flex-col gap-12">
+        <button class="btn-level-select btn-level-select--leve" id="btn-level-leve" data-nivel="leve">
+          <span class="btn-level-select__label">🟢 LEVE</span>
+          <span class="btn-level-select__desc">Consigo pensar com clareza</span>
+        </button>
+
+        <button class="btn-level-select btn-level-select--moderado" id="btn-level-moderado" data-nivel="moderado">
+          <span class="btn-level-select__label">🟠 MODERADO</span>
+          <span class="btn-level-select__desc">Está difícil mas controlável</span>
+        </button>
+
+        <button class="btn-level-select btn-level-select--critico" id="btn-level-critico" data-nivel="critico">
+          <span class="btn-level-select__label">🔴 CRÍTICO</span>
+          <span class="btn-level-select__desc">Estou no limite</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════
          ETAPA 2 — ESCOLHA
          ════════════════════════════ -->
     <div class="step-wrapper step--hidden" id="step-escolha">
@@ -527,13 +619,8 @@
       <h1 class="iv-title" id="pergunta-texto">O que você está sentindo agora?</h1>
 
       <div class="iv-chips" id="pergunta-chips">
-        <!-- Opções geradas pelo JS — placeholder visual -->
+        <!-- Opções geradas pelo JS -->
         <button class="iv-chip">Ansiedade</button>
-        <button class="iv-chip">Tédio</button>
-        <button class="iv-chip">Solidão</button>
-        <button class="iv-chip">Estresse</button>
-        <button class="iv-chip">Tristeza</button>
-        <button class="iv-chip">Raiva</button>
       </div>
 
       <div class="iv-footer">
@@ -566,6 +653,9 @@
         <p class="iv-acao-text" id="acao-texto">
           Saia do ambiente agora. Vá para outro cômodo.
         </p>
+        <div class="acao-ciencia" id="acao-ciencia">
+          Por que funciona: ...
+        </div>
       </div>
 
       <div class="iv-acao-retorno" id="acao-retorno">

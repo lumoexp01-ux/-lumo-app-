@@ -22,7 +22,7 @@ setGlobalOptions({ region: 'us-central1', maxInstances: 10 });
 // Lê `pagamento` direto do Firestore via Admin SDK.
 // trialFim é Timestamp nativo — usa .toMillis() para comparar.
 // ─────────────────────────────────────────────────────────────────────────────
-exports.verificarAcesso = onCall({ cors: ['https://lumoexp01-ux.github.io'], invoker: 'public' }, async (request) => {
+exports.verificarAcesso = onCall({ cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000'], invoker: 'public' }, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Login necessário.');
   }
@@ -80,7 +80,7 @@ exports.verificarAcesso = onCall({ cors: ['https://lumoexp01-ux.github.io'], inv
 //   3. deviceId encodado em base64url antes de virar ID de documento
 //      (evita injeção de "/" no path do Firestore)
 // ─────────────────────────────────────────────────────────────────────────────
-exports.ativarTrial = onCall({ cors: ['https://lumoexp01-ux.github.io'], invoker: 'public' }, async (request) => {
+exports.ativarTrial = onCall({ cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000'], invoker: 'public' }, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Login necessário.');
   }
@@ -176,7 +176,7 @@ exports.ativarTrial = onCall({ cors: ['https://lumoexp01-ux.github.io'], invoker
 // entitlement ativo usando a chave pública.
 // O webhook (7.4) mantém as renovações e cancelamentos sincronizados.
 // ─────────────────────────────────────────────────────────────────────────────
-exports.ativarPagamento = onCall({ cors: ['https://lumoexp01-ux.github.io'], invoker: 'public', secrets: [RC_SECRET_KEY] }, async (request) => {
+exports.ativarPagamento = onCall({ cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000'], invoker: 'public', secrets: [RC_SECRET_KEY] }, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Login necessário.');
   }

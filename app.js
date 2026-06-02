@@ -429,19 +429,18 @@ document.addEventListener('DOMContentLoaded', () => {
       // Verificação de acesso feita exclusivamente pelo guard.js (server-side).
       // app.js não redireciona — evita race condition com Timestamp do Firestore.
 
-      // Discord — visível apenas para pagantes
-      if (dados.pagamento?.pago === true) {
-        const discordSection = document.getElementById('discord-section');
-        if (discordSection) discordSection.style.display = 'block';
-        // Busca link do Discord no Firestore
-        getDoc(doc(db, 'config-app', 'global')).then(cfg => {
-          if (cfg.exists()) {
-            const link = cfg.data()?.discordLink;
-            const discordLink = document.getElementById('discord-link');
-            if (link && discordLink) discordLink.href = link;
-          }
-        }).catch(() => {});
-      }
+      // Discord — oculto até Fase 7.5 (pós-lançamento)
+      // if (dados.pagamento?.pago === true) {
+      //   const discordSection = document.getElementById('discord-section');
+      //   if (discordSection) discordSection.style.display = 'block';
+      //   getDoc(doc(db, 'config-app', 'global')).then(cfg => {
+      //     if (cfg.exists()) {
+      //       const link = cfg.data()?.discordLink;
+      //       const discordLink = document.getElementById('discord-link');
+      //       if (link && discordLink) discordLink.href = link;
+      //     }
+      //   }).catch(() => {});
+      // }
 
     } else {
       // Perfil ainda não foi salvo no Firestore (Fragment 4.3 pendente).
