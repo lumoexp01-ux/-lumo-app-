@@ -5,6 +5,7 @@
 'use strict';
 
 const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
+const { onSchedule }         = require('firebase-functions/v2/scheduler');
 const { setGlobalOptions }   = require('firebase-functions/v2');
 const { defineSecret }       = require('firebase-functions/params');
 const admin = require('firebase-admin');
@@ -21,7 +22,7 @@ setGlobalOptions({ region: 'us-central1', maxInstances: 10 });
 // Lê `pagamento` direto do Firestore via Admin SDK.
 // trialFim é Timestamp nativo — usa .toMillis() para comparar.
 // ─────────────────────────────────────────────────────────────────────────────
-exports.verificarAcesso = onCall({ cors: true, invoker: 'public' }, async (request) => {
+exports.verificarAcesso = onCall({ cors: ['https://lumoexp01-ux.github.io'], invoker: 'public' }, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Login necessário.');
   }
@@ -79,7 +80,7 @@ exports.verificarAcesso = onCall({ cors: true, invoker: 'public' }, async (reque
 //   3. deviceId encodado em base64url antes de virar ID de documento
 //      (evita injeção de "/" no path do Firestore)
 // ─────────────────────────────────────────────────────────────────────────────
-exports.ativarTrial = onCall({ cors: true, invoker: 'public' }, async (request) => {
+exports.ativarTrial = onCall({ cors: ['https://lumoexp01-ux.github.io'], invoker: 'public' }, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Login necessário.');
   }
@@ -175,7 +176,7 @@ exports.ativarTrial = onCall({ cors: true, invoker: 'public' }, async (request) 
 // entitlement ativo usando a chave pública.
 // O webhook (7.4) mantém as renovações e cancelamentos sincronizados.
 // ─────────────────────────────────────────────────────────────────────────────
-exports.ativarPagamento = onCall({ cors: true, invoker: 'public', secrets: [RC_SECRET_KEY] }, async (request) => {
+exports.ativarPagamento = onCall({ cors: ['https://lumoexp01-ux.github.io'], invoker: 'public', secrets: [RC_SECRET_KEY] }, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Login necessário.');
   }
@@ -185,11 +186,9 @@ exports.ativarPagamento = onCall({ cors: true, invoker: 'public', secrets: [RC_S
 
   try {
     // 1. Validação server-side no RevenueCat
-    // v1 API usa a chave pública (strp_sb_) como Bearer token.
-    // RC armazena o customer com prefixo "_user_id=" pois é assim que o
-    // Web Purchase Link passa o app_user_id na URL.
-    const RC_V1_KEY    = 'strp_sb_MiOlkXfcKatnRgaZDFrOBLBR'; // chave pública — seguro no servidor
-    const rcCustomerId = `_user_id=${uid}`;
+    // v1 API usa a chave secreta para ler status do subscriber
+    const RC_V1_KEY    = RC_SECRET_KEY.value(); 
+    const rcCustomerId = uid;
     console.log('[ativarPagamento] Consultando RC v1 para customer:', rcCustomerId);
     const response = await fetch(
       `https://api.revenuecat.com/v1/subscribers/${rcCustomerId}`,
@@ -289,4 +288,103 @@ exports.webhookRevenueCat = onRequest({ secrets: [WEBHOOK_SECRET] }, async (req,
   }
 });
 
-// Force redeploy 2
+// ─────────────────────────────────────────────────────────────────────────────
+// enviarPushHorarioCritico — Notificação FCM nos horários críticos do usuário
+//
+// Roda a cada hora. Verifica se o período atual (Manhã/Tarde/Noite/Madrugada)
+// no fuso de Brasília coincide com os gatilhos de horário salvos pelo usuário.
+// Envia push somente para quem tem pushToken registrado naquele período.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.enviarPushHorarioCritico = onSchedule(
+  { schedule: '0 * * * *', timeZone: 'America/Sao_Paulo', region: 'us-central1' },
+  async () => {
+    const horaN = parseInt(
+      new Intl.DateTimeFormat('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        hour: 'numeric',
+        hour12: false,
+      }).format(new Date()),
+      10
+    );
+
+    // Envia apenas nos horários de pico de cada período
+    const SLOTS = { 9: 'Manhã', 14: 'Tarde', 21: 'Noite', 1: 'Madrugada' };
+    const slot  = SLOTS[horaN];
+    if (!slot) return;
+
+    console.log(`[push-cron] Hora SP: ${horaN}h — slot: ${slot}`);
+
+    const snap = await admin.firestore()
+      .collection('usuarios')
+      .where('gatilhos.horarios', 'array-contains', slot)
+      .get();
+
+    if (snap.empty) {
+      console.log('[push-cron] Nenhum usuário com esse slot.');
+      return;
+    }
+
+    // Mantém refs alinhados com mensagens (só docs que têm pushToken)
+    const mensagens = [];
+    const docRefs   = [];
+    snap.forEach(docSnap => {
+      const token = docSnap.data().pushToken;
+      if (token) {
+        mensagens.push({
+          token,
+          data: { acao: 'tela-vermelha' },
+          notification: {
+            title: 'LUMO',
+            body: 'Este é um horário crítico para você. Toque para abrir o protocolo.',
+          },
+          android: { priority: 'high' },
+          apns:    { payload: { aps: { sound: 'default' } } },
+        });
+        docRefs.push(docSnap.ref);
+      }
+    });
+
+    if (mensagens.length === 0) {
+      console.log('[push-cron] Nenhum token válido encontrado.');
+      return;
+    }
+
+    console.log(`[push-cron] Enviando para ${mensagens.length} usuário(s)`);
+
+    // FCM admite até 500 mensagens por lote
+    const LOTE = 500;
+    const db   = admin.firestore();
+
+    for (let i = 0; i < mensagens.length; i += LOTE) {
+      const loteMensagens = mensagens.slice(i, i + LOTE);
+      const loteRefs      = docRefs.slice(i, i + LOTE);
+
+      const response = await admin.messaging().sendEach(loteMensagens);
+      console.log(`[push-cron] Lote ${Math.floor(i / LOTE) + 1}: ${response.successCount} ok, ${response.failureCount} falha(s)`);
+
+      if (response.failureCount > 0) {
+        const writeBatch  = db.batch();
+        let tokensRemovidos = 0;
+
+        response.responses.forEach((res, idx) => {
+          if (!res.success) {
+            const code = res.error?.code ?? '';
+            // Token inválido ou app desinstalado — remove do Firestore
+            if (
+              code === 'messaging/invalid-argument' ||
+              code === 'messaging/registration-token-not-registered'
+            ) {
+              writeBatch.update(loteRefs[idx], { pushToken: admin.firestore.FieldValue.delete() });
+              tokensRemovidos++;
+            }
+          }
+        });
+
+        if (tokensRemovidos > 0) {
+          await writeBatch.commit();
+          console.log(`[push-cron] Removidos ${tokensRemovidos} token(s) inválido(s) do Firestore.`);
+        }
+      }
+    }
+  }
+);

@@ -1,8 +1,7 @@
 // push.js — Fragmento 5.3
 // Permissão de notificação, token FCM, foreground handler, tela vermelha por push.
 //
-// TODO (Fase 5.3 backend): criar Cloud Function que lê gatilhos.horarios
-// de cada usuário e envia push nos horários críticos com { acao: 'tela-vermelha' }.
+// CF enviarPushHorarioCritico implementada em functions/index.js (Fase 8).
 
 // ── VAPID Key ──
 // Obter em: Firebase Console → Project Settings → Cloud Messaging

@@ -25,6 +25,7 @@ const STRINGS = {
     'index.progresso-label': 'Progresso no nível',
     'index.jornada':         'Jornada',
     'index.btn-crise':       'Alerta de Recaída',
+    'index.ativo':           'Ativo',
     'stat.dias':             'Dias de controle',
     'stat.impulsos':         'Impulsos vencidos',
     'stat.recaidas':         'Recaídas',
@@ -231,6 +232,10 @@ const STRINGS = {
     'iv.checkin.recaida':           'Tive uma recaída',
     'iv.confronto.btn-recomecar':   'Recomeçar do zero',
     'iv.confronto.btn-nao':         'Não vou recair',
+    'iv.restantes':                 's restantes',
+    'iv.pronto':                    'Pronto.',
+    'iv.nivel.titulo':              'Como está o seu impulso agora?',
+    'iv.nivel.subtitulo':           'Isso ajuda a escolher o melhor suporte',
 
     // ── Paywall ─────────────────────────────────────────────────
     'pay.sair':               'Sair',
@@ -261,6 +266,7 @@ const STRINGS = {
     'pay.redirecionando':      'Redirecionando para pagamento seguro...',
     'pay.erro-rc':            'Pagamento indisponível no momento. Aguarde e tente novamente.',
     'pay.erro-pagamento':     'Não foi possível processar o pagamento. Tente novamente.',
+    'pay.btn-assinar':        'Ver Planos e Assinar',
   },
 
   // ══════════════════════════════════════════════════════════════
@@ -278,6 +284,7 @@ const STRINGS = {
     'index.progresso-label': 'Level progress',
     'index.jornada':         'Journey',
     'index.btn-crise':       'Crisis Alert',
+    'index.ativo':           'Active',
     'stat.dias':             'Days of control',
     'stat.impulsos':         'Urges overcome',
     'stat.recaidas':         'Relapses',
@@ -476,6 +483,10 @@ const STRINGS = {
     'iv.checkin.recaida':       'I had a relapse',
     'iv.confronto.btn-recomecar':'Start over',
     'iv.confronto.btn-nao':     "I won't relapse",
+    'iv.restantes':             's remaining',
+    'iv.pronto':                'Ready.',
+    'iv.nivel.titulo':          'How is your urge right now?',
+    'iv.nivel.subtitulo':       'This helps choose the best support',
 
     // ── Paywall ─────────────────────────────────────────────────
     'pay.sair':               'Sign out',
@@ -506,6 +517,7 @@ const STRINGS = {
     'pay.redirecionando':      'Redirecting to secure payment...',
     'pay.erro-rc':            'Payment unavailable at the moment. Please wait and try again.',
     'pay.erro-pagamento':     'Could not process the payment. Please try again.',
+    'pay.btn-assinar':        'View Plans and Subscribe',
   },
 
   // ══════════════════════════════════════════════════════════════
@@ -523,6 +535,7 @@ const STRINGS = {
     'index.progresso-label': 'Progreso en el nivel',
     'index.jornada':         'Jornada',
     'index.btn-crise':       'Alerta de recaída',
+    'index.ativo':           'Activo',
     'stat.dias':             'Días de control',
     'stat.impulsos':         'Impulsos vencidos',
     'stat.recaidas':         'Recaídas',
@@ -721,6 +734,10 @@ const STRINGS = {
     'iv.checkin.recaida':       'Tuve una recaída',
     'iv.confronto.btn-recomecar':'Empezar de cero',
     'iv.confronto.btn-nao':     'No voy a recaer',
+    'iv.restantes':             's restantes',
+    'iv.pronto':                'Listo.',
+    'iv.nivel.titulo':          '¿Cómo está tu impulso ahora?',
+    'iv.nivel.subtitulo':       'Esto ayuda a elegir el mejor soporte',
 
     // ── Paywall ─────────────────────────────────────────────────
     'pay.sair':               'Salir',
@@ -751,6 +768,7 @@ const STRINGS = {
     'pay.redirecionando':      'Redirigiendo al pago seguro...',
     'pay.erro-rc':            'Pago no disponible en este momento. Espera e inténtalo de nuevo.',
     'pay.erro-pagamento':     'No se pudo procesar el pago. Inténtalo de nuevo.',
+    'pay.btn-assinar':        'Ver Planes y Suscribirse',
   },
 };
 
