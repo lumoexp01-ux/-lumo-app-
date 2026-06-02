@@ -226,9 +226,10 @@
     if (erroEl) erroEl.style.display = 'none';
 
     // Abre checkout RC em nova aba — RC atribui o entitlement ao UID correto
-    // Se a URL base já termina com "/", removemos a barra extra antes de anexar os query parameters
-    const baseUrlClean = RC_PURCHASE_URL.endsWith('/') ? RC_PURCHASE_URL.slice(0, -1) : RC_PURCHASE_URL;
-    const url = baseUrlClean + '?app_user_id=' + encodeURIComponent(user.uid);
+    // O formato oficial do RevenueCat para identified users em Web Purchase Link é:
+    // https://pay.rev.cat/<token>/<app_user_id>
+    const baseUrlClean = RC_PURCHASE_URL.endsWith('/') ? RC_PURCHASE_URL : RC_PURCHASE_URL + '/';
+    const url = baseUrlClean + encodeURIComponent(user.uid);
     window.open(url, '_blank');
 
     // Restaurar botão (página continua aberta)
