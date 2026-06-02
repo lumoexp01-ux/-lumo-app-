@@ -225,11 +225,9 @@
     const erroEl = document.getElementById('erro-checkout');
     if (erroEl) erroEl.style.display = 'none';
 
-    // Abre checkout RC em nova aba — RC atribui o entitlement ao UID correto
-    // O formato oficial do RevenueCat para identified users em Web Purchase Link é:
-    // https://pay.rev.cat/<token>/<app_user_id>
-    const baseUrlClean = RC_PURCHASE_URL.endsWith('/') ? RC_PURCHASE_URL : RC_PURCHASE_URL + '/';
-    const url = baseUrlClean + encodeURIComponent(user.uid);
+    // Abre checkout RC em nova aba — usando a URL limpa do RevenueCat sem interrogação/parâmetros
+    // para evitar erros 404 de sandbox
+    const url = RC_PURCHASE_URL;
     window.open(url, '_blank');
 
     // Restaurar botão (página continua aberta)
