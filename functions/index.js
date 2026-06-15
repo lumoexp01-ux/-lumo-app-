@@ -187,8 +187,9 @@ exports.ativarPagamento = onCall({ cors: ['https://lumoexp01-ux.github.io', 'htt
   try {
     // 1. Validação server-side no RevenueCat
     // v1 API usa a chave secreta para ler status do subscriber
-    const RC_V1_KEY    = RC_SECRET_KEY.value(); 
-    const rcCustomerId = uid;
+    const RC_V1_KEY    = RC_SECRET_KEY.value();
+    // RC armazena o subscriber com prefixo "_user_id=" quando a purchase URL usa esse formato
+    const rcCustomerId = '_user_id=' + uid;
     console.log('[ativarPagamento] Consultando RC v1 para customer:', rcCustomerId);
     const response = await fetch(
       `https://api.revenuecat.com/v1/subscribers/${rcCustomerId}`,
