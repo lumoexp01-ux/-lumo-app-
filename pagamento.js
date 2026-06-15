@@ -225,9 +225,9 @@
     const erroEl = document.getElementById('erro-checkout');
     if (erroEl) erroEl.style.display = 'none';
 
-    // Abre checkout RC em nova aba — usando a URL limpa do RevenueCat sem interrogação/parâmetros
-    // para evitar erros 404 de sandbox
-    const url = RC_PURCHASE_URL;
+    // Abre checkout RC em nova aba — _user_id= como segmento de path (sem ?)
+    // O RC armazena o subscriber com ID "_user_id=FIREBASE_UID"
+    const url = RC_PURCHASE_URL + '_user_id=' + encodeURIComponent(user.uid);
     window.open(url, '_blank');
 
     // Restaurar botão (página continua aberta)
