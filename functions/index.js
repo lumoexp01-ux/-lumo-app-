@@ -6,6 +6,7 @@
 
 const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
 const { onSchedule }         = require('firebase-functions/v2/scheduler');
+const { onDocumentUpdated }  = require('firebase-functions/v2/firestore');
 const { setGlobalOptions }   = require('firebase-functions/v2');
 const { defineSecret }       = require('firebase-functions/params');
 const admin = require('firebase-admin');
@@ -33,30 +34,40 @@ setGlobalOptions({ region: 'us-central1', maxInstances: 10 });
 // ar nunca bloqueia pagamento, trial ou webhook. Logs auditam cada transição.
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Remove BOM (U+FEFF) e espaços — todos os secrets podem vir com BOM ao copiar/colar
+function s(secret) {
+  return secret.value().replace(/^﻿/, '').trim();
+}
+
 function discordAtivo() {
-  const token = DISCORD_BOT_TOKEN.value();
-  const guild = DISCORD_GUILD_ID.value();
+  const token = s(DISCORD_BOT_TOKEN);
+  const guild = s(DISCORD_GUILD_ID);
   return !!(token && token !== 'PLACEHOLDER' && guild && guild !== 'PLACEHOLDER');
 }
 
 // Retorna o Role ID do Discord para o tipo dado, ou null se ainda não configurado
 function discordRoleId(tipo) {
   const mapa = {
-    trial:   DISCORD_ROLE_TRIAL_ID.value(),
-    expired: DISCORD_ROLE_EXPIRED_ID.value(),
-    pro:     DISCORD_ROLE_PRO_ID.value(),
+    trial:   s(DISCORD_ROLE_TRIAL_ID),
+    expired: s(DISCORD_ROLE_EXPIRED_ID),
+    pro:     s(DISCORD_ROLE_PRO_ID),
   };
   const id = mapa[tipo];
   return (id && id !== 'PLACEHOLDER') ? id : null;
 }
 
 async function discordAPI(method, memberId, roleId) {
-  const guildId = DISCORD_GUILD_ID.value();
+  const guildId = s(DISCORD_GUILD_ID);
   const url = `https://discord.com/api/v10/guilds/${guildId}/members/${memberId}/roles/${roleId}`;
-  return fetch(url, {
+  const res = await fetch(url, {
     method,
-    headers: { 'Authorization': `Bot ${DISCORD_BOT_TOKEN.value()}` },
+    headers: { 'Authorization': `Bot ${s(DISCORD_BOT_TOKEN)}` },
   });
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    console.warn(`[discord] API ${method} HTTP ${res.status}: ${body}`);
+  }
+  return res;
 }
 
 // Lê discordUserId e discordRoleAtual do Firestore (uma leitura só)
@@ -454,6 +465,52 @@ exports.expirarTrialsDiscord = onSchedule({
   }
 
   console.log(`[trial-expiry] ${expirados} trial(s) expirado(s) de ${snap.size} verificados.`);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// onDiscordUserIdVinculado — Trigger Firestore
+//
+// Dispara quando discordUserId muda para um valor novo (usuário vincula conta
+// Discord pela primeira vez, ou troca o ID). Atribui automaticamente o cargo
+// correto com base no status de assinatura atual — cobre usuários que já eram
+// Pro/Trial antes de vincular o Discord.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.onDiscordUserIdVinculado = onDocumentUpdated({
+  document: 'usuarios/{uid}',
+  region: 'southamerica-east1',
+  secrets: DISCORD_SECRETS,
+}, async (event) => {
+  const before = event.data.before.data() ?? {};
+  const after  = event.data.after.data()  ?? {};
+  const uid    = event.params.uid;
+
+  const idAntes = before.discordUserId ?? null;
+  const idAgora = after.discordUserId  ?? null;
+
+  // Só processa quando o ID foi adicionado ou trocado
+  if (!idAgora || idAntes === idAgora) return;
+
+  const pagamento = after.pagamento ?? {};
+  let novoTipo = null;
+
+  if (pagamento.pago === true) {
+    novoTipo = 'pro';
+  } else if (pagamento.trial === true && pagamento.trialFim) {
+    const trialFimMs = typeof pagamento.trialFim.toMillis === 'function'
+      ? pagamento.trialFim.toMillis()
+      : new Date(pagamento.trialFim).getTime();
+    novoTipo = Date.now() < trialFimMs ? 'trial' : 'expired';
+  } else if (after.subscriptionStatus === 'expired') {
+    novoTipo = 'expired';
+  }
+
+  if (!novoTipo) {
+    console.log(`[discord] id-vinculado uid=${uid}: sem assinatura ativa, nenhum cargo atribuído`);
+    return;
+  }
+
+  console.log(`[discord] id-vinculado uid=${uid}: discordUserId="${idAgora}" → cargo ${novoTipo}`);
+  await discordTransicionar(uid, novoTipo, 'discord-id-vinculado');
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
