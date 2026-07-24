@@ -44,7 +44,8 @@ export default {
   'nivel.Coronel': 'Major',
   'nivel.General': 'Colonel',
   'nivel.Rei':     'General',
-  'nivel.Monge':   'Legend',
+  'nivel.Monge':   'Monk',
+  'nivel.Lenda':   'Legend',
 
   'chip.soldado':  '0–6 days',
   'chip.cabo':     '7–13 days',
@@ -55,7 +56,8 @@ export default {
   'chip.coronel':  '60–89 days',
   'chip.general':  '90–119 days',
   'chip.rei':      '120–179 days',
-  'chip.monge':    '180+ days',
+  'chip.monge':    '180–359 days',
+  'chip.lenda':    '360+ days',
 
   'impulso.title':      "You've got this.",
   'impulso.subtitle':   ', breathe. One step at a time.',
