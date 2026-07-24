@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Intercepta todos os links internos para transição de saída suave ──
   document.querySelectorAll('a[href]').forEach(link => {
     const href = link.getAttribute('href');
-    // apenas links locais (não âncoras, não externos)
-    if (!href || href.startsWith('#') || href.startsWith('http')) return;
+    // apenas links locais (não âncoras, não externos, não javascript:)
+    if (!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('javascript')) return;
 
     link.addEventListener('click', (e) => {
       e.preventDefault();
