@@ -10,19 +10,123 @@ const { setGlobalOptions }   = require('firebase-functions/v2');
 const { defineSecret }       = require('firebase-functions/params');
 const admin = require('firebase-admin');
 
-const RC_SECRET_KEY  = defineSecret('RC_SECRET_KEY');
-const WEBHOOK_SECRET = defineSecret('WEBHOOK_SECRET');
+const RC_SECRET_KEY          = defineSecret('RC_SECRET_KEY');
+const WEBHOOK_SECRET         = defineSecret('WEBHOOK_SECRET');
+const DISCORD_BOT_TOKEN      = defineSecret('DISCORD_BOT_TOKEN');
+const DISCORD_GUILD_ID       = defineSecret('DISCORD_GUILD_ID');
+const DISCORD_ROLE_TRIAL_ID  = defineSecret('DISCORD_ROLE_TRIAL_ID');
+const DISCORD_ROLE_EXPIRED_ID = defineSecret('DISCORD_ROLE_EXPIRED_ID');
+const DISCORD_ROLE_PRO_ID    = defineSecret('DISCORD_ROLE_PRO_ID');
 
 admin.initializeApp();
 setGlobalOptions({ region: 'us-central1', maxInstances: 10 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Helpers Discord (internos — nunca exportados)
+//
+// Modelo de roles (um de cada vez por usuário):
+//   @Trial   — trial ativo (lê + escreve em tudo igual ao Pro)
+//   @Expirado — trial expirado ou assinatura cancelada (só leitura em COMUNIDADE PRO)
+//   @Pro     — assinante ativo (lê + escreve em tudo)
+//
+// Toda chamada à API do Discord é não-fatal: falha de rede ou Discord fora do
+// ar nunca bloqueia pagamento, trial ou webhook. Logs auditam cada transição.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function discordAtivo() {
+  const token = DISCORD_BOT_TOKEN.value();
+  const guild = DISCORD_GUILD_ID.value();
+  return !!(token && token !== 'PLACEHOLDER' && guild && guild !== 'PLACEHOLDER');
+}
+
+// Retorna o Role ID do Discord para o tipo dado, ou null se ainda não configurado
+function discordRoleId(tipo) {
+  const mapa = {
+    trial:   DISCORD_ROLE_TRIAL_ID.value(),
+    expired: DISCORD_ROLE_EXPIRED_ID.value(),
+    pro:     DISCORD_ROLE_PRO_ID.value(),
+  };
+  const id = mapa[tipo];
+  return (id && id !== 'PLACEHOLDER') ? id : null;
+}
+
+async function discordAPI(method, memberId, roleId) {
+  const guildId = DISCORD_GUILD_ID.value();
+  const url = `https://discord.com/api/v10/guilds/${guildId}/members/${memberId}/roles/${roleId}`;
+  return fetch(url, {
+    method,
+    headers: { 'Authorization': `Bot ${DISCORD_BOT_TOKEN.value()}` },
+  });
+}
+
+// Lê discordUserId e discordRoleAtual do Firestore (uma leitura só)
+async function discordGetInfo(uid) {
+  const snap = await admin.firestore().doc(`usuarios/${uid}`).get();
+  if (!snap.exists) return { discordUserId: null, roleAtual: null };
+  const data = snap.data();
+  return {
+    discordUserId: data.discordUserId ?? null,
+    roleAtual:     data.discordRoleAtual ?? null,
+  };
+}
+
+// Transição genérica: remove role anterior (se houver), adiciona novo role.
+// Garante que nunca há mais de uma role (Trial/Expirado/Pro) ao mesmo tempo.
+async function discordTransicionar(uid, novoTipo, motivo) {
+  if (!discordAtivo()) return;
+  try {
+    const { discordUserId, roleAtual } = await discordGetInfo(uid);
+
+    if (!discordUserId) {
+      console.log(`[discord] ${motivo}: sem discordUserId uid=${uid} — aguardando vínculo`);
+      return;
+    }
+
+    // Remove role anterior (só se diferente do novo — evita toggle desnecessário)
+    if (roleAtual && roleAtual !== novoTipo) {
+      const idAnterior = discordRoleId(roleAtual);
+      if (idAnterior) {
+        const r = await discordAPI('DELETE', discordUserId, idAnterior);
+        console.log(`[discord] -${roleAtual} uid=${uid} (${motivo}): HTTP ${r.status}`);
+      }
+    }
+
+    // Adiciona novo role
+    const idNovo = discordRoleId(novoTipo);
+    if (idNovo) {
+      const r = await discordAPI('PUT', discordUserId, idNovo);
+      console.log(`[discord] +${novoTipo} uid=${uid} (${motivo}): HTTP ${r.status}`);
+    }
+
+    await admin.firestore().doc(`usuarios/${uid}`).set(
+      { discordRoleAtual: novoTipo },
+      { merge: true }
+    );
+  } catch (err) {
+    console.warn(`[discord] Erro ${motivo} (não fatal):`, err.message);
+  }
+}
+
+// Secrets Discord — usados em todas as CFs que chamam discordTransicionar
+const DISCORD_SECRETS = [
+  DISCORD_BOT_TOKEN,
+  DISCORD_GUILD_ID,
+  DISCORD_ROLE_TRIAL_ID,
+  DISCORD_ROLE_EXPIRED_ID,
+  DISCORD_ROLE_PRO_ID,
+];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // verificarAcesso — guard de acesso no servidor
 //
 // Lê `pagamento` direto do Firestore via Admin SDK.
 // trialFim é Timestamp nativo — usa .toMillis() para comparar.
+// Trial e Pro recebem discordLink (acesso idêntico ao Discord durante o período).
 // ─────────────────────────────────────────────────────────────────────────────
-exports.verificarAcesso = onCall({ cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000'], invoker: 'public' }, async (request) => {
+exports.verificarAcesso = onCall({
+  cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000'],
+  invoker: 'public',
+}, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Login necessário.');
   }
@@ -39,9 +143,15 @@ exports.verificarAcesso = onCall({ cors: ['https://lumoexp01-ux.github.io', 'htt
     const pagamento = snap.data().pagamento ?? {};
     const agora     = Date.now();
 
+    async function buscarDiscordLink() {
+      try {
+        const cfg = await admin.firestore().doc('config-app/global').get();
+        return cfg.exists ? (cfg.data()?.discordLink ?? null) : null;
+      } catch (_) { return null; }
+    }
+
     // Verificar trial ativo
     if (pagamento.trial === true && pagamento.trialFim) {
-      // trialFim é Timestamp do Firestore — usa toMillis(); fallback para string ISO
       const trialFimMs = typeof pagamento.trialFim.toMillis === 'function'
         ? pagamento.trialFim.toMillis()
         : new Date(pagamento.trialFim).getTime();
@@ -50,18 +160,17 @@ exports.verificarAcesso = onCall({ cors: ['https://lumoexp01-ux.github.io', 'htt
         const trialFimISO = typeof pagamento.trialFim.toDate === 'function'
           ? pagamento.trialFim.toDate().toISOString()
           : pagamento.trialFim;
-        return { acesso: true, tipo: 'trial', trialFim: trialFimISO };
+        const discordLink = await buscarDiscordLink();
+        return { acesso: true, tipo: 'trial', trialFim: trialFimISO, discordLink };
       }
     }
 
     // Verificar assinatura paga
     if (pagamento.pago === true) {
-      return { acesso: true, tipo: 'pago', plano: pagamento.plano ?? null };
+      const discordLink = await buscarDiscordLink();
+      return { acesso: true, tipo: 'pago', plano: pagamento.plano ?? null, discordLink };
     }
 
-    // trialVirgem: true = usuário nunca usou trial (ex: ativarTrial falhou por rede).
-    // pagamento.js usa esse flag para exibir botão de recuperação, evitando
-    // que falha de rede prive o usuário do trial gratuito para sempre.
     const trialVirgem = (pagamento.trialUsado !== true);
     return { acesso: false, motivo: 'sem-assinatura', trialVirgem };
 
@@ -72,22 +181,18 @@ exports.verificarAcesso = onCall({ cors: ['https://lumoexp01-ux.github.io', 'htt
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ativarTrial — ativa trial de 7 dias de forma segura no servidor
-//
-// Correções aplicadas:
-//   1. trialFim salvo como Timestamp nativo (comparável em Firestore rules)
-//   2. set+merge em vez de update (evita race condition: doc pode não ter
-//      propagado entre setDoc e a chamada da CF)
-//   3. deviceId encodado em base64url antes de virar ID de documento
-//      (evita injeção de "/" no path do Firestore)
 // ─────────────────────────────────────────────────────────────────────────────
-exports.ativarTrial = onCall({ cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000'], invoker: 'public' }, async (request) => {
+exports.ativarTrial = onCall({
+  cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000'],
+  invoker: 'public',
+  secrets: DISCORD_SECRETS,
+}, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Login necessário.');
   }
 
-  const uid      = request.auth.uid;
-  const email    = (request.auth.token.email ?? '').toLowerCase().trim();
-  // Fix 4: base64url no deviceId evita "/" no path do Firestore
+  const uid         = request.auth.uid;
+  const email       = (request.auth.token.email ?? '').toLowerCase().trim();
   const rawDeviceId = String(request.data?.deviceId ?? '').slice(0, 128);
   const deviceKey   = rawDeviceId
     ? Buffer.from(rawDeviceId).toString('base64url')
@@ -96,13 +201,11 @@ exports.ativarTrial = onCall({ cors: ['https://lumoexp01-ux.github.io', 'http://
   try {
     const db = admin.firestore();
 
-    // 1. Verificar se este UID já ativou trial
     const userSnap = await db.doc(`usuarios/${uid}`).get();
     if (userSnap.exists && userSnap.data().pagamento?.trialUsado === true) {
       return { sucesso: false, motivo: 'trial-ja-usado' };
     }
 
-    // 2. Verificar se email já foi usado para trial (em qualquer conta)
     if (email) {
       const emailKey  = Buffer.from(email).toString('base64url');
       const emailSnap = await db.doc(`triaisUsados/email_${emailKey}`).get();
@@ -111,7 +214,6 @@ exports.ativarTrial = onCall({ cors: ['https://lumoexp01-ux.github.io', 'http://
       }
     }
 
-    // 3. Verificar deviceKey (heurística — base64url garante path válido)
     if (deviceKey) {
       const deviceSnap = await db.doc(`triaisUsados/device_${deviceKey}`).get();
       if (deviceSnap.exists) {
@@ -119,18 +221,12 @@ exports.ativarTrial = onCall({ cors: ['https://lumoexp01-ux.github.io', 'http://
       }
     }
 
-    // Tudo OK — calcular fim do trial
-    const agora    = new Date();
-    const trialFim = new Date(agora.getTime() + 7 * 24 * 60 * 60 * 1000);
-
-    // Fix 2: Timestamp nativo — Firestore rules podem comparar com request.time
+    const agora             = new Date();
+    const trialFim          = new Date(agora.getTime() + 7 * 24 * 60 * 60 * 1000);
     const trialFimTimestamp = admin.firestore.Timestamp.fromDate(trialFim);
 
     const batch = db.batch();
 
-    // Fix 3: set+merge em vez de update — evita race condition com o setDoc
-    // anterior no onboarding. Mesmo que o doc ainda não tenha propagado,
-    // set+merge cria ou funde sem erro NOT_FOUND.
     batch.set(db.doc(`usuarios/${uid}`), {
       pagamento: {
         trial:      true,
@@ -139,9 +235,10 @@ exports.ativarTrial = onCall({ cors: ['https://lumoexp01-ux.github.io', 'http://
         pago:       false,
         plano:      null,
       },
+      subscriptionStatus: 'trial',
+      trialStartDate:     agora.toISOString(),
     }, { merge: true });
 
-    // Marcar email como usado
     if (email) {
       const emailKey = Buffer.from(email).toString('base64url');
       batch.set(db.doc(`triaisUsados/email_${emailKey}`), {
@@ -149,7 +246,6 @@ exports.ativarTrial = onCall({ cors: ['https://lumoexp01-ux.github.io', 'http://
       });
     }
 
-    // Marcar device como usado
     if (deviceKey) {
       batch.set(db.doc(`triaisUsados/device_${deviceKey}`), {
         ativadoEm: admin.firestore.Timestamp.fromDate(agora),
@@ -158,7 +254,10 @@ exports.ativarTrial = onCall({ cors: ['https://lumoexp01-ux.github.io', 'http://
 
     await batch.commit();
 
-    console.log('Trial ativado');
+    // Atribuir @Trial no Discord (não bloqueia se usuário ainda não vinculou)
+    await discordTransicionar(uid, 'trial', 'trial-inicio');
+
+    console.log('Trial ativado:', uid);
     return { sucesso: true, trialFim: trialFim.toISOString() };
 
   } catch (err) {
@@ -169,35 +268,32 @@ exports.ativarTrial = onCall({ cors: ['https://lumoexp01-ux.github.io', 'http://
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ─────────────────────────────────────────────────────────────────────────────
 // ativarPagamento — chamado pelo cliente após purchasePackage() RC ser concluído
-//
-// Registra pagamento no Firestore APENAS se o RevenueCat confirmar o
-// entitlement ativo usando a chave pública.
-// O webhook (7.4) mantém as renovações e cancelamentos sincronizados.
 // ─────────────────────────────────────────────────────────────────────────────
-exports.ativarPagamento = onCall({ cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000'], invoker: 'public', secrets: [RC_SECRET_KEY] }, async (request) => {
+exports.ativarPagamento = onCall({
+  cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000'],
+  invoker: 'public',
+  secrets: [RC_SECRET_KEY, ...DISCORD_SECRETS],
+}, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Login necessário.');
   }
 
-  const uid = request.auth.uid;
+  const uid           = request.auth.uid;
   const planoDesejado = request.data?.plano || 'desconhecido';
 
   try {
-    // 1. Validação server-side no RevenueCat
-    // v1 API usa a chave secreta para ler status do subscriber
     const RC_V1_KEY    = RC_SECRET_KEY.value();
-    // RC armazena o subscriber com prefixo "_user_id=" quando a purchase URL usa esse formato
     const rcCustomerId = '_user_id=' + uid;
     console.log('[ativarPagamento] Consultando RC v1 para customer:', rcCustomerId);
+
     const response = await fetch(
       `https://api.revenuecat.com/v1/subscribers/${rcCustomerId}`,
       {
         headers: {
           'Authorization': `Bearer ${RC_V1_KEY}`,
-          'Accept': 'application/json'
-        }
+          'Accept': 'application/json',
+        },
       }
     );
 
@@ -209,13 +305,11 @@ exports.ativarPagamento = onCall({ cors: ['https://lumoexp01-ux.github.io', 'htt
     const expiracao   = entitlement?.expires_date;
     console.log('[ativarPagamento] entitlement lumo_pro:', entitlement ?? 'não encontrado');
 
-    // Se não tem o entitlement ou já expirou, barra a requisição!
     if (!expiracao || new Date(expiracao).getTime() < Date.now()) {
-      console.warn('[ativarPagamento] Acesso negado. RC status:', response.status, '| entitlements disponíveis:', Object.keys(rcData?.subscriber?.entitlements ?? {}));
+      console.warn('[ativarPagamento] Acesso negado. RC status:', response.status);
       throw new HttpsError('permission-denied', 'Pagamento não confirmado pelo provedor.');
     }
 
-    // 2. Se o RC confirmou, atualiza o Firestore de forma segura
     const identifier = entitlement.product_identifier || planoDesejado;
 
     await admin.firestore().doc(`usuarios/${uid}`).set({
@@ -226,7 +320,11 @@ exports.ativarPagamento = onCall({ cors: ['https://lumoexp01-ux.github.io', 'htt
         plano:      identifier,
         pagoEm:     admin.firestore.Timestamp.fromDate(new Date()),
       },
+      subscriptionStatus: 'pro',
     }, { merge: true });
+
+    // Discord: remove @Trial ou @Expirado (o que estiver ativo) e atribui @Pro
+    await discordTransicionar(uid, 'pro', 'pagamento-web');
 
     console.log('Pagamento ativado via RC:', uid, identifier);
     return { sucesso: true };
@@ -240,8 +338,9 @@ exports.ativarPagamento = onCall({ cors: ['https://lumoexp01-ux.github.io', 'htt
 // ─────────────────────────────────────────────────────────────────────────────
 // webhookRevenueCat — Atualiza status do assinante em caso de renovação/cancelamento
 // ─────────────────────────────────────────────────────────────────────────────
-exports.webhookRevenueCat = onRequest({ secrets: [WEBHOOK_SECRET] }, async (req, res) => {
-  // Verificar segredo do webhook
+exports.webhookRevenueCat = onRequest({
+  secrets: [WEBHOOK_SECRET, ...DISCORD_SECRETS],
+}, async (req, res) => {
   const auth = req.headers['authorization'] ?? '';
   if (auth !== WEBHOOK_SECRET.value()) {
     return res.status(401).send('Não autorizado');
@@ -251,34 +350,44 @@ exports.webhookRevenueCat = onRequest({ secrets: [WEBHOOK_SECRET] }, async (req,
     const event = req.body?.event;
     if (!event) return res.status(400).send('Sem evento');
 
-    const uid = event.app_user_id;
+    // RC envia app_user_id com prefixo "_user_id=" quando a purchase URL usa esse formato
+    const rawId = event.app_user_id ?? '';
+    const uid   = rawId.startsWith('_user_id=') ? rawId.slice('_user_id='.length) : rawId;
     if (!uid) return res.status(400).send('Sem UID');
 
     const ref = admin.firestore().doc(`usuarios/${uid}`);
 
     switch (event.type) {
-      case "INITIAL_PURCHASE":
-      case "RENEWAL":
-      case "PRODUCT_CHANGE":
+      case 'INITIAL_PURCHASE':
+      case 'RENEWAL':
+      case 'PRODUCT_CHANGE':
         await ref.set({
           pagamento: {
             pago: true,
             trial: false,
-            proximoVencimento: event.expiration_at_ms ? new Date(event.expiration_at_ms).toISOString() : null,
-          }
+            proximoVencimento: event.expiration_at_ms
+              ? new Date(event.expiration_at_ms).toISOString()
+              : null,
+          },
+          subscriptionStatus: 'pro',
         }, { merge: true });
-        console.log(`Webhook: Assinatura renovada/ativada para UID ${uid}`);
+        console.log(`Webhook: Assinatura renovada/ativada para UID ${uid} (${event.type})`);
+        // Remove @Trial ou @Expirado (o que estiver), adiciona @Pro
+        await discordTransicionar(uid, 'pro', `webhook-${event.type.toLowerCase()}`);
         break;
 
-      case "CANCELLATION":
-      case "EXPIRATION":
+      case 'CANCELLATION':
+      case 'EXPIRATION':
         await ref.set({
           pagamento: {
             pago: false,
-            canceladoEm: new Date().toISOString()
-          }
+            canceladoEm: new Date().toISOString(),
+          },
+          subscriptionStatus: 'expired',
         }, { merge: true });
-        console.log(`Webhook: Assinatura expirada/cancelada para UID ${uid}`);
+        console.log(`Webhook: Assinatura expirada/cancelada para UID ${uid} (${event.type})`);
+        // Remove @Pro, adiciona @Expirado (leitura em COMUNIDADE PRO)
+        await discordTransicionar(uid, 'expired', `webhook-${event.type.toLowerCase()}`);
         break;
     }
 
@@ -290,11 +399,65 @@ exports.webhookRevenueCat = onRequest({ secrets: [WEBHOOK_SECRET] }, async (req,
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// enviarPushHorarioCritico — Notificação FCM nos horários críticos do usuário
+// expirarTrialsDiscord — Cron diário (3h horário de Brasília)
 //
-// Roda a cada hora. Verifica se o período atual (Manhã/Tarde/Noite/Madrugada)
-// no fuso de Brasília coincide com os gatilhos de horário salvos pelo usuário.
-// Envia push somente para quem tem pushToken registrado naquele período.
+// Percorre usuários com subscriptionStatus == 'trial' e, para os que têm
+// trialStartDate >= 7 dias atrás sem conversão para pago:
+//   Remove @Trial → adiciona @Expirado (leitura em COMUNIDADE PRO)
+//   Atualiza subscriptionStatus para 'expired'
+// ─────────────────────────────────────────────────────────────────────────────
+exports.expirarTrialsDiscord = onSchedule({
+  schedule: '0 3 * * *',
+  timeZone: 'America/Sao_Paulo',
+  region: 'us-central1',
+  secrets: DISCORD_SECRETS,
+}, async () => {
+  const db           = admin.firestore();
+  const agora        = Date.now();
+  const SETE_DIAS_MS = 7 * 24 * 60 * 60 * 1000;
+
+  const snap = await db.collection('usuarios')
+    .where('subscriptionStatus', '==', 'trial')
+    .get();
+
+  if (snap.empty) {
+    console.log('[trial-expiry] Nenhum usuário com trial ativo.');
+    return;
+  }
+
+  let expirados = 0;
+  for (const docSnap of snap.docs) {
+    const data = docSnap.data();
+    const uid  = docSnap.id;
+
+    // Não expirar quem já converteu para pago
+    if (data.pagamento?.pago === true) continue;
+
+    // Calcular início do trial: campo direto ou fallback via trialFim − 7 dias
+    const trialStartMs = data.trialStartDate
+      ? new Date(data.trialStartDate).getTime()
+      : typeof data.pagamento?.trialFim?.toMillis === 'function'
+        ? data.pagamento.trialFim.toMillis() - SETE_DIAS_MS
+        : null;
+
+    if (!trialStartMs || isNaN(trialStartMs)) continue;
+    if (agora - trialStartMs < SETE_DIAS_MS) continue;
+
+    console.log(`[trial-expiry] Expirando trial uid=${uid} — transicionando para @Expirado`);
+
+    // Remove @Trial, adiciona @Expirado (leitura em COMUNIDADE PRO)
+    await discordTransicionar(uid, 'expired', 'trial-expirado');
+
+    await docSnap.ref.set({ subscriptionStatus: 'expired' }, { merge: true });
+
+    expirados++;
+  }
+
+  console.log(`[trial-expiry] ${expirados} trial(s) expirado(s) de ${snap.size} verificados.`);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// enviarPushHorarioCritico — Notificação FCM nos horários críticos do usuário
 // ─────────────────────────────────────────────────────────────────────────────
 exports.enviarPushHorarioCritico = onSchedule(
   { schedule: '0 * * * *', timeZone: 'America/Sao_Paulo', region: 'us-central1' },
@@ -308,7 +471,6 @@ exports.enviarPushHorarioCritico = onSchedule(
       10
     );
 
-    // Envia apenas nos horários de pico de cada período
     const SLOTS = { 9: 'Manhã', 14: 'Tarde', 21: 'Noite', 1: 'Madrugada' };
     const slot  = SLOTS[horaN];
     if (!slot) return;
@@ -325,7 +487,6 @@ exports.enviarPushHorarioCritico = onSchedule(
       return;
     }
 
-    // Mantém refs alinhados com mensagens (só docs que têm pushToken)
     const mensagens = [];
     const docRefs   = [];
     snap.forEach(docSnap => {
@@ -352,7 +513,6 @@ exports.enviarPushHorarioCritico = onSchedule(
 
     console.log(`[push-cron] Enviando para ${mensagens.length} usuário(s)`);
 
-    // FCM admite até 500 mensagens por lote
     const LOTE = 500;
     const db   = admin.firestore();
 
@@ -370,7 +530,6 @@ exports.enviarPushHorarioCritico = onSchedule(
         response.responses.forEach((res, idx) => {
           if (!res.success) {
             const code = res.error?.code ?? '';
-            // Token inválido ou app desinstalado — remove do Firestore
             if (
               code === 'messaging/invalid-argument' ||
               code === 'messaging/registration-token-not-registered'

@@ -43,8 +43,11 @@
         .then(function (resultado) {
           if (!resultado.data || !resultado.data.acesso) {
             window.location.replace('pagamento.html');
+            return;
           }
-          // acesso === true → app segue normalmente
+          // Expõe resultado globalmente para outros scripts (ex: botão Discord)
+          window.lumoAcesso = resultado.data;
+          document.dispatchEvent(new CustomEvent('lumo:acesso', { detail: resultado.data }));
         })
         .catch(function () {
           // Falha de rede não bloqueia o app — Firebase Auth já protege os dados.

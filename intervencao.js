@@ -369,12 +369,20 @@
       irParaStep('step-nivel');
     });
 
-    // Discord — oculto até Fase 7.5 (pós-lançamento)
-    // const usuario = carregarUsuario();
-    // if (usuario.pago === true) {
-    //   const discordBtn = document.getElementById('choice-discord');
-    //   if (discordBtn) discordBtn.style.display = 'flex';
-    // }
+    // Discord — visível apenas para assinantes pagos
+    function inicializarDiscord(acesso) {
+      if (!['trial', 'pago'].includes(acesso?.tipo) || !acesso?.discordLink) return;
+      const discordBtn = document.getElementById('choice-discord');
+      if (!discordBtn) return;
+      discordBtn.addEventListener('click', () => window.open(acesso.discordLink, '_blank', 'noopener'));
+      discordBtn.style.display = 'flex';
+    }
+
+    if (window.lumoAcesso) {
+      inicializarDiscord(window.lumoAcesso);
+    } else {
+      document.addEventListener('lumo:acesso', (e) => inicializarDiscord(e.detail), { once: true });
+    }
 
   });
 

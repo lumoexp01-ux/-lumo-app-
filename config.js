@@ -188,6 +188,56 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   })();
 
+  // ── Discord User ID ──
+  (function () {
+    const secao    = document.getElementById('discord-config-section');
+    const input    = document.getElementById('config-discord-userid');
+    const statusEl = document.getElementById('config-discord-status');
+    if (!secao || !input) return;
+
+    // Mostrar seção para trial e pago (via guard.js que seta window.lumoAcesso)
+    function mostrarSeAcesso(acesso) {
+      if (acesso?.tipo === 'trial' || acesso?.tipo === 'pago') {
+        secao.style.display = '';
+      }
+    }
+    if (window.lumoAcesso) {
+      mostrarSeAcesso(window.lumoAcesso);
+    } else {
+      document.addEventListener('lumo:acesso', (e) => mostrarSeAcesso(e.detail), { once: true });
+    }
+
+    // Preencher input com valor salvo (uidAtual já vem do onAuthStateChanged acima)
+    onAuthStateChanged(auth, async (userFirebase) => {
+      if (!userFirebase) return;
+      const snap = await getDoc(doc(db, 'usuarios', userFirebase.uid));
+      if (snap.exists()) {
+        input.value = snap.data()?.discordUserId ?? '';
+      }
+    });
+
+    // Salvar com debounce — valida formato Discord ID (17-20 dígitos)
+    let debounceDiscord = null;
+    input.addEventListener('input', () => {
+      if (statusEl) statusEl.textContent = '';
+      clearTimeout(debounceDiscord);
+      debounceDiscord = setTimeout(async () => {
+        if (!uidAtual) return;
+        const valor = input.value.trim();
+        if (valor !== '' && !/^\d{17,20}$/.test(valor)) {
+          if (statusEl) statusEl.textContent = 'ID inválido — deve ter 17 a 20 dígitos numéricos.';
+          return;
+        }
+        try {
+          await updateDoc(doc(db, 'usuarios', uidAtual), { discordUserId: valor || null });
+          if (statusEl) statusEl.textContent = valor ? 'ID salvo. Roles serão sincronizadas automaticamente.' : 'ID removido.';
+        } catch (_) {
+          if (statusEl) statusEl.textContent = 'Erro ao salvar. Tente novamente.';
+        }
+      }, 800);
+    });
+  })();
+
   // ── Nota de plataforma no FAB ──
   (function () {
     const notaEl = document.getElementById('fab-plat-note');
