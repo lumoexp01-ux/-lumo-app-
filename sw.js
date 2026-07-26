@@ -23,7 +23,17 @@ messaging.onBackgroundMessage(function(payload) {
 
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
+  // self.registration.scope aponta para a raiz do app independente do subpath do GitHub Pages
+  const url = self.registration.scope + '?acao=tela-vermelha';
   event.waitUntil(
-    clients.openWindow('/?acao=tela-vermelha')
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(list) {
+      // Se o app já está aberto, foca a janela existente em vez de abrir uma nova
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].url.includes(self.registration.scope)) {
+          return list[i].focus();
+        }
+      }
+      return clients.openWindow(url);
+    })
   );
 });

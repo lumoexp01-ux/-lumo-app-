@@ -8,6 +8,9 @@
 //           → Web Push certificates → Gerar par de chaves → copiar a chave pública
 const VAPID_KEY = 'BOjH-OCVsee25cl8QnLWm6aYQeE9w9VbjXLaDpLjoLLbfbTocJ9kGCJtkrxpOvufr7Cfs0QK1cdJQcBwVT5lEV8';
 
+// Guarda o unsubscribe do onMessage para não acumular listeners entre chamadas
+let _unsubOnMessage = null;
+
 // ── Inicializa push para o uid autenticado ──
 // Chamada por app.js após auth + carregamento do perfil.
 window.inicializarPush = async function (uid) {
@@ -59,7 +62,9 @@ window.inicializarPush = async function (uid) {
     }
 
     // ── Mensagens em foreground (app aberto) ──
-    onMessage(messaging, (payload) => {
+    // Remove listener anterior antes de registrar novo — evita acúmulo entre chamadas
+    if (_unsubOnMessage) { _unsubOnMessage(); _unsubOnMessage = null; }
+    _unsubOnMessage = onMessage(messaging, (payload) => {
       const acao = payload.data?.acao ?? '';
       if (acao === 'tela-vermelha') {
         // Ativa tela vermelha diretamente sem abrir notificação
