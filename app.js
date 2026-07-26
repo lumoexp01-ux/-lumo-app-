@@ -431,18 +431,21 @@ document.addEventListener('DOMContentLoaded', () => {
       // Verificação de acesso feita exclusivamente pelo guard.js (server-side).
       // app.js não redireciona — evita race condition com Timestamp do Firestore.
 
-      // Discord — oculto até Fase 7.5 (pós-lançamento)
-      // if (dados.pagamento?.pago === true) {
-      //   const discordSection = document.getElementById('discord-section');
-      //   if (discordSection) discordSection.style.display = 'block';
-      //   getDoc(doc(db, 'config-app', 'global')).then(cfg => {
-      //     if (cfg.exists()) {
-      //       const link = cfg.data()?.discordLink;
-      //       const discordLink = document.getElementById('discord-link');
-      //       if (link && discordLink) discordLink.href = link;
-      //     }
-      //   }).catch(() => {});
-      // }
+      // Discord quick card — ativado via lumo:acesso (guard.js já traz o link)
+      function ativarDiscordCard(acesso) {
+        if (!acesso?.discordLink) return;
+        const card = document.getElementById('discord-quick-card');
+        if (!card) return;
+        card.style.display = 'flex';
+        card.addEventListener('click', function () {
+          window.open(acesso.discordLink, '_blank', 'noopener');
+        }, { once: true });
+      }
+      if (window.lumoAcesso) {
+        ativarDiscordCard(window.lumoAcesso);
+      } else {
+        document.addEventListener('lumo:acesso', function (e) { ativarDiscordCard(e.detail); }, { once: true });
+      }
 
     } else {
       // Perfil ainda não foi salvo no Firestore (Fragment 4.3 pendente).

@@ -114,6 +114,18 @@
       text-align: right;
     }
 
+    /* Bloco de navegação (link para outra tela) */
+    a.config-block--nav {
+      display: block;
+      text-decoration: none;
+      transition: opacity 0.12s;
+    }
+    a.config-block--nav:active { opacity: 0.7; }
+    .config-block--nav .config-block__header { border-bottom: none; padding: 16px; }
+    .config-block--nav__body { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .config-block--nav__sub { font-size: 11px; color: var(--text-secondary); font-weight: 400; text-transform: none; letter-spacing: 0; }
+    .config-block--nav__arrow { color: var(--text-muted); font-size: 22px; margin-left: auto; }
+
     /* Subseção de chips dentro de bloco */
     .config-sub {
       padding: 14px 16px;
@@ -321,6 +333,20 @@
           <span class="badge" id="config-perfil-nivel">—</span>
         </div>
       </div>
+
+      <!-- ════════════════════════════
+           SEÇÃO: GATILHOS
+           ════════════════════════════ -->
+      <a class="config-block config-block--nav" href="triggers.html">
+        <div class="config-block__header">
+          <span class="config-block__icon">⚡</span>
+          <div class="config-block--nav__body">
+            <span class="config-block__title">Meus gatilhos</span>
+            <span class="config-block--nav__sub">Horários e situações de risco</span>
+          </div>
+          <span class="config-block--nav__arrow">›</span>
+        </div>
+      </a>
 
       <!-- ════════════════════════════
            SEÇÃO: IDIOMA
