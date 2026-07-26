@@ -290,6 +290,207 @@
       line-height: 1.5;
       margin-top: 12px;
     }
+
+    /* ── Separador PIX ───────────────────────────────────────── */
+    .pay-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 16px 0 0;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    .pay-divider::before,
+    .pay-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+    .btn-plano--pix {
+      background: #00a86b;
+      color: #fff;
+      margin-top: 12px;
+      gap: 8px;
+    }
+    .btn-plano--pix:active { opacity: 0.88; transform: scale(0.98); }
+
+    /* ── Modal PIX ───────────────────────────────────────────── */
+    .pix-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 200;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .pix-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .pix-sheet {
+      background: #12121a;
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-width: 480px;
+      padding: 28px 24px 40px;
+      transform: translateY(30px);
+      transition: transform 0.25s ease;
+    }
+    .pix-overlay.visible .pix-sheet { transform: translateY(0); }
+
+    .pix-close {
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .pix-sheet { position: relative; }
+
+    /* Step 1 — escolha de plano */
+    #pix-step-plano .pix-title {
+      font-family: var(--font-display);
+      font-size: 26px;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    #pix-step-plano .pix-sub {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .pix-plan-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 16px 18px;
+      background: var(--bg-card);
+      border: var(--border-default);
+      border-radius: 14px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: border-color 0.15s;
+    }
+    .pix-plan-btn:active { opacity: 0.85; }
+    .pix-plan-btn--destaque { border-color: #00a86b; background: rgba(0,168,107,0.08); }
+    .pix-plan-btn__left { text-align: left; }
+    .pix-plan-btn__nome {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 2px;
+    }
+    .pix-plan-btn__desc { font-size: 13px; color: var(--text-secondary); }
+    .pix-plan-btn__preco {
+      font-family: var(--font-display);
+      font-size: 28px;
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+    .pix-plan-badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: #00a86b;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    /* Step 2 — QR Code */
+    #pix-step-qr { display: none; text-align: center; }
+    #pix-step-qr.active { display: block; }
+    #pix-step-plano.hidden { display: none; }
+
+    .pix-qr-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .pix-qr-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 18px;
+      line-height: 1.4;
+    }
+    .pix-qr-img {
+      width: 200px;
+      height: 200px;
+      border-radius: 12px;
+      background: #fff;
+      display: block;
+      margin: 0 auto 16px;
+      object-fit: contain;
+    }
+    .pix-qr-timer {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .pix-qr-timer span { color: #e57373; font-weight: 600; }
+    .pix-copy-btn {
+      width: 100%;
+      padding: 15px;
+      background: rgba(0,168,107,0.15);
+      border: 1px solid rgba(0,168,107,0.4);
+      border-radius: 12px;
+      color: #00c87a;
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 12px;
+      transition: opacity 0.15s;
+    }
+    .pix-copy-btn:active { opacity: 0.75; }
+    .pix-waiting {
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .pix-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #00a86b;
+      animation: pix-pulse 1.4s infinite;
+    }
+    @keyframes pix-pulse {
+      0%,100% { opacity: 0.3; transform: scale(0.85); }
+      50%      { opacity: 1;   transform: scale(1.1); }
+    }
+    .pix-error {
+      font-size: 13px;
+      color: #e57373;
+      margin-top: 10px;
+      display: none;
+    }
+    .pix-spinner {
+      width: 36px; height: 36px;
+      border: 3px solid rgba(0,168,107,0.2);
+      border-top-color: #00a86b;
+      border-radius: 50%;
+      animation: pay-spin 0.9s linear infinite;
+      margin: 24px auto;
+    }
   </style>
 </head>
 <body>
@@ -365,18 +566,89 @@
       </div>
     </div>
 
-    <!-- CTA Único -->
+    <!-- CTA Cartão -->
     <button class="btn-plano btn-plano--anual" id="btn-assinar" data-i18n="pay.btn-assinar">
-      Ver Planos e Assinar
+      Assinar com Cartão
+    </button>
+
+    <!-- Separador -->
+    <div class="pay-divider">ou</div>
+
+    <!-- CTA PIX -->
+    <button class="btn-plano btn-plano--pix" id="btn-pix">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M6.5 17.5L2 12l4.5-5.5M17.5 6.5L22 12l-4.5 5.5M14 4l-4 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Pagar com PIX
     </button>
 
     <!-- Erro de checkout (RC/Stripe) -->
     <p id="erro-checkout" style="display:none; text-align:center; font-size:13px; color:#e57373; margin-top:10px; line-height:1.4;"></p>
 
     <p class="paywall-nota" data-i18n="pay.nota">
-      Pagamento seguro via Stripe · Cancele a qualquer momento.
+      Pagamento seguro via Stripe · PIX aprovado em segundos.
     </p>
 
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       MODAL PIX
+       ════════════════════════════════════════════ -->
+  <div class="pix-overlay" id="pix-overlay" role="dialog" aria-modal="true" aria-label="Pagamento PIX">
+    <div class="pix-sheet">
+      <button class="pix-close" id="pix-fechar" aria-label="Fechar">✕</button>
+
+      <!-- Step 1 — Escolha de plano -->
+      <div id="pix-step-plano">
+        <div class="pix-title">Escolha o plano</div>
+        <p class="pix-sub">Pagamento único via PIX. Aprovação em segundos.</p>
+
+        <button class="pix-plan-btn pix-plan-btn--destaque" id="pix-btn-anual" data-plano="anual">
+          <div class="pix-plan-btn__left">
+            <div class="pix-plan-btn__nome">Anual <span class="pix-plan-badge">MELHOR</span></div>
+            <div class="pix-plan-btn__desc">365 dias · R$8,33/mês</div>
+          </div>
+          <div class="pix-plan-btn__preco">R$99,90</div>
+        </button>
+
+        <button class="pix-plan-btn" id="pix-btn-mensal" data-plano="mensal">
+          <div class="pix-plan-btn__left">
+            <div class="pix-plan-btn__nome">Mensal</div>
+            <div class="pix-plan-btn__desc">30 dias</div>
+          </div>
+          <div class="pix-plan-btn__preco">R$12,90</div>
+        </button>
+
+        <p class="pix-error" id="pix-erro-plano"></p>
+      </div>
+
+      <!-- Step 2 — QR Code -->
+      <div id="pix-step-qr">
+        <div class="pix-qr-title">Escaneie o QR Code</div>
+        <p class="pix-qr-sub">Abra o app do banco → PIX → Ler QR Code.</p>
+
+        <!-- spinner enquanto gera -->
+        <div class="pix-spinner" id="pix-spinner"></div>
+
+        <img class="pix-qr-img" id="pix-qr-img" src="" alt="QR Code PIX" style="display:none;" />
+
+        <div class="pix-qr-timer" id="pix-timer" style="display:none;">
+          Expira em <span id="pix-countdown">30:00</span>
+        </div>
+
+        <button class="pix-copy-btn" id="pix-copy" style="display:none;">
+          Copiar código PIX (copia e cola)
+        </button>
+
+        <div class="pix-waiting" id="pix-waiting" style="display:none;">
+          <div class="pix-dot"></div>
+          Aguardando confirmação do pagamento…
+        </div>
+
+        <p class="pix-error" id="pix-erro-qr"></p>
+      </div>
+
+    </div>
   </div>
 
   <script src="i18n.js"></script>

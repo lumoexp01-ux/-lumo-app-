@@ -11,13 +11,15 @@ const { setGlobalOptions }   = require('firebase-functions/v2');
 const { defineSecret }       = require('firebase-functions/params');
 const admin = require('firebase-admin');
 
-const RC_SECRET_KEY          = defineSecret('RC_SECRET_KEY');
-const WEBHOOK_SECRET         = defineSecret('WEBHOOK_SECRET');
-const DISCORD_BOT_TOKEN      = defineSecret('DISCORD_BOT_TOKEN');
-const DISCORD_GUILD_ID       = defineSecret('DISCORD_GUILD_ID');
-const DISCORD_ROLE_TRIAL_ID  = defineSecret('DISCORD_ROLE_TRIAL_ID');
+const RC_SECRET_KEY           = defineSecret('RC_SECRET_KEY');
+const WEBHOOK_SECRET          = defineSecret('WEBHOOK_SECRET');
+const DISCORD_BOT_TOKEN       = defineSecret('DISCORD_BOT_TOKEN');
+const DISCORD_GUILD_ID        = defineSecret('DISCORD_GUILD_ID');
+const DISCORD_ROLE_TRIAL_ID   = defineSecret('DISCORD_ROLE_TRIAL_ID');
 const DISCORD_ROLE_EXPIRED_ID = defineSecret('DISCORD_ROLE_EXPIRED_ID');
-const DISCORD_ROLE_PRO_ID    = defineSecret('DISCORD_ROLE_PRO_ID');
+const DISCORD_ROLE_PRO_ID     = defineSecret('DISCORD_ROLE_PRO_ID');
+const STRIPE_SECRET_KEY       = defineSecret('STRIPE_SECRET_KEY');
+const STRIPE_WEBHOOK_PIX      = defineSecret('STRIPE_WEBHOOK_PIX');
 
 admin.initializeApp();
 setGlobalOptions({ region: 'us-central1', maxInstances: 10 });
@@ -603,5 +605,155 @@ exports.enviarPushHorarioCritico = onSchedule(
         }
       }
     }
+  }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PIX — Stripe
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Cria e confirma um PaymentIntent PIX no Stripe.
+// Retorna: { clientSecret, pixCode, pixQrUrl, expiresAt }
+exports.criarPagamentoPix = onCall(
+  { secrets: [STRIPE_SECRET_KEY], region: 'southamerica-east1' },
+  async (request) => {
+    if (!request.auth) throw new HttpsError('unauthenticated', 'Login necessário.');
+
+    const { plano } = request.data; // 'mensal' | 'anual'
+    if (!['mensal', 'anual'].includes(plano)) {
+      throw new HttpsError('invalid-argument', 'Plano inválido.');
+    }
+
+    const Stripe = require('stripe');
+    const stripe = Stripe(s(STRIPE_SECRET_KEY));
+
+    const valorCentavos = plano === 'anual' ? 9990 : 1290; // R$99,90 ou R$12,90
+    const diasPlano     = plano === 'anual' ? 365 : 30;
+
+    let pi;
+    try {
+      pi = await stripe.paymentIntents.create({
+        amount:   valorCentavos,
+        currency: 'brl',
+        payment_method_types: ['pix'],
+        payment_method_data:  { type: 'pix' },
+        confirm: true,
+        metadata: {
+          uid:   request.auth.uid,
+          plano,
+          dias:  String(diasPlano),
+        },
+      });
+    } catch (err) {
+      console.error('[pix] Erro ao criar PaymentIntent:', err.message);
+      throw new HttpsError('internal', 'Erro ao gerar QR Code PIX.');
+    }
+
+    const pix = pi.next_action?.pix_display_qr_code;
+    if (!pix) {
+      console.error('[pix] next_action ausente:', pi.status);
+      throw new HttpsError('internal', 'PIX indisponível no momento.');
+    }
+
+    return {
+      paymentIntentId: pi.id,
+      pixCode:  pix.data,
+      pixQrUrl: pix.image_url_png,
+      expiresAt: pix.expires_at, // unix timestamp
+    };
+  }
+);
+
+// Webhook Stripe — confirma pagamento PIX e ativa Pro no Firestore + Discord
+exports.webhookStripe = onRequest(
+  { secrets: [STRIPE_SECRET_KEY, STRIPE_WEBHOOK_PIX, ...DISCORD_SECRETS], region: 'southamerica-east1' },
+  async (req, res) => {
+    const sig     = req.headers['stripe-signature'];
+    const rawBody = req.rawBody;
+
+    let event;
+    try {
+      const Stripe = require('stripe');
+      const stripe = Stripe(s(STRIPE_SECRET_KEY));
+      event = stripe.webhooks.constructEvent(rawBody, sig, s(STRIPE_WEBHOOK_PIX));
+    } catch (err) {
+      console.error('[webhook-stripe] Assinatura inválida:', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    if (event.type !== 'payment_intent.succeeded') {
+      return res.status(200).send('ignored');
+    }
+
+    const pi  = event.data.object;
+    const uid  = pi.metadata?.uid;
+    const dias = parseInt(pi.metadata?.dias ?? '30', 10);
+    const plano = pi.metadata?.plano ?? 'mensal';
+
+    if (!uid) {
+      console.error('[webhook-stripe] uid ausente no metadata');
+      return res.status(200).send('sem uid');
+    }
+
+    const db  = admin.firestore();
+    const now  = new Date();
+    const venc = new Date(now.getTime() + dias * 24 * 60 * 60 * 1000);
+
+    await db.collection('usuarios').doc(uid).set({
+      pagamento: {
+        pago:              true,
+        plano,
+        metodoPagamento:   'pix',
+        dataUltimoPagamento: now.toISOString(),
+        proximoVencimento: venc.toISOString(),
+        paymentIntentId:   pi.id,
+      },
+    }, { merge: true });
+
+    console.log(`[webhook-stripe] PIX confirmado — uid=${uid} plano=${plano} venc=${venc.toISOString()}`);
+
+    // Transição Discord → @Pro
+    try {
+      await discordTransicionar(uid, 'pro', 'pagamento-pix');
+    } catch (e) {
+      console.error('[webhook-stripe] Discord falhou (não-fatal):', e.message);
+    }
+
+    return res.status(200).send('ok');
+  }
+);
+
+// Cron diário — expira assinaturas PIX vencidas
+exports.verificarExpiracaoProPix = onSchedule(
+  { schedule: 'every 24 hours', secrets: [...DISCORD_SECRETS], region: 'southamerica-east1' },
+  async () => {
+    const db  = admin.firestore();
+    const now = new Date().toISOString();
+
+    const snap = await db.collection('usuarios')
+      .where('pagamento.metodoPagamento', '==', 'pix')
+      .where('pagamento.pago', '==', true)
+      .where('pagamento.proximoVencimento', '<=', now)
+      .get();
+
+    if (snap.empty) {
+      console.log('[expira-pix] Nenhuma assinatura PIX vencida.');
+      return;
+    }
+
+    console.log(`[expira-pix] Expirando ${snap.size} assinatura(s) PIX.`);
+    const batch = db.batch();
+
+    for (const docSnap of snap.docs) {
+      batch.update(docSnap.ref, { 'pagamento.pago': false });
+      try {
+        await discordTransicionar(docSnap.id, 'expirado', 'pix-vencido');
+      } catch (e) {
+        console.error(`[expira-pix] Discord falhou para ${docSnap.id}:`, e.message);
+      }
+    }
+
+    await batch.commit();
+    console.log('[expira-pix] Expiração concluída.');
   }
 );

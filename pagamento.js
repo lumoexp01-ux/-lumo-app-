@@ -239,6 +239,144 @@
     }
   }
 
+  // ── PIX — estado interno ──────────────────────────────────────────────────
+  var _pixPollingId = null;
+  var _pixTimerId   = null;
+  var _pixCode      = '';
+
+  function abrirModalPix() {
+    const overlay = document.getElementById('pix-overlay');
+    if (!overlay) return;
+    // Reset para step 1
+    document.getElementById('pix-step-plano').classList.remove('hidden');
+    document.getElementById('pix-step-qr').classList.remove('active');
+    document.getElementById('pix-erro-plano').style.display = 'none';
+    overlay.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function fecharModalPix() {
+    const overlay = document.getElementById('pix-overlay');
+    if (overlay) overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+    clearInterval(_pixPollingId);
+    clearInterval(_pixTimerId);
+    _pixPollingId = null;
+    _pixTimerId   = null;
+    _pixCode      = '';
+  }
+
+  function mostrarQRCode(dados) {
+    // Esconde step 1, mostra step 2
+    document.getElementById('pix-step-plano').classList.add('hidden');
+    const stepQr = document.getElementById('pix-step-qr');
+    stepQr.classList.add('active');
+
+    const spinner  = document.getElementById('pix-spinner');
+    const qrImg    = document.getElementById('pix-qr-img');
+    const timerEl  = document.getElementById('pix-timer');
+    const copyBtn  = document.getElementById('pix-copy');
+    const waiting  = document.getElementById('pix-waiting');
+    const erroEl   = document.getElementById('pix-erro-qr');
+
+    if (spinner)  spinner.style.display  = 'none';
+    if (qrImg)  { qrImg.src = dados.pixQrUrl; qrImg.style.display = 'block'; }
+    if (timerEl)  timerEl.style.display  = 'block';
+    if (copyBtn)  copyBtn.style.display  = 'block';
+    if (waiting)  waiting.style.display  = 'flex';
+    if (erroEl)   erroEl.style.display   = 'none';
+
+    _pixCode = dados.pixCode;
+
+    iniciarTimer(dados.expiresAt);
+    iniciarPollingPix();
+  }
+
+  function iniciarTimer(expiresAt) {
+    clearInterval(_pixTimerId);
+    const countdownEl = document.getElementById('pix-countdown');
+    if (!countdownEl) return;
+
+    function tick() {
+      const restante = Math.max(0, expiresAt - Math.floor(Date.now() / 1000));
+      const m = Math.floor(restante / 60).toString().padStart(2, '0');
+      const s = (restante % 60).toString().padStart(2, '0');
+      countdownEl.textContent = m + ':' + s;
+      if (restante === 0) {
+        clearInterval(_pixTimerId);
+        clearInterval(_pixPollingId);
+        const erroEl = document.getElementById('pix-erro-qr');
+        if (erroEl) {
+          erroEl.textContent   = 'O QR Code expirou. Feche e tente novamente.';
+          erroEl.style.display = 'block';
+        }
+        const waiting = document.getElementById('pix-waiting');
+        if (waiting) waiting.style.display = 'none';
+      }
+    }
+    tick();
+    _pixTimerId = setInterval(tick, 1000);
+  }
+
+  function iniciarPollingPix() {
+    clearInterval(_pixPollingId);
+    const lumo = window.lumo;
+    if (!lumo) return;
+
+    _pixPollingId = setInterval(async function () {
+      try {
+        const verificarFn = lumo.httpsCallable(lumo.functions, 'verificarAcesso');
+        const resultado   = await verificarFn();
+        if (resultado.data?.acesso) {
+          clearInterval(_pixPollingId);
+          clearInterval(_pixTimerId);
+          // Pagamento confirmado!
+          const waiting = document.getElementById('pix-waiting');
+          if (waiting) waiting.innerHTML = '<span style="color:#00c87a;font-weight:700">✓ Pagamento confirmado! Entrando...</span>';
+          setTimeout(function () {
+            window.location.replace('index.html');
+          }, 1200);
+        }
+      } catch (_) {
+        // Falha de rede — silencioso, tenta na próxima iteração
+      }
+    }, 5000);
+  }
+
+  async function selecionarPlanoPix(plano) {
+    const erroEl   = document.getElementById('pix-erro-plano');
+    const btns     = document.querySelectorAll('.pix-plan-btn');
+    const lumo     = window.lumo;
+
+    if (!lumo?.auth?.currentUser) return;
+
+    btns.forEach(function (b) { b.disabled = true; });
+    if (erroEl) erroEl.style.display = 'none';
+
+    // Mostra step QR com spinner
+    document.getElementById('pix-step-plano').classList.add('hidden');
+    const stepQr = document.getElementById('pix-step-qr');
+    stepQr.classList.add('active');
+    const spinner = document.getElementById('pix-spinner');
+    if (spinner) spinner.style.display = 'block';
+
+    try {
+      const criarFn  = lumo.httpsCallable(lumo.functions, 'criarPagamentoPix');
+      const resultado = await criarFn({ plano });
+      mostrarQRCode(resultado.data);
+    } catch (err) {
+      // Volta para step 1 e mostra erro
+      stepQr.classList.remove('active');
+      document.getElementById('pix-step-plano').classList.remove('hidden');
+      btns.forEach(function (b) { b.disabled = false; });
+      if (erroEl) {
+        erroEl.textContent   = 'Não foi possível gerar o PIX. Verifique sua conexão.';
+        erroEl.style.display = 'block';
+      }
+      console.error('[pix] erro ao criar PaymentIntent:', err);
+    }
+  }
+
   // ── Wire-up: logout e cards ───────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('btn-logout-paywall')?.addEventListener('click', function () {
@@ -246,6 +384,40 @@
     });
 
     document.getElementById('btn-assinar')?.addEventListener('click', iniciarCheckout);
+
+    // PIX
+    document.getElementById('btn-pix')?.addEventListener('click', abrirModalPix);
+    document.getElementById('pix-fechar')?.addEventListener('click', fecharModalPix);
+    document.getElementById('pix-overlay')?.addEventListener('click', function (e) {
+      if (e.target === e.currentTarget) fecharModalPix();
+    });
+    document.getElementById('pix-btn-anual')?.addEventListener('click', function () {
+      selecionarPlanoPix('anual');
+    });
+    document.getElementById('pix-btn-mensal')?.addEventListener('click', function () {
+      selecionarPlanoPix('mensal');
+    });
+    document.getElementById('pix-copy')?.addEventListener('click', function () {
+      if (!_pixCode) return;
+      navigator.clipboard.writeText(_pixCode).then(function () {
+        const btn = document.getElementById('pix-copy');
+        if (btn) {
+          const orig = btn.textContent;
+          btn.textContent = '✓ Código copiado!';
+          setTimeout(function () { btn.textContent = orig; }, 2000);
+        }
+      }).catch(function () {
+        // Fallback para browsers sem clipboard API
+        const ta = document.createElement('textarea');
+        ta.value = _pixCode;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      });
+    });
 
     aguardarLumo(inicializar);
   });
