@@ -615,7 +615,7 @@ exports.enviarPushHorarioCritico = onSchedule(
 // Cria e confirma um PaymentIntent PIX no Stripe.
 // Retorna: { clientSecret, pixCode, pixQrUrl, expiresAt }
 exports.criarPagamentoPix = onCall(
-  { secrets: [STRIPE_SECRET_KEY], region: 'southamerica-east1' },
+  { secrets: [STRIPE_SECRET_KEY] },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Login necessário.');
 
