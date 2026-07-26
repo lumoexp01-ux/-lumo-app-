@@ -627,7 +627,7 @@ exports.criarPagamentoPix = onCall(
     const Stripe = require('stripe');
     const stripe = Stripe(s(STRIPE_SECRET_KEY));
 
-    const valorCentavos = plano === 'anual' ? 9990 : 1290; // R$99,90 ou R$12,90
+    const valorCentavos = plano === 'anual' ? 11700 : 1199; // R$117,00 ou R$11,99
     const diasPlano     = plano === 'anual' ? 365 : 30;
 
     let pi;
