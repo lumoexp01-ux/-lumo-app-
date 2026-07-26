@@ -33,13 +33,14 @@ function calcularNivel(dias) {
   if (dias < 90)  return { nome: 'Coronel',  proximo: 'General',  diasFaltam: 90  - dias };
   if (dias < 120) return { nome: 'General',  proximo: 'Rei',      diasFaltam: 120 - dias };
   if (dias < 180) return { nome: 'Rei',      proximo: 'Monge',    diasFaltam: 180 - dias };
-  if (dias < 360) return { nome: 'Monge',   proximo: 'Lenda',    diasFaltam: 360 - dias };
-  return { nome: 'Lenda', proximo: null, diasFaltam: 0 };
+  if (dias < 365) return { nome: 'Monge',   proximo: 'Lenda',    diasFaltam: 365 - dias };
+  if (dias < 548) return { nome: 'Lenda',   proximo: 'Lumo',     diasFaltam: 548 - dias };
+  return { nome: 'Lumo', proximo: null, diasFaltam: 0 };
 }
 
 function calcularProgresso(dias) {
-  const limites  = [7, 14, 21, 30, 45, 60, 90, 120, 180, 360];
-  const anterior = [0,  7, 14, 21, 30, 45, 60,  90, 120, 180];
+  const limites  = [7, 14, 21, 30, 45, 60, 90, 120, 180, 365, 548];
+  const anterior = [0,  7, 14, 21, 30, 45, 60,  90, 120, 180, 365];
   for (let i = 0; i < limites.length; i++) {
     if (dias < limites[i]) {
       return Math.round(((dias - anterior[i]) / (limites[i] - anterior[i])) * 100);
@@ -76,7 +77,7 @@ function salvarSessao() {
 
 const ORDEM_NIVEIS = [
   'Soldado', 'Cabo', 'Sargento', 'Tenente',
-  'Capitão', 'Major', 'Coronel', 'General', 'Rei', 'Monge', 'Lenda',
+  'Capitão', 'Major', 'Coronel', 'General', 'Rei', 'Monge', 'Lenda', 'Lumo',
 ];
 
 function renderizarIndex() {

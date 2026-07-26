@@ -170,6 +170,15 @@
     .level-chip--locked .level-chip__name { color: var(--text-faint); }
     .level-chip--locked .level-chip__days { color: var(--text-faint); }
 
+    /* Estado: Lumo — dourado, o topo da jornada */
+    .level-chip--lumo {
+      background: rgba(212, 160, 23, 0.12);
+      border-color: rgba(212, 160, 23, 0.45);
+      box-shadow: 0 0 12px rgba(212, 160, 23, 0.15);
+    }
+    .level-chip--lumo .level-chip__name { color: #d4a017; }
+    .level-chip--lumo .level-chip__days { color: rgba(212, 160, 23, 0.65); }
+
     /* Grid de stats */
     .stats-section {
       margin-top: 16px;
@@ -821,12 +830,17 @@
 
         <div class="level-chip level-chip--locked">
           <span class="level-chip__name" data-i18n="nivel.Monge">Monge</span>
-          <span class="level-chip__days" data-i18n="chip.monge">180–359 dias</span>
+          <span class="level-chip__days" data-i18n="chip.monge">180–364 dias</span>
         </div>
 
         <div class="level-chip level-chip--locked">
           <span class="level-chip__name" data-i18n="nivel.Lenda">Lenda</span>
-          <span class="level-chip__days" data-i18n="chip.lenda">360+ dias</span>
+          <span class="level-chip__days" data-i18n="chip.lenda">365–547 dias</span>
+        </div>
+
+        <div class="level-chip level-chip--lumo">
+          <span class="level-chip__name" data-i18n="nivel.Lumo">Lumo</span>
+          <span class="level-chip__days" data-i18n="chip.lumo">548+ dias</span>
         </div>
 
       </div>

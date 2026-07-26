@@ -46,6 +46,7 @@ export default {
   'nivel.Rei':     'Rey',
   'nivel.Monge':   'Monje',
   'nivel.Lenda':   'Leyenda',
+  'nivel.Lumo':    'Lumo',
 
   'chip.soldado':  '0–6 días',
   'chip.cabo':     '7–13 días',
@@ -56,8 +57,9 @@ export default {
   'chip.coronel':  '60–89 días',
   'chip.general':  '90–119 días',
   'chip.rei':      '120–179 días',
-  'chip.monge':    '180–359 días',
-  'chip.lenda':    '360+ días',
+  'chip.monge':    '180–364 días',
+  'chip.lenda':    '365–547 días',
+  'chip.lumo':     '548+ días',
 
   'impulso.title':      'Tú puedes.',
   'impulso.subtitle':   ', respira. Un paso a la vez.',

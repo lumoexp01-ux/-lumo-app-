@@ -46,6 +46,7 @@ export default {
   'nivel.Rei':     'General',
   'nivel.Monge':   'Monk',
   'nivel.Lenda':   'Legend',
+  'nivel.Lumo':    'Lumo',
 
   'chip.soldado':  '0–6 days',
   'chip.cabo':     '7–13 days',
@@ -56,8 +57,9 @@ export default {
   'chip.coronel':  '60–89 days',
   'chip.general':  '90–119 days',
   'chip.rei':      '120–179 days',
-  'chip.monge':    '180–359 days',
-  'chip.lenda':    '360+ days',
+  'chip.monge':    '180–364 days',
+  'chip.lenda':    '365–547 days',
+  'chip.lumo':     '548+ days',
 
   'impulso.title':      "You've got this.",
   'impulso.subtitle':   ', breathe. One step at a time.',
