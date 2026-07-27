@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "@capacitor/cli": "^8.4.1",
+    "@capacitor/core": "^8.4.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.0",
+    "dotenv": "^17.4.2"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:report": "playwright show-report"
+  }
+}

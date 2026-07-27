@@ -3,3 +3,6 @@ app.lumo/
 .claude/
 node_modules/
 functions/node_modules/
+.env.test
+test-results/
+playwright-report/
