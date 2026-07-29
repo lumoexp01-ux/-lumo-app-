@@ -223,6 +223,11 @@ function registrarRecaida() {
   usuario.historicoRecaidas = [...(usuario.historicoRecaidas || []), hoje];
   salvarSessao();
   renderizarIndex();
+  // Reflete queda de nível no apelido do Discord — não-bloqueante
+  if (window.lumo) {
+    window.lumo.httpsCallable(window.lumo.functions, 'sincronizarNivelDiscord')()
+      .catch(() => {});
+  }
 
   const uid = window.lumo?.auth?.currentUser?.uid;
   if (uid && window.lumo) {
@@ -471,6 +476,12 @@ document.addEventListener('DOMContentLoaded', () => {
     window.aplicarConfigFab?.(usuario.configFab);
     window.inicializarPush?.(userFirebase.uid);
     ocultarSplash();
+
+    // Sincroniza nível no apelido do Discord — não-bloqueante, falha silenciosa
+    if (window.lumo) {
+      window.lumo.httpsCallable(window.lumo.functions, 'sincronizarNivelDiscord')()
+        .catch(() => {});
+    }
 
     // "Recomeçar do zero" — modal de recaída na index
     const btnRecomecar = document.getElementById('btn-recomecar');

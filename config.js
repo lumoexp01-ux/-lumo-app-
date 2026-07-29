@@ -207,16 +207,37 @@ document.addEventListener('DOMContentLoaded', () => {
       document.addEventListener('lumo:acesso', (e) => mostrarSeAcesso(e.detail), { once: true });
     }
 
-    // Preencher input com valor salvo (uidAtual já vem do onAuthStateChanged acima)
+    const inputNome = document.getElementById('config-discord-nome');
+
+    // Preencher inputs com valores salvos
     onAuthStateChanged(auth, async (userFirebase) => {
       if (!userFirebase) return;
       const snap = await getDoc(doc(db, 'usuarios', userFirebase.uid));
       if (snap.exists()) {
         input.value = snap.data()?.discordUserId ?? '';
+        if (inputNome) inputNome.value = snap.data()?.nomeBaseDiscord ?? '';
       }
     });
 
-    // Salvar com debounce — valida formato Discord ID (17-20 dígitos)
+    // Salvar nome base com debounce
+    let debounceNome = null;
+    if (inputNome) {
+      inputNome.addEventListener('input', () => {
+        clearTimeout(debounceNome);
+        debounceNome = setTimeout(async () => {
+          if (!uidAtual) return;
+          const nome = inputNome.value.trim();
+          try {
+            await updateDoc(doc(db, 'usuarios', uidAtual), {
+              nomeBaseDiscord: nome || null,
+              ultimoNivelSincronizado: null, // força re-sincronização na próxima abertura
+            });
+          } catch (_) {}
+        }, 800);
+      });
+    }
+
+    // Salvar User ID com debounce — valida formato Discord ID (17-20 dígitos)
     let debounceDiscord = null;
     input.addEventListener('input', () => {
       if (statusEl) statusEl.textContent = '';
@@ -229,8 +250,11 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
         try {
-          await updateDoc(doc(db, 'usuarios', uidAtual), { discordUserId: valor || null });
-          if (statusEl) statusEl.textContent = valor ? 'ID salvo. Roles serão sincronizadas automaticamente.' : 'ID removido.';
+          await updateDoc(doc(db, 'usuarios', uidAtual), {
+            discordUserId: valor || null,
+            ultimoNivelSincronizado: null, // força re-sincronização
+          });
+          if (statusEl) statusEl.textContent = valor ? 'ID salvo. Nível será sincronizado automaticamente.' : 'ID removido.';
         } catch (_) {
           if (statusEl) statusEl.textContent = 'Erro ao salvar. Tente novamente.';
         }

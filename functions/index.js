@@ -129,6 +129,41 @@ const DISCORD_SECRETS = [
   DISCORD_ROLE_PRO_ID,
 ];
 
+// Replica a lógica canônica de calcularNivel de app.js — nunca divergir
+function calcularNivelServidor(dias) {
+  if (dias < 7)   return 'Soldado';
+  if (dias < 14)  return 'Cabo';
+  if (dias < 21)  return 'Sargento';
+  if (dias < 30)  return 'Tenente';
+  if (dias < 45)  return 'Capitão';
+  if (dias < 60)  return 'Major';
+  if (dias < 90)  return 'Coronel';
+  if (dias < 120) return 'General';
+  if (dias < 180) return 'Rei';
+  if (dias < 365) return 'Monge';
+  if (dias < 548) return 'Lenda';
+  return 'Lumo';
+}
+
+// Edita apenas o apelido no Discord — zero cargos envolvidos
+async function discordEditarApelido(discordUserId, apelido) {
+  const guildId = s(DISCORD_GUILD_ID);
+  const url = `https://discord.com/api/v10/guilds/${guildId}/members/${discordUserId}`;
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      'Authorization': `Bot ${s(DISCORD_BOT_TOKEN)}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ nick: apelido }),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    console.warn(`[discord-nick] PATCH HTTP ${res.status}: ${body}`);
+  }
+  return res.status;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // verificarAcesso — guard de acesso no servidor
 //
@@ -755,5 +790,66 @@ exports.verificarExpiracaoProPix = onSchedule(
 
     await batch.commit();
     console.log('[expira-pix] Expiração concluída.');
+  }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// sincronizarNivelDiscord — edita apelido no Discord com o nível atual
+// Chamada no login e na recaída. Zero cargos envolvidos.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.sincronizarNivelDiscord = onCall(
+  { secrets: [DISCORD_BOT_TOKEN, DISCORD_GUILD_ID] },
+  async (request) => {
+    if (!request.auth) throw new HttpsError('unauthenticated', 'Login necessário.');
+    if (!discordAtivo()) return { ok: false, motivo: 'discord-inativo' };
+
+    const uid = request.auth.uid;
+    const db  = admin.firestore();
+    const snap = await db.doc(`usuarios/${uid}`).get();
+    if (!snap.exists) return { ok: false, motivo: 'usuario-nao-encontrado' };
+
+    const data           = snap.data();
+    const discordUserId  = data.discordUserId ?? null;
+    const nomeBase       = data.nomeBaseDiscord ?? null;
+    const startDate      = data.perfil?.startDate ?? null;
+    const ultimoNivel    = data.ultimoNivelSincronizado ?? null;
+
+    if (!discordUserId || !nomeBase) {
+      console.log(`[discord-nick] uid=${uid} sem discordUserId ou nomeBaseDiscord — skip`);
+      return { ok: false, motivo: 'sem-vinculo' };
+    }
+
+    // Calcula dias e nível atual
+    const dias = startDate
+      ? Math.max(0, Math.floor((Date.now() - new Date(startDate + 'T12:00:00').getTime()) / 86400000))
+      : 0;
+    const nivelAtual = calcularNivelServidor(dias);
+
+    if (nivelAtual === ultimoNivel) {
+      console.log(`[discord-nick] uid=${uid} nível já sincronizado (${nivelAtual}) — skip`);
+      return { ok: true, motivo: 'sem-mudanca' };
+    }
+
+    // Monta apelido respeitando limite de 32 chars do Discord
+    const sufixo   = ` · ${nivelAtual}`;
+    const maxNome  = 32 - sufixo.length;
+    const nomeFinal = nomeBase.length > maxNome ? nomeBase.slice(0, maxNome) : nomeBase;
+    const apelido   = nomeFinal + sufixo;
+
+    try {
+      const status = await discordEditarApelido(discordUserId, apelido);
+      if (status === 200 || status === 204) {
+        await db.doc(`usuarios/${uid}`).set(
+          { ultimoNivelSincronizado: nivelAtual },
+          { merge: true }
+        );
+        console.log(`[discord-nick] uid=${uid} apelido="${apelido}" HTTP ${status}`);
+        return { ok: true, apelido };
+      }
+      return { ok: false, motivo: `discord-http-${status}` };
+    } catch (err) {
+      console.warn(`[discord-nick] Erro (não fatal) uid=${uid}:`, err.message);
+      return { ok: false, motivo: 'erro-api' };
+    }
   }
 );
