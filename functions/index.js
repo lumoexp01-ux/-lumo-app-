@@ -798,7 +798,11 @@ exports.verificarExpiracaoProPix = onSchedule(
 // Chamada no login e na recaída. Zero cargos envolvidos.
 // ─────────────────────────────────────────────────────────────────────────────
 exports.sincronizarNivelDiscord = onCall(
-  { secrets: [DISCORD_BOT_TOKEN, DISCORD_GUILD_ID] },
+  {
+    secrets: [DISCORD_BOT_TOKEN, DISCORD_GUILD_ID],
+    cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000'],
+    invoker: 'public',
+  },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Login necessário.');
     if (!discordAtivo()) return { ok: false, motivo: 'discord-inativo' };
