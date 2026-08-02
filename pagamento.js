@@ -1,11 +1,14 @@
-// pagamento.js — Fragmento 7.3 (rev. Web Purchase Link)
-// Checkout via redirect para RC Web Purchase Link — sem SDK no browser.
+// pagamento.js — Fragmento 7.4 (Google Pay / Apple Pay via Stripe.js + PIX)
+// Google Pay e Apple Pay via Stripe PaymentRequest Button (sem redirect externo).
+// PIX via Cloud Function criarPagamentoPix + polling.
 
 (function () {
   'use strict';
 
-  // ── URL de compra RevenueCat ──────────────────────────────────────────────
-  const RC_PURCHASE_URL = 'https://pay.rev.cat/sandbox/bzvefsatehwoqmrs/';
+  // ── Stripe publishable key ────────────────────────────────────────────────
+  // SUBSTITUIR pela chave do Stripe Dashboard → Developers → API Keys
+  // Começa com pk_test_ (modo teste) ou pk_live_ (produção)
+  const STRIPE_PK = 'pk_test_SUBSTITUIR';
 
   // ── Cálculo de nível inline (sem depender de app.js) ─────────────────────
   const NIVEIS = [
@@ -126,72 +129,13 @@
     });
   }
 
-  // ── Verificar retorno do RC após pagamento bem-sucedido ───────────────────
-  // Chamado quando URL tem ?status=sucesso (redirect do RC após checkout)
-  async function verificarRetornoRC(lumo) {
-    const erroEl = document.getElementById('erro-checkout');
-
-    try {
-      const ativarFn = lumo.httpsCallable(lumo.functions, 'ativarPagamento');
-      const resultado = await ativarFn({ plano: 'web' });
-      if (resultado.data?.sucesso) {
-        window.location.replace('index.html');
-        return true;
-      }
-    } catch (_) {
-      // CF retornou erro (entitlement não confirmado pelo RC)
-    }
-
-    if (erroEl) {
-      erroEl.textContent   = window.t?.('pay.erro-pagamento') || 'Pagamento não confirmado. Se o problema persistir, entre em contato com o suporte.';
-      erroEl.style.display = 'block';
-    }
-    return false;
-  }
-
   // ── Inicializar paywall ───────────────────────────────────────────────────
   function inicializar() {
     const lumo = window.lumo;
 
-    // Native: escuta deep link lumo:// enquanto o app está aberto (foreground)
-    if (window.Capacitor?.isNativePlatform()) {
-      var CapApp = window.Capacitor.Plugins.App;
-      CapApp.addListener('appUrlOpen', function (data) {
-        if (!data?.url?.includes('status=sucesso')) return;
-        var user = lumo.auth.currentUser;
-        if (!user) return;
-        var btn = document.getElementById('btn-assinar');
-        if (btn) { btn.disabled = true; btn.textContent = 'Verificando pagamento...'; }
-        verificarRetornoRC(lumo);
-      });
-    }
-
     lumo.onAuthStateChanged(lumo.auth, async function (user) {
       if (!user) {
         window.location.replace('onboarding.html');
-        return;
-      }
-
-      // Retorno do RC após pagamento: ?status=sucesso na URL (web)
-      // OU deep link lumo://pagamento?status=sucesso (native, app estava fechado)
-      const params = new URLSearchParams(window.location.search);
-      var deveVerificarRetorno = params.get('status') === 'sucesso';
-
-      if (!deveVerificarRetorno && window.Capacitor?.isNativePlatform()) {
-        try {
-          const launchResult = await window.Capacitor.Plugins.App.getLaunchUrl();
-          if (launchResult?.url?.includes('status=sucesso')) deveVerificarRetorno = true;
-        } catch (_) {}
-      }
-
-      if (deveVerificarRetorno) {
-        // Limpar parâmetro da URL antes de qualquer coisa
-        window.history.replaceState({}, '', 'pagamento.html');
-        const ativado = await verificarRetornoRC(lumo);
-        if (ativado) return; // redirect para index.html já iniciado
-        // CF falhou — mostrar paywall com mensagem de erro já exibida
-        revelarPaywall();
-        wiredRecovery(lumo);
         return;
       }
 
@@ -220,46 +164,129 @@
         adaptarHero(trialVirgem);
         wiredRecovery(lumo);
         revelarPaywall();
+        inicializarWallet(lumo);
 
       } catch (_) {
         revelarPaywall();
         wiredRecovery(lumo);
+        inicializarWallet(lumo);
       }
     });
   }
 
-  // ── Checkout: redirect para RC Web Purchase Link ──────────────────────────
-  function iniciarCheckout() {
-    const user = window.lumo?.auth?.currentUser;
-    
-    if (!user) {
-      alert("Erro interno: Autenticação não carregada. Por favor, recarregue a página (Ctrl + F5).");
-      return;
-    }
+  // ── Google Pay / Apple Pay via Stripe.js PaymentRequest Button ───────────
+  function inicializarWallet(lumo) {
+    if (!window.Stripe || STRIPE_PK === 'pk_test_SUBSTITUIR') return;
 
-    const btnAssinar = document.getElementById('btn-assinar');
-    if (btnAssinar) {
-      // Salvar texto original (feedback de loading)
-      btnAssinar.dataset.textoOriginal = btnAssinar.textContent;
-      btnAssinar.textContent = window.t?.('pay.redirecionando') || 'Redirecionando...';
-      btnAssinar.disabled = true;
-    }
+    var stripe          = window.Stripe(STRIPE_PK);
+    var selectedPlan    = 'anual'; // padrão
+    var erroEl          = document.getElementById('erro-checkout');
 
-    const erroEl = document.getElementById('erro-checkout');
-    if (erroEl) erroEl.style.display = 'none';
+    var paymentRequest = stripe.paymentRequest({
+      country:            'BR',
+      currency:           'brl',
+      total:              { label: 'LUMO Pro Anual', amount: 11700 },
+      requestPayerName:   false,
+      requestPayerEmail:  false,
+    });
 
-    // Abre checkout RC em nova aba — _user_id= como segmento de path (sem ?)
-    // O RC armazena o subscriber com ID "_user_id=FIREBASE_UID"
-    const url = RC_PURCHASE_URL + '_user_id=' + encodeURIComponent(user.uid);
-    window.open(url, '_blank');
+    var elements  = stripe.elements();
+    var prButton  = elements.create('paymentRequestButton', {
+      paymentRequest,
+      style: {
+        paymentRequestButton: { type: 'buy', theme: 'dark', height: '54px' },
+      },
+    });
 
-    // Restaurar botão (página continua aberta)
-    if (btnAssinar) {
-      setTimeout(function () {
-        btnAssinar.textContent = btnAssinar.dataset.textoOriginal || 'Ver Planos e Assinar';
-        btnAssinar.disabled = false;
-      }, 1500);
-    }
+    // Mostra o botão só se o dispositivo tiver Google Pay ou Apple Pay
+    paymentRequest.canMakePayment().then(function (result) {
+      if (!result) return;
+      prButton.mount('#payment-request-button');
+      var secao = document.getElementById('secao-wallet');
+      if (secao) secao.classList.remove('hidden');
+    });
+
+    // Troca de plano — atualiza amount mostrado na wallet sheet
+    ['anual', 'mensal'].forEach(function (plano) {
+      var card = document.getElementById('card-' + plano);
+      if (!card) return;
+      card.addEventListener('click', function () {
+        selectedPlan = plano;
+        paymentRequest.update({
+          total: {
+            label:  plano === 'anual' ? 'LUMO Pro Anual' : 'LUMO Pro Mensal',
+            amount: plano === 'anual' ? 11700 : 1199,
+          },
+        });
+      });
+    });
+
+    // Evento disparado quando o usuário confirma o pagamento na wallet
+    paymentRequest.on('paymentmethod', async function (ev) {
+      if (erroEl) erroEl.style.display = 'none';
+
+      // 1. Cria PaymentIntent no servidor
+      var clientSecret;
+      try {
+        var criarFn = lumo.httpsCallable(lumo.functions, 'criarPagamentoWallet');
+        var res     = await criarFn({ plano: selectedPlan });
+        clientSecret = res.data.clientSecret;
+      } catch (err) {
+        ev.complete('fail');
+        if (erroEl) {
+          erroEl.textContent   = 'Erro ao iniciar pagamento. Tente novamente.';
+          erroEl.style.display = 'block';
+        }
+        return;
+      }
+
+      // 2. Confirma sem tratar 3DS neste momento (handleActions: false)
+      var confirmResult = await stripe.confirmCardPayment(
+        clientSecret,
+        { payment_method: ev.paymentMethod.id },
+        { handleActions: false }
+      );
+
+      if (confirmResult.error) {
+        ev.complete('fail');
+        if (erroEl) {
+          erroEl.textContent   = confirmResult.error.message || 'Pagamento recusado.';
+          erroEl.style.display = 'block';
+        }
+        return;
+      }
+
+      ev.complete('success');
+
+      // 3DS se necessário
+      if (confirmResult.paymentIntent.status === 'requires_action') {
+        var actionResult = await stripe.confirmCardPayment(clientSecret);
+        if (actionResult.error) {
+          if (erroEl) {
+            erroEl.textContent   = actionResult.error.message || 'Autenticação necessária — tente PIX.';
+            erroEl.style.display = 'block';
+          }
+          return;
+        }
+      }
+
+      // 3. Ativa Pro no Firestore imediatamente (sem aguardar webhook)
+      try {
+        var confirmarFn = lumo.httpsCallable(lumo.functions, 'confirmarPagamentoStripe');
+        await confirmarFn({
+          paymentIntentId: confirmResult.paymentIntent.id,
+          plano:           selectedPlan,
+        });
+        window.location.replace('index.html');
+      } catch (_) {
+        if (erroEl) {
+          erroEl.textContent   = 'Pagamento processado! Se o acesso não abrir em alguns segundos, feche e entre novamente.';
+          erroEl.style.display = 'block';
+        }
+        // Tenta redirecionar mesmo assim após 3s — webhook pode ter ativado
+        setTimeout(function () { window.location.replace('index.html'); }, 3000);
+      }
+    });
   }
 
   // ── PIX — estado interno ──────────────────────────────────────────────────
@@ -400,13 +427,19 @@
     }
   }
 
-  // ── Wire-up: logout e cards ───────────────────────────────────────────────
+  // ── Wire-up ───────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('btn-logout-paywall')?.addEventListener('click', function () {
       if (window.logout) window.logout();
     });
 
-    document.getElementById('btn-assinar')?.addEventListener('click', iniciarCheckout);
+    // Seleção de plano — destaque visual ao trocar card
+    ['anual', 'mensal'].forEach(function (plano) {
+      document.getElementById('card-' + plano)?.addEventListener('click', function () {
+        document.getElementById('card-anual')?.classList.toggle('plan-card--destaque', plano === 'anual');
+        document.getElementById('card-mensal')?.classList.toggle('plan-card--destaque', plano === 'mensal');
+      });
+    });
 
     // PIX
     document.getElementById('btn-pix')?.addEventListener('click', abrirModalPix);

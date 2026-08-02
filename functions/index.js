@@ -172,7 +172,7 @@ async function discordEditarApelido(discordUserId, apelido) {
 // Trial e Pro recebem discordLink (acesso idêntico ao Discord durante o período).
 // ─────────────────────────────────────────────────────────────────────────────
 exports.verificarAcesso = onCall({
-  cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000'],
+  cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000', 'https://localhost'],
   invoker: 'public',
 }, async (request) => {
   if (!request.auth) {
@@ -231,7 +231,7 @@ exports.verificarAcesso = onCall({
 // ativarTrial — ativa trial de 7 dias de forma segura no servidor
 // ─────────────────────────────────────────────────────────────────────────────
 exports.ativarTrial = onCall({
-  cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000'],
+  cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000', 'https://localhost'],
   invoker: 'public',
   secrets: DISCORD_SECRETS,
 }, async (request) => {
@@ -319,7 +319,7 @@ exports.ativarTrial = onCall({
 // ativarPagamento — chamado pelo cliente após purchasePackage() RC ser concluído
 // ─────────────────────────────────────────────────────────────────────────────
 exports.ativarPagamento = onCall({
-  cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000'],
+  cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000', 'https://localhost'],
   invoker: 'public',
   secrets: [RC_SECRET_KEY, ...DISCORD_SECRETS],
 }, async (request) => {
@@ -649,9 +649,11 @@ exports.enviarPushHorarioCritico = onSchedule(
 
 // Cria e confirma um PaymentIntent PIX no Stripe.
 // Retorna: { clientSecret, pixCode, pixQrUrl, expiresAt }
-exports.criarPagamentoPix = onCall(
-  { secrets: [STRIPE_SECRET_KEY] },
-  async (request) => {
+exports.criarPagamentoPix = onCall({
+  cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000', 'https://localhost'],
+  invoker: 'public',
+  secrets: [STRIPE_SECRET_KEY],
+}, async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Login necessário.');
 
     const { plano } = request.data; // 'mensal' | 'anual'
@@ -720,10 +722,13 @@ exports.webhookStripe = onRequest(
       return res.status(200).send('ignored');
     }
 
-    const pi  = event.data.object;
-    const uid  = pi.metadata?.uid;
-    const dias = parseInt(pi.metadata?.dias ?? '30', 10);
-    const plano = pi.metadata?.plano ?? 'mensal';
+    const pi     = event.data.object;
+    const uid    = pi.metadata?.uid;
+    const dias   = parseInt(pi.metadata?.dias ?? '30', 10);
+    const plano  = pi.metadata?.plano ?? 'mensal';
+    const metodo = Array.isArray(pi.payment_method_types) && pi.payment_method_types.includes('pix')
+      ? 'pix'
+      : 'wallet';
 
     if (!uid) {
       console.error('[webhook-stripe] uid ausente no metadata');
@@ -736,16 +741,16 @@ exports.webhookStripe = onRequest(
 
     await db.collection('usuarios').doc(uid).set({
       pagamento: {
-        pago:              true,
+        pago:               true,
         plano,
-        metodoPagamento:   'pix',
+        metodoPagamento:    metodo,
         dataUltimoPagamento: now.toISOString(),
-        proximoVencimento: venc.toISOString(),
-        paymentIntentId:   pi.id,
+        proximoVencimento:  venc.toISOString(),
+        paymentIntentId:    pi.id,
       },
     }, { merge: true });
 
-    console.log(`[webhook-stripe] PIX confirmado — uid=${uid} plano=${plano} venc=${venc.toISOString()}`);
+    console.log(`[webhook-stripe] ${metodo.toUpperCase()} confirmado — uid=${uid} plano=${plano} venc=${venc.toISOString()}`);
 
     // Transição Discord → @Pro
     try {
@@ -800,7 +805,7 @@ exports.verificarExpiracaoProPix = onSchedule(
 exports.sincronizarNivelDiscord = onCall(
   {
     secrets: [DISCORD_BOT_TOKEN, DISCORD_GUILD_ID],
-    cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000'],
+    cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000', 'https://localhost'],
     invoker: 'public',
   },
   async (request) => {
@@ -857,3 +862,102 @@ exports.sincronizarNivelDiscord = onCall(
     }
   }
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// criarPagamentoWallet — Cria PaymentIntent para Google Pay / Apple Pay
+// O Stripe.js no cliente confirma o pagamento com a wallet nativa.
+// O webhook webhookStripe ativa o Pro automaticamente ao receber succeeded.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.criarPagamentoWallet = onCall({
+  cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000', 'https://localhost'],
+  invoker: 'public',
+  secrets: [STRIPE_SECRET_KEY],
+}, async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Login necessário.');
+
+  const { plano } = request.data;
+  if (!['mensal', 'anual'].includes(plano)) {
+    throw new HttpsError('invalid-argument', 'Plano inválido.');
+  }
+
+  const Stripe = require('stripe');
+  const stripe = Stripe(s(STRIPE_SECRET_KEY));
+
+  const valorCentavos = plano === 'anual' ? 11700 : 1199;
+  const diasPlano     = plano === 'anual' ? 365 : 30;
+
+  let pi;
+  try {
+    pi = await stripe.paymentIntents.create({
+      amount:               valorCentavos,
+      currency:             'brl',
+      payment_method_types: ['card'],
+      metadata: {
+        uid:   request.auth.uid,
+        plano,
+        dias:  String(diasPlano),
+      },
+    });
+  } catch (err) {
+    console.error('[wallet] Erro ao criar PaymentIntent:', err.message);
+    throw new HttpsError('internal', 'Erro ao iniciar pagamento.');
+  }
+
+  return { clientSecret: pi.client_secret };
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// confirmarPagamentoStripe — Ativa Pro imediatamente após confirmação do Stripe.js
+// Verifica o PaymentIntent no Stripe antes de gravar no Firestore.
+// O webhook webhookStripe também dispara, mas esta CF garante ativação sem delay.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.confirmarPagamentoStripe = onCall({
+  cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000', 'https://localhost'],
+  invoker: 'public',
+  secrets: [STRIPE_SECRET_KEY, ...DISCORD_SECRETS],
+}, async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Login necessário.');
+
+  const { paymentIntentId, plano } = request.data;
+  if (!paymentIntentId) throw new HttpsError('invalid-argument', 'paymentIntentId ausente.');
+
+  const Stripe = require('stripe');
+  const stripe = Stripe(s(STRIPE_SECRET_KEY));
+
+  let pi;
+  try {
+    pi = await stripe.paymentIntents.retrieve(paymentIntentId);
+  } catch (err) {
+    throw new HttpsError('internal', 'Erro ao verificar pagamento.');
+  }
+
+  if (pi.status !== 'succeeded') {
+    throw new HttpsError('failed-precondition', 'Pagamento ainda não confirmado.');
+  }
+
+  const uid = pi.metadata?.uid;
+  if (uid !== request.auth.uid) {
+    throw new HttpsError('permission-denied', 'Pagamento não pertence a este usuário.');
+  }
+
+  const planoFinal  = pi.metadata?.plano ?? plano ?? 'mensal';
+  const diasPlano   = planoFinal === 'anual' ? 365 : 30;
+  const venc        = new Date(Date.now() + diasPlano * 24 * 60 * 60 * 1000);
+
+  await admin.firestore().doc(`usuarios/${uid}`).set({
+    pagamento: {
+      pago:               true,
+      plano:              planoFinal,
+      metodoPagamento:    'wallet',
+      pagoEm:             admin.firestore.Timestamp.fromDate(new Date()),
+      proximoVencimento:  venc.toISOString(),
+      paymentIntentId:    pi.id,
+    },
+    subscriptionStatus: 'pro',
+  }, { merge: true });
+
+  await discordTransicionar(uid, 'pro', 'pagamento-wallet');
+
+  console.log(`[wallet] Pagamento confirmado — uid=${uid} plano=${planoFinal}`);
+  return { sucesso: true };
+});

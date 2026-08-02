@@ -266,16 +266,10 @@
       font-weight: 700;
       cursor: pointer;
       transition: opacity 0.15s, transform 0.1s;
-      margin-top: 20px;
+      margin-top: 12px;
     }
     .btn-plano:active { opacity: 0.88; transform: scale(0.98); }
     .btn-plano:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .btn-plano--anual  { background: var(--purple-primary); color: #fff; }
-    .btn-plano--mensal {
-      background: transparent;
-      color: var(--text-secondary);
-      border: var(--border-default);
-    }
     .btn-plano--recover {
       background: var(--purple-primary);
       color: #fff;
@@ -291,12 +285,12 @@
       margin-top: 12px;
     }
 
-    /* ── Separador PIX ───────────────────────────────────────── */
+    /* ── Separador ───────────────────────────────────────────── */
     .pay-divider {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin: 16px 0 0;
+      margin: 14px 0 0;
       color: var(--text-muted);
       font-size: 12px;
     }
@@ -307,13 +301,22 @@
       height: 1px;
       background: rgba(255,255,255,0.08);
     }
+
+    /* ── Wallet (Google Pay / Apple Pay) ─────────────────────── */
+    #secao-wallet { margin-top: 20px; }
+    #payment-request-button { min-height: 54px; border-radius: var(--radius-btn); overflow: hidden; }
+
+    /* ── PIX ─────────────────────────────────────────────────── */
     .btn-plano--pix {
       background: #00a86b;
       color: #fff;
-      margin-top: 12px;
       gap: 8px;
     }
     .btn-plano--pix:active { opacity: 0.88; transform: scale(0.98); }
+
+    /* ── Plan cards — interativos ────────────────────────────── */
+    .plan-card { cursor: pointer; }
+    .plan-card:active { opacity: 0.9; }
 
     /* ── Modal PIX ───────────────────────────────────────────── */
     .pix-overlay {
@@ -566,15 +569,42 @@
       </div>
     </div>
 
-    <!-- CTA Cartão -->
-    <button class="btn-plano btn-plano--anual" id="btn-assinar" data-i18n="pay.btn-assinar">
-      Assinar com Cartão
-    </button>
+    <!-- Cards de plano (anual / mensal) -->
+    <div class="plan-cards">
+      <div class="plan-card plan-card--destaque" id="card-anual" data-plano="anual">
+        <div class="plan-card__badge-top">MELHOR OPÇÃO</div>
+        <div class="plan-card__header">
+          <div class="plan-card__nome">Anual</div>
+          <div class="plan-card__economia">–17%</div>
+        </div>
+        <div class="plan-card__preco">
+          <span class="plan-card__cifra">R$</span>
+          <span class="plan-card__valor">117</span>
+        </div>
+        <div class="plan-card__detalhe">R$9,75/mês · 365 dias de acesso</div>
+      </div>
 
-    <!-- Separador -->
-    <div class="pay-divider">ou</div>
+      <div class="plan-card" id="card-mensal" data-plano="mensal">
+        <div class="plan-card__header">
+          <div class="plan-card__nome">Mensal</div>
+        </div>
+        <div class="plan-card__preco">
+          <span class="plan-card__cifra">R$</span>
+          <span class="plan-card__valor">11</span>
+          <span class="plan-card__periodo">,99/mês</span>
+        </div>
+        <div class="plan-card__detalhe">30 dias de acesso</div>
+      </div>
+    </div>
 
-    <!-- CTA PIX -->
+    <!-- Google Pay / Apple Pay (Stripe.js PaymentRequest Button) -->
+    <!-- Visível apenas se o dispositivo tiver wallet configurada -->
+    <div id="secao-wallet" class="hidden">
+      <div id="payment-request-button"></div>
+      <div class="pay-divider">ou</div>
+    </div>
+
+    <!-- PIX -->
     <button class="btn-plano btn-plano--pix" id="btn-pix">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M6.5 17.5L2 12l4.5-5.5M17.5 6.5L22 12l-4.5 5.5M14 4l-4 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -582,11 +612,11 @@
       Pagar com PIX
     </button>
 
-    <!-- Erro de checkout (RC/Stripe) -->
+    <!-- Erro de pagamento -->
     <p id="erro-checkout" style="display:none; text-align:center; font-size:13px; color:#e57373; margin-top:10px; line-height:1.4;"></p>
 
-    <p class="paywall-nota" data-i18n="pay.nota">
-      Pagamento seguro via Stripe · PIX aprovado em segundos.
+    <p class="paywall-nota">
+      Pagamento seguro via Stripe · Google Pay · PIX
     </p>
 
   </div>
@@ -651,6 +681,7 @@
     </div>
   </div>
 
+  <script src="https://js.stripe.com/v3/"></script>
   <script src="i18n.js"></script>
   <script src="platform.js"></script>
   <script type="module" src="firebase.js"></script>
