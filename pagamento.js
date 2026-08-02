@@ -153,15 +153,38 @@
   function inicializar() {
     const lumo = window.lumo;
 
+    // Native: escuta deep link lumo:// enquanto o app está aberto (foreground)
+    if (window.Capacitor?.isNativePlatform()) {
+      var CapApp = window.Capacitor.Plugins.App;
+      CapApp.addListener('appUrlOpen', function (data) {
+        if (!data?.url?.includes('status=sucesso')) return;
+        var user = lumo.auth.currentUser;
+        if (!user) return;
+        var btn = document.getElementById('btn-assinar');
+        if (btn) { btn.disabled = true; btn.textContent = 'Verificando pagamento...'; }
+        verificarRetornoRC(lumo);
+      });
+    }
+
     lumo.onAuthStateChanged(lumo.auth, async function (user) {
       if (!user) {
         window.location.replace('onboarding.html');
         return;
       }
 
-      // Retorno do RC após pagamento: ?status=sucesso na URL
+      // Retorno do RC após pagamento: ?status=sucesso na URL (web)
+      // OU deep link lumo://pagamento?status=sucesso (native, app estava fechado)
       const params = new URLSearchParams(window.location.search);
-      if (params.get('status') === 'sucesso') {
+      var deveVerificarRetorno = params.get('status') === 'sucesso';
+
+      if (!deveVerificarRetorno && window.Capacitor?.isNativePlatform()) {
+        try {
+          const launchResult = await window.Capacitor.Plugins.App.getLaunchUrl();
+          if (launchResult?.url?.includes('status=sucesso')) deveVerificarRetorno = true;
+        } catch (_) {}
+      }
+
+      if (deveVerificarRetorno) {
         // Limpar parâmetro da URL antes de qualquer coisa
         window.history.replaceState({}, '', 'pagamento.html');
         const ativado = await verificarRetornoRC(lumo);
