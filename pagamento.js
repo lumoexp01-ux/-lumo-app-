@@ -8,7 +8,7 @@
   // ── Stripe publishable key ────────────────────────────────────────────────
   // SUBSTITUIR pela chave do Stripe Dashboard → Developers → API Keys
   // Começa com pk_test_ (modo teste) ou pk_live_ (produção)
-  const STRIPE_PK = 'pk_test_SUBSTITUIR';
+  const STRIPE_PK = 'pk_test_51TT7DqA9nl3a7P5tsXY6oksErbO5lwNilrqGEjGNNMpb5Fq22jyEMcWg623is87YbEC63VZrnxGeyDpllvdC1T8r0013ZJGd41';
 
   // ── Cálculo de nível inline (sem depender de app.js) ─────────────────────
   const NIVEIS = [
