@@ -164,12 +164,110 @@
         adaptarHero(trialVirgem);
         wiredRecovery(lumo);
         revelarPaywall();
-        inicializarWallet(lumo);
+        // Nativo: Payment Sheet plugin. Browser: Stripe.js PaymentRequest Button.
+        if (window.Capacitor?.isNativePlatform()) {
+          inicializarNativo(lumo);
+        } else {
+          inicializarWallet(lumo);
+        }
 
       } catch (_) {
         revelarPaywall();
         wiredRecovery(lumo);
-        inicializarWallet(lumo);
+        if (window.Capacitor?.isNativePlatform()) {
+          inicializarNativo(lumo);
+        } else {
+          inicializarWallet(lumo);
+        }
+      }
+    });
+  }
+
+  // ── Payment Sheet nativa (@capacitor-community/stripe) ───────────────────
+  // Usada apenas no app Capacitor (Android/iOS).
+  // Mostra Google Pay, Link e campos de cartão em um bottom sheet nativo.
+  function inicializarNativo(lumo) {
+    var StripePlugin = window.Capacitor?.Plugins?.Stripe;
+    if (!StripePlugin) return;
+
+    var btn    = document.getElementById('btn-wallet-nativo');
+    var erroEl = document.getElementById('erro-checkout');
+
+    // Inicializa o plugin com a publishable key
+    StripePlugin.initialize({ publishableKey: STRIPE_PK });
+
+    // Mostra o botão nativo
+    if (btn) btn.style.display = 'flex';
+
+    btn?.addEventListener('click', async function () {
+      if (erroEl) erroEl.style.display = 'none';
+      btn.disabled    = true;
+      btn.textContent = 'Aguarde...';
+
+      // Plano selecionado (card com destaque ativo)
+      var selectedPlan = document.getElementById('card-anual')
+        ?.classList.contains('plan-card--destaque') ? 'anual' : 'mensal';
+
+      var clientSecret;
+      var paymentIntentId;
+
+      try {
+        // 1. Cria sessão no servidor (Customer + EphemeralKey + PaymentIntent)
+        var criarFn = lumo.httpsCallable(lumo.functions, 'criarSessaoPagamento');
+        var res     = await criarFn({ plano: selectedPlan });
+        clientSecret   = res.data.clientSecret;
+        var ephemeralKey = res.data.ephemeralKey;
+        var customerId   = res.data.customerId;
+
+        // Extrai paymentIntentId do clientSecret (formato: pi_xxx_secret_yyy)
+        paymentIntentId = clientSecret.split('_secret_')[0];
+
+        // 2. Cria a Payment Sheet nativa
+        await StripePlugin.createPaymentSheet({
+          paymentIntentClientSecret: clientSecret,
+          customerEphemeralKeySecret: ephemeralKey,
+          customerId:          customerId,
+          merchantDisplayName: 'LUMO',
+          style:               'alwaysDark',
+          enableGooglePay:     true,
+          GooglePayIsTesting:  true,  // false quando Stripe Live estiver ativo
+          countryCode:         'BR',
+          currency:            'BRL',
+        });
+
+      } catch (err) {
+        btn.disabled    = false;
+        btn.textContent = '💳  Cartão / Google Pay / Link';
+        if (erroEl) {
+          erroEl.textContent   = 'Erro ao iniciar pagamento. Tente novamente.';
+          erroEl.style.display = 'block';
+        }
+        return;
+      }
+
+      try {
+        // 3. Apresenta a Payment Sheet ao usuário
+        var result = await StripePlugin.presentPaymentSheet();
+
+        if (result.paymentResult === 'paymentSheetCompleted') {
+          // 4. Confirma e ativa Pro no Firestore
+          var confirmarFn = lumo.httpsCallable(lumo.functions, 'confirmarPagamentoStripe');
+          await confirmarFn({ paymentIntentId, plano: selectedPlan });
+          window.location.replace('index.html');
+          return;
+        }
+
+        // Cancelado pelo usuário — apenas restaura o botão
+        btn.disabled    = false;
+        btn.textContent = '💳  Cartão / Google Pay / Link';
+
+      } catch (err) {
+        btn.disabled    = false;
+        btn.textContent = '💳  Cartão / Google Pay / Link';
+        if (erroEl) {
+          erroEl.textContent   = err?.message || 'Pagamento não concluído.';
+          erroEl.style.display = 'block';
+        }
       }
     });
   }

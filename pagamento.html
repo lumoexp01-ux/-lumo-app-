@@ -302,9 +302,19 @@
       background: rgba(255,255,255,0.08);
     }
 
-    /* ── Wallet (Google Pay / Apple Pay) ─────────────────────── */
+    /* ── Wallet web (Google Pay / Apple Pay via Stripe.js) ──────── */
     #secao-wallet { margin-top: 20px; }
     #payment-request-button { min-height: 54px; border-radius: var(--radius-btn); overflow: hidden; }
+
+    /* ── Wallet nativo (@capacitor-community/stripe) ─────────── */
+    .btn-plano--wallet {
+      background: #1a1a2e;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.18);
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .btn-plano--wallet:active { opacity: 0.88; transform: scale(0.98); }
 
     /* ── PIX ─────────────────────────────────────────────────── */
     .btn-plano--pix {
@@ -597,8 +607,14 @@
       </div>
     </div>
 
-    <!-- Google Pay / Apple Pay (Stripe.js PaymentRequest Button) -->
-    <!-- Visível apenas se o dispositivo tiver wallet configurada -->
+    <!-- Wallet nativo: Payment Sheet do @capacitor-community/stripe -->
+    <!-- Mostrado apenas no app nativo (Capacitor). JS decide visibilidade. -->
+    <button class="btn-plano btn-plano--wallet" id="btn-wallet-nativo" style="display:none;">
+      💳&nbsp; Cartão / Google Pay / Link
+    </button>
+
+    <!-- Wallet web: Stripe.js PaymentRequest Button (browser/PWA) -->
+    <!-- Visível apenas se o dispositivo tiver Google Pay/Apple Pay/Link -->
     <div id="secao-wallet" class="hidden">
       <div id="payment-request-button"></div>
       <div class="pay-divider">ou</div>

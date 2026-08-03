@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@capacitor-community/stripe": "^8.1.1",
     "@capacitor/android": "^8.5.0",
     "@capacitor/app": "^8.1.1",
     "@capacitor/cli": "^8.4.1",

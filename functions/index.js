@@ -644,6 +644,68 @@ exports.enviarPushHorarioCritico = onSchedule(
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
+// criarSessaoPagamento — Payment Sheet nativa (Google Pay / Link / Cartão)
+//
+// Cria ou recupera o Customer Stripe vinculado ao UID Firebase.
+// Retorna clientSecret + ephemeralKey + customerId para o plugin
+// @capacitor-community/stripe montar a Payment Sheet nativa.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.criarSessaoPagamento = onCall({
+  cors: ['https://lumoexp01-ux.github.io', 'http://localhost:3000', 'https://localhost'],
+  invoker: 'public',
+  secrets: [STRIPE_SECRET_KEY],
+}, async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Login necessário.');
+
+  const { plano } = request.data;
+  if (!['mensal', 'anual'].includes(plano)) {
+    throw new HttpsError('invalid-argument', 'Plano inválido.');
+  }
+
+  const Stripe       = require('stripe');
+  const stripe       = Stripe(s(STRIPE_SECRET_KEY));
+  const uid          = request.auth.uid;
+  const db           = admin.firestore();
+  const valorCentavos = plano === 'anual' ? 11700 : 1199;
+  const diasPlano     = plano === 'anual' ? 365 : 30;
+
+  // Busca ou cria Customer no Stripe
+  const snap = await db.doc(`usuarios/${uid}`).get();
+  let stripeCustomerId = snap.data()?.stripeCustomerId ?? null;
+
+  if (!stripeCustomerId) {
+    const customer = await stripe.customers.create({ metadata: { uid } });
+    stripeCustomerId = customer.id;
+    await db.doc(`usuarios/${uid}`).set({ stripeCustomerId }, { merge: true });
+  }
+
+  // Ephemeral Key (necessário para o Stripe Link reconhecer o usuário)
+  const ephemeralKey = await stripe.ephemeralKeys.create(
+    { customer: stripeCustomerId },
+    { apiVersion: '2023-10-16' }
+  );
+
+  // PaymentIntent para cartão/Google Pay/Link
+  const pi = await stripe.paymentIntents.create({
+    amount:               valorCentavos,
+    currency:             'brl',
+    customer:             stripeCustomerId,
+    payment_method_types: ['card'],
+    metadata: {
+      uid,
+      plano,
+      dias: String(diasPlano),
+    },
+  });
+
+  return {
+    clientSecret:  pi.client_secret,
+    ephemeralKey:  ephemeralKey.secret,
+    customerId:    stripeCustomerId,
+  };
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // PIX — Stripe
 // ─────────────────────────────────────────────────────────────────────────────
 
