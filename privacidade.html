@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Política de Privacidade — LUMO</title>
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0a0f;
+      --bg-card:   #0f0f18;
+      --text:      #e4e4f0;
+      --text-muted:#5c5c72;
+      --accent:    #9d6fff;
+      --border:    rgba(255,255,255,0.06);
+      --font-disp: 'Bebas Neue', sans-serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.7;
+      padding: 0 20px 80px;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 40px 0 48px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 48px;
+    }
+    .logo {
+      font-family: var(--font-disp);
+      font-size: 32px;
+      letter-spacing: 0.08em;
+      color: var(--text);
+      line-height: 1;
+    }
+    .logo span { color: var(--accent); }
+    .header-meta {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: right;
+      line-height: 1.4;
+    }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* ── Título principal ── */
+    .doc-title {
+      font-family: var(--font-disp);
+      font-size: clamp(36px, 8vw, 52px);
+      letter-spacing: 0.04em;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 8px;
+      text-wrap: balance;
+    }
+    .doc-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 48px;
+    }
+
+    /* ── Seções ── */
+    section {
+      margin-bottom: 40px;
+    }
+    h2 {
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    p {
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    p:last-child { margin-bottom: 0; }
+
+    /* ── Lista de itens ── */
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .item__label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .item__desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* ── Terceiros ── */
+    .third-party-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .tp {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      font-size: 14px;
+    }
+    .tp__name {
+      font-weight: 600;
+      color: var(--text);
+      min-width: 110px;
+      flex-shrink: 0;
+    }
+    .tp__role { color: var(--text-muted); }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 40px 0;
+    }
+
+    /* ── Contato ── */
+    .contact-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .contact-box a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .contact-box a:hover { text-decoration: underline; }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .footer-logo {
+      font-family: var(--font-disp);
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+    .footer-logo span { color: var(--accent); }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg:        #f5f5fa;
+        --bg-card:   #ebebf5;
+        --text:      #12121a;
+        --text-muted:#7070888;
+        --border:    rgba(0,0,0,0.08);
+      }
+    }
+    @media (max-width: 480px) {
+      .tp { flex-direction: column; gap: 2px; }
+      .tp__name { min-width: unset; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header class="site-header">
+      <div class="logo">LUM<span>O</span></div>
+      <div class="header-meta">
+        Última atualização<br>04 de agosto de 2026
+      </div>
+    </header>
+
+    <h1 class="doc-title">Política de<br>Privacidade</h1>
+    <p class="doc-subtitle">Aplicável ao app LUMO para Android e iOS</p>
+
+    <section>
+      <h2>Sobre este documento</h2>
+      <p>O LUMO é um aplicativo de apoio comportamental. Levamos a privacidade a sério porque entendemos a natureza sensível do que você compartilha conosco. Esta política explica quais dados coletamos, por quê e como os protegemos.</p>
+      <p>Ao usar o LUMO, você concorda com as práticas descritas aqui. Se tiver dúvidas, entre em contato pelo e-mail ao final deste documento.</p>
+    </section>
+
+    <section>
+      <h2>Dados que coletamos</h2>
+      <div class="item-list">
+        <div class="item">
+          <div class="item__label">Conta e autenticação</div>
+          <p class="item__desc">Endereço de e-mail e nome, fornecidos ao criar sua conta ou ao entrar com Google. Usados apenas para identificar seu acesso.</p>
+        </div>
+        <div class="item">
+          <div class="item__label">Progresso na jornada</div>
+          <p class="item__desc">Data de início, número de dias, nível atual e registro de recaídas. Armazenados para calcular seu progresso e sincronizar entre dispositivos.</p>
+        </div>
+        <div class="item">
+          <div class="item__label">Gatilhos e horários críticos</div>
+          <p class="item__desc">Situações de risco e horários que você cadastra voluntariamente. Usados para enviar lembretes nos momentos certos.</p>
+        </div>
+        <div class="item">
+          <div class="item__label">Mensagens do chat</div>
+          <p class="item__desc">Conversas com a IA de apoio. Enviadas à OpenAI para gerar respostas e armazenadas no seu perfil para histórico.</p>
+        </div>
+        <div class="item">
+          <div class="item__label">Token de notificação</div>
+          <p class="item__desc">Identificador do dispositivo para envio de notificações push. Não é usado para rastreamento.</p>
+        </div>
+        <div class="item">
+          <div class="item__label">Identificador do dispositivo</div>
+          <p class="item__desc">Usado exclusivamente para verificar elegibilidade ao período gratuito, evitando uso duplicado. Armazenado de forma anonimizada.</p>
+        </div>
+        <div class="item">
+          <div class="item__label">Dados de pagamento</div>
+          <p class="item__desc">Processados pelo Stripe. O LUMO não armazena dados de cartão. Guardamos apenas confirmação de status (ativo/expirado) e plano contratado.</p>
+        </div>
+        <div class="item">
+          <div class="item__label">ID do Discord (opcional)</div>
+          <p class="item__desc">Fornecido voluntariamente para vinculação à comunidade. Usado apenas para atribuir seu cargo no servidor.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Finalidade do uso</h2>
+      <p>Usamos seus dados exclusivamente para:</p>
+      <div class="item-list">
+        <div class="item">
+          <p class="item__desc">Fornecer e personalizar o serviço (progresso, níveis, intervenções)</p>
+        </div>
+        <div class="item">
+          <p class="item__desc">Enviar notificações de apoio nos horários que você configurou</p>
+        </div>
+        <div class="item">
+          <p class="item__desc">Processar e verificar pagamentos e assinaturas</p>
+        </div>
+        <div class="item">
+          <p class="item__desc">Sincronizar seu cargo e apelido na comunidade Discord (se vinculado)</p>
+        </div>
+      </div>
+      <p style="margin-top:16px;">Não usamos seus dados para publicidade, perfis de comportamento ou venda a terceiros.</p>
+    </section>
+
+    <section>
+      <h2>Serviços de terceiros</h2>
+      <p>O LUMO utiliza os seguintes serviços externos, cada um com sua própria política de privacidade:</p>
+      <div class="third-party-list" style="margin-top:16px;">
+        <div class="tp"><span class="tp__name">Google Firebase</span><span class="tp__role">Autenticação, banco de dados e notificações push</span></div>
+        <div class="tp"><span class="tp__name">Stripe</span><span class="tp__role">Processamento de pagamentos (Google Pay, Apple Pay, PIX)</span></div>
+        <div class="tp"><span class="tp__name">OpenAI</span><span class="tp__role">Respostas do chat de apoio com inteligência artificial</span></div>
+        <div class="tp"><span class="tp__name">Discord</span><span class="tp__role">Comunidade de apoio (vinculação opcional)</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Retenção de dados</h2>
+      <p>Seus dados são mantidos enquanto sua conta estiver ativa. Ao solicitar exclusão da conta, removemos todos os dados pessoais identificáveis em até 30 dias.</p>
+      <p>Logs anonimizados (sem identificação pessoal) podem ser mantidos por até 90 dias para fins de estabilidade do serviço.</p>
+    </section>
+
+    <section>
+      <h2>Seus direitos (LGPD)</h2>
+      <p>De acordo com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você tem o direito de:</p>
+      <div class="item-list">
+        <div class="item"><p class="item__desc">Acessar os dados que temos sobre você</p></div>
+        <div class="item"><p class="item__desc">Corrigir dados incompletos ou incorretos</p></div>
+        <div class="item"><p class="item__desc">Solicitar a exclusão dos seus dados</p></div>
+        <div class="item"><p class="item__desc">Revogar o consentimento a qualquer momento</p></div>
+      </div>
+      <p style="margin-top:16px;">Para exercer qualquer um desses direitos, entre em contato pelo e-mail abaixo.</p>
+    </section>
+
+    <section>
+      <h2>Segurança</h2>
+      <p>Os dados são transmitidos com criptografia TLS e armazenados em servidores do Google Firebase com controles de acesso restritos. Nenhum funcionário tem acesso ao conteúdo das suas mensagens de chat ou progresso pessoal sem sua solicitação explícita.</p>
+    </section>
+
+    <div class="divider"></div>
+
+    <section>
+      <h2>Contato</h2>
+      <div class="contact-box">
+        <p>Dúvidas, solicitações de exclusão ou qualquer questão sobre privacidade:</p>
+        <p style="margin-top:10px;"><strong>E-mail:</strong> <a href="mailto:lumoexp01@gmail.com">lumoexp01@gmail.com</a></p>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-logo">LUM<span>O</span></div>
+      <span>© 2026 LUMO · Todos os direitos reservados</span>
+    </footer>
+
+  </div>
+</body>
+</html>
